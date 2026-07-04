@@ -1,0 +1,452 @@
+Product Requirements Document (PRD)
+Jansunwai AI
+MP Dashboard (AI Decision Intelligence Platform)
+
+Version: 1.0
+
+Role: Member of Parliament (MP)
+
+Platform: Responsive Web Application
+
+Product Vision
+
+The MP Dashboard is an AI-powered constituency decision intelligence platform that helps Members of Parliament make faster, data-driven, and transparent development decisions.
+
+Instead of manually reviewing thousands of citizen requests, MPs receive AI-generated insights, demand analysis, infrastructure gap reports, budget recommendations, and prioritized development plans.
+
+The dashboard transforms scattered citizen feedback into actionable development strategies.
+
+Primary Goals
+Centralize all development suggestions.
+Prioritize projects using AI.
+Visualize demand hotspots.
+Allocate budgets intelligently.
+Generate constituency development reports.
+Improve transparency and decision-making.
+Target Users
+Member of Parliament
+MP Personal Assistant
+Constituency Development Team
+Planning Officers (optional)
+Dashboard Overview
+
+After login, the MP lands on a clean executive dashboard.
+
+Dashboard Widgets
+Total Citizens
+Suggestions Received
+AI High-Priority Projects
+Active Development Projects
+Budget Utilization
+Constituency Health Score
+Development Index
+Pending Reviews
+Left Sidebar Navigation
+Dashboard
+
+Executive Overview
+
+AI Copilot
+
+Ask AI questions.
+
+Suggestions
+
+View all citizen submissions.
+
+Constituency Map
+
+Interactive GIS map.
+
+Priority Engine
+
+AI-ranked development projects.
+
+Budget Planner
+
+Budget allocation assistant.
+
+Development Plans
+
+Approved projects.
+
+Reports
+
+AI-generated reports.
+
+Notifications
+
+Updates and alerts.
+
+Profile
+
+MP profile.
+
+AI Copilot (Most Unique Feature)
+
+This is the heart of the platform.
+
+The MP can ask natural language questions such as:
+
+Which villages need urgent development?
+What are the top citizen priorities?
+Which projects will benefit the highest population?
+Show education-related requests.
+What should I spend ₹5 crore on?
+Which areas have repeated road requests?
+Which requests have been ignored for more than 60 days?
+
+The AI returns:
+
+Answer
+Charts
+Maps
+Supporting data
+Suggested actions
+Constituency Health Score
+
+AI generates a score from 0–100.
+
+Factors include:
+
+Road Infrastructure
+Education
+Healthcare
+Water Supply
+Electricity
+Citizen Satisfaction
+Environmental Conditions
+Digital Connectivity
+
+Example:
+
+Constituency Health Score
+
+82 / 100
+
+Excellent
+
+Recommendations
+
+Improve drainage in Ward 6.
+
+Upgrade PHC in Village X.
+
+Install 120 street lights.
+
+Build one girls' hostel.
+AI Priority Engine
+
+Every citizen suggestion receives an AI priority score.
+
+AI considers:
+Number of supporting citizens
+Population affected
+Infrastructure gap
+Existing government facilities
+Social impact
+Economic impact
+Cost estimation
+Urgency
+Demographic data
+Public datasets
+
+Example:
+
+Project	Priority	Score
+PHC Upgrade	Critical	98
+School Building	High	94
+Village Road	High	90
+Drainage	Medium	72
+Development Heatmap
+
+Interactive Google Maps.
+
+Layers include:
+
+Road Requests
+School Requests
+Hospital Requests
+Water Issues
+Agriculture
+Environment
+Women Safety
+
+Color Coding:
+
+🔴 Critical
+🟠 High
+🟡 Medium
+🟢 Low
+
+Clicking any hotspot opens:
+
+Photos
+Citizen Suggestions
+AI Summary
+Estimated Cost
+Population
+Recommendation
+Suggestion Management
+
+MP can:
+
+View Suggestions
+Search
+Filter
+Sort
+Group by Category
+Group by Village
+Group by Block
+Group by Priority
+
+Filters:
+
+Date
+Category
+Village
+Block
+AI Score
+Budget
+Population
+Status
+Suggestion Details
+
+Each suggestion page includes:
+
+Citizen Information
+
+AI Summary
+
+Original Suggestion
+
+Translated Version
+
+Photos
+
+Videos
+
+Supporting Citizens
+
+Nearby Suggestions
+
+Duplicate Detection
+
+Affected Population
+
+Estimated Budget
+
+Priority Score
+
+Infrastructure Analysis
+
+Recommended Action
+
+Timeline
+
+AI Infrastructure Gap Analysis
+
+The AI compares:
+
+Citizen Demand
+
+VS
+
+Existing Infrastructure
+
+Example:
+
+Village A
+
+Population
+
+18,000
+
+Existing School
+
+1
+
+Required
+
+3
+
+Gap
+
+2 Schools
+
+Recommendation
+
+Build two primary schools.
+
+Budget Planner
+
+The MP enters:
+
+Available Budget
+
+₹10 Crore
+
+The AI automatically distributes funds.
+
+Example:
+
+Project	Budget
+Hospital Upgrade	₹3 Cr
+Roads	₹2 Cr
+School	₹2 Cr
+Water Supply	₹1.5 Cr
+Street Lights	₹1 Cr
+Parks	₹0.5 Cr
+
+The dashboard explains why each allocation is recommended.
+
+Development Simulator (Judge-Winning Feature)
+
+The MP can test scenarios before approving projects.
+
+Example:
+
+"What happens if I build a hospital instead of a road?"
+
+The AI estimates:
+
+Population impacted
+Travel time reduction
+Healthcare improvement
+Budget impact
+Long-term benefits
+Public Dataset Integration
+
+AI combines citizen input with:
+
+Census Data
+Education Data
+Healthcare Data
+Road Network
+Water Infrastructure
+Government Open Data
+Satellite Data (future)
+
+This produces smarter recommendations instead of relying only on citizen requests.
+
+Local Development Plan Analyzer
+
+The MP uploads:
+
+PDF
+Excel
+Government Plan
+
+The AI:
+
+Reads the document
+Finds ongoing projects
+Detects duplicates
+Identifies missing priorities
+Suggests improvements
+Reports
+
+One-click report generation.
+
+Formats:
+
+PDF
+PowerPoint
+Excel
+
+Reports include:
+
+Monthly Development Report
+Budget Report
+AI Priority Report
+Constituency Health Report
+Citizen Engagement Report
+Notifications
+
+The MP receives alerts for:
+
+High-priority suggestions
+Emerging hotspots
+Budget threshold warnings
+New village trends
+AI recommendations
+Upcoming deadlines
+AI Forecasting
+
+Predicts:
+
+Future demand
+Infrastructure needs
+Population growth impact
+Budget requirements
+Seasonal development trends
+Analytics Dashboard
+
+Charts:
+
+Suggestion Growth
+Category Distribution
+Village Comparison
+Budget Usage
+Citizen Participation
+Monthly Trends
+Project Completion Rate
+AI Confidence Scores
+Security
+Role-Based Access Control (RBAC)
+Multi-Factor Authentication
+Audit Logs
+Session Management
+Data Encryption
+Secure File Uploads
+Activity Monitoring
+Technology Stack
+Frontend
+Next.js 15
+React 19
+TypeScript
+Tailwind CSS
+Shadcn UI
+Framer Motion
+Recharts
+Backend
+Node.js
+Express.js
+Database
+Supabase (PostgreSQL)
+Authentication
+Supabase Auth
+AI
+Gemini 2.5 Flash
+Gemini Vision
+Google AI Studio
+Google Translation API
+Speech-to-Text API
+Maps
+Google Maps Platform
+Storage
+Supabase Storage
+Hosting
+Vercel
+Render
+Success Metrics
+Time saved in reviewing suggestions
+AI recommendation acceptance rate
+Budget optimization efficiency
+Citizen engagement
+Project approval turnaround time
+Development completion rate
+Constituency Health Score improvement
+Future Roadmap
+Multi-MP support
+State-wide deployment
+MLA dashboards
+Panchayat dashboards
+AI voice assistant for MPs
+WhatsApp integration
+Predictive disaster planning
+Drone and satellite integration
+IoT-based infrastructure monitoring
+⭐ Winning Feature
+
+To make Jansunwai AI stand out from other hackathon projects, I recommend adding a Constituency Digital Twin. This is an interactive 3D/2D map of the MP's constituency where roads, schools, hospitals, water facilities, and citizen suggestions are visualized in one place. Instead of viewing isolated complaints, the MP sees the entire constituency as a living digital model. Clicking any village instantly reveals infrastructure gaps, AI-generated priority scores, citizen demand trends, and recommended projects. This single feature demonstrates practical AI decision support and creates a memorable demo for judges because it goes beyond complaint management into intelligent constituency planning.

@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+/client/node_modules/
+/server/node_modules/
+.pnp
+.pnp.*
+
+# Next.js build
+/client/.next/
+/client/out/
+
+# Server build
+/server/dist/
+
+# production
+/build
+
+# testing
+/coverage
+
+# misc
+.DS_Store
+*.pem
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env*
