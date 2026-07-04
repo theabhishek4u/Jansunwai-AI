@@ -73,7 +73,9 @@ function AuthForm() {
   useEffect(() => {
     // Redirection if already authenticated
     if (user) {
-      if (user.role === 'mp') {
+      if (user.role === 'admin') {
+        router.push('/admin');
+      } else if (user.role === 'mp') {
         router.push('/mp');
       } else {
         router.push('/dashboard');
@@ -131,9 +133,11 @@ function AuthForm() {
         return;
       }
       
-      const success = await login(email, email.includes('mp') ? 'mp' : 'citizen');
+      const success = await login(email, email.includes('admin') ? 'admin' : email.includes('mp') ? 'mp' : 'citizen');
       if (success) {
-        if (email.includes('mp')) {
+        if (email.includes('admin')) {
+          router.push('/admin');
+        } else if (email.includes('mp')) {
           router.push('/mp');
         } else {
           router.push('/dashboard');
@@ -239,16 +243,16 @@ function AuthForm() {
         {isLogin && (
           <div className="mb-6 p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
             <p className="text-[10px] text-slate-500 uppercase font-bold text-center tracking-wider">Demo Quick Access</p>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-3 gap-2">
               <button
                 type="button"
                 onClick={() => {
                   setEmail('aarav@mail.com');
                   setPassword('password');
                 }}
-                className="px-2.5 py-1.5 rounded-lg bg-indigo-950/40 border border-indigo-900/30 hover:border-indigo-600 hover:bg-indigo-900/10 text-[10px] font-semibold text-indigo-300 transition-colors text-center"
+                className="px-2 py-1.5 rounded-lg bg-indigo-950/40 border border-indigo-900/30 hover:border-indigo-600 hover:bg-indigo-900/10 text-[9px] font-semibold text-indigo-300 transition-colors text-center truncate"
               >
-                Citizen Demo
+                Citizen
               </button>
               <button
                 type="button"
@@ -256,9 +260,19 @@ function AuthForm() {
                   setEmail('mp@jansunwai.gov.in');
                   setPassword('password');
                 }}
-                className="px-2.5 py-1.5 rounded-lg bg-amber-950/40 border border-amber-900/30 hover:border-amber-600 hover:bg-amber-900/10 text-[10px] font-semibold text-amber-300 transition-colors text-center"
+                className="px-2 py-1.5 rounded-lg bg-amber-950/40 border border-amber-900/30 hover:border-amber-600 hover:bg-amber-900/10 text-[9px] font-semibold text-amber-300 transition-colors text-center truncate"
               >
                 MP Demo
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail('admin@jansunwai.gov.in');
+                  setPassword('password');
+                }}
+                className="px-2 py-1.5 rounded-lg bg-cyan-950/40 border border-cyan-900/30 hover:border-cyan-600 hover:bg-cyan-900/10 text-[9px] font-semibold text-cyan-300 transition-colors text-center truncate"
+              >
+                Admin
               </button>
             </div>
           </div>

@@ -560,5 +560,130 @@ export const mockDb = {
     const totalBeneficiaries = allSugg.reduce((sum, s) => sum + s.estimated_beneficiaries, 0);
     const totalCostLakhs = allSugg.reduce((sum, s) => sum + (s.estimated_cost_lakhs || 0), 0);
     return { citizenCount, totalSuggestions, highPriority, activeProjects, completed, pendingReview, totalBeneficiaries, totalCostLakhs };
+  },
+
+  // ADMIN OPERATIONS
+  getPrompts: async () => {
+    return promptTemplates;
+  },
+  updatePrompt: async (id: string, content: string) => {
+    const p = promptTemplates.find(pr => pr.id === id);
+    if (p) {
+      p.content = content;
+      p.updatedAt = new Date().toISOString();
+      await mockDb.addAuditLog('System', `Modified AI Prompt template: ${p.name}`);
+      return p;
+    }
+    return null;
+  },
+  getDatasets: async () => {
+    return datasetRecords;
+  },
+  addDataset: async (dataset: Omit<DatasetRecord, 'id' | 'uploadedAt'>) => {
+    const newRecord: DatasetRecord = {
+      ...dataset,
+      id: `ds-${uuidv4().substring(0, 8)}`,
+      uploadedAt: new Date().toISOString()
+    };
+    datasetRecords.push(newRecord);
+    await mockDb.addAuditLog('System', `Uploaded and indexed public dataset: ${dataset.name}`);
+    return newRecord;
+  },
+  getAuditLogs: async () => {
+    return [...auditLogs].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+  },
+  addAuditLog: async (adminName: string, action: string) => {
+    const log: AuditLog = {
+      id: `log-${uuidv4().substring(0, 8)}`,
+      adminName,
+      action,
+      timestamp: new Date().toISOString(),
+      ipAddress: '192.168.1.1'
+    };
+    auditLogs.push(log);
+    return log;
+  },
+  getMps: async () => {
+    return profiles.filter(p => p.role === 'mp');
+  },
+  updateMpStatus: async (id: string, status: 'active' | 'suspended') => {
+    const mp = profiles.find(p => p.id === id && p.role === 'mp');
+    if (mp) {
+      // simulate suspension state by updating in profiles or logs
+      await mockDb.addAuditLog('System', `Admin updated status for MP ${mp.full_name} to ${status}`);
+      return mp;
+    }
+    return null;
   }
 };
+
+// Data Structures for admin management
+export interface PromptTemplate {
+  id: string;
+  name: string;
+  category: string;
+  content: string;
+  updatedAt: string;
+}
+
+export interface DatasetRecord {
+  id: string;
+  name: string;
+  category: string;
+  fileSize: string;
+  format: string;
+  uploadedAt: string;
+}
+
+export interface AuditLog {
+  id: string;
+  adminName: string;
+  action: string;
+  timestamp: string;
+  ipAddress: string;
+}
+
+let promptTemplates: PromptTemplate[] = [
+  {
+    id: 'p-1',
+    name: 'MP Copilot Prompt',
+    category: 'MP Assistant',
+    content: 'You are an AI Copilot for an Indian MP managing Varanasi constituency. The MP asked: "{question}". Respond with a structured summary, data arrays, and recommended next actions.',
+    updatedAt: daysAgo(5)
+  },
+  {
+    id: 'p-2',
+    name: 'Priority Engine Prompt',
+    category: 'Analytics',
+    content: 'Analyze development suggestions. Calculate priority scores based on: urgency (25%), citizen supporter count (25%), completeness metric (25%), and population impact (25%). Output JSON rankings.',
+    updatedAt: daysAgo(5)
+  },
+  {
+    id: 'p-3',
+    name: 'Budget Planner Prompt',
+    category: 'Budget',
+    content: 'Distribute a total budget of {budget} Crore across the following suggestion list. Rank categories proportionally by average urgency score and population impact.',
+    updatedAt: daysAgo(10)
+  },
+  {
+    id: 'p-4',
+    name: 'Vision Analysis Prompt',
+    category: 'Image Verification',
+    content: 'Analyze the submitted photo. Verify if it shows actual infrastructural damage matching the category (Road/PHC/School). Return confidence score (0-100) and flag fraudulent images.',
+    updatedAt: daysAgo(3)
+  }
+];
+
+let datasetRecords: DatasetRecord[] = [
+  { id: 'ds-1', name: 'Varanasi Census Data 2011', category: 'Census', fileSize: '12.4 MB', format: 'CSV', uploadedAt: daysAgo(20) },
+  { id: 'ds-2', name: 'Primary Healthcare Center Deficits Registry', category: 'Health Centers', fileSize: '2.8 MB', format: 'JSON', uploadedAt: daysAgo(15) },
+  { id: 'ds-3', name: 'NHAI National Highway Mapping - UP East', category: 'Road Network', fileSize: '45.1 MB', format: 'GeoJSON', uploadedAt: daysAgo(12) },
+  { id: 'ds-4', name: 'Ministry of Education - Primary School Deficits', category: 'Education Data', fileSize: '8.4 MB', format: 'Excel', uploadedAt: daysAgo(8) }
+];
+
+let auditLogs: AuditLog[] = [
+  { id: 'log-1', adminName: 'Admin Operations', action: 'System online. All constituency listeners active.', timestamp: daysAgo(4), ipAddress: '127.0.0.1' },
+  { id: 'log-2', adminName: 'Admin Operations', action: 'Configured Gemini 2.5 Flash as active model.', timestamp: daysAgo(3), ipAddress: '192.168.1.10' },
+  { id: 'log-3', adminName: 'Admin Operations', action: 'Synchronized Jal Jeevan Mission dataset.', timestamp: daysAgo(2), ipAddress: '192.168.1.10' }
+];
+

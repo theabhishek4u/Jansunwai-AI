@@ -31,8 +31,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const [showNotifications, setShowNotifications] = useState(false);
 
   useEffect(() => {
-    if (!loading && !user) {
-      router.push('/auth');
+    if (!loading) {
+      if (!user) {
+        router.push('/auth');
+      } else if (user.role === 'admin') {
+        router.push('/admin');
+      } else if (user.role === 'mp') {
+        router.push('/mp');
+      }
     }
   }, [user, loading, router]);
 

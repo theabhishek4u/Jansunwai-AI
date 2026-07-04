@@ -17,13 +17,13 @@ interface UserProfile {
   language_preference: string;
   contribution_score: number;
   avatar_url?: string;
-  role: 'citizen' | 'mp';
+  role: 'citizen' | 'mp' | 'admin';
 }
 
 interface AuthContextType {
   user: UserProfile | null;
   loading: boolean;
-  login: (email: string, role?: 'citizen' | 'mp') => Promise<boolean>;
+  login: (email: string, role?: 'citizen' | 'mp' | 'admin') => Promise<boolean>;
   register: (profile: Omit<UserProfile, 'contribution_score' | 'id'>) => Promise<boolean>;
   logout: () => void;
   refreshProfile: () => Promise<void>;
@@ -49,14 +49,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setLoading(false);
   }, []);
 
-  const login = async (email: string, role: 'citizen' | 'mp' = 'citizen'): Promise<boolean> => {
+  const login = async (email: string, role: 'citizen' | 'mp' | 'admin' = 'citizen'): Promise<boolean> => {
     setLoading(true);
     try {
       // Fetch or simulate profile sync
       let mockProfile: UserProfile;
       
-      // If MP login
-      if (email.includes('mp') || role === 'mp') {
+      // If Admin login
+      if (email.includes('admin') || role === 'admin') {
+        mockProfile = {
+          id: 'admin-123',
+          full_name: 'System Operations Admin',
+          email: email,
+          phone: '+91 9999111122',
+          state: 'National',
+          district: 'Delhi',
+          parliamentary_constituency: 'Delhi Central',
+          assembly_constituency: 'Secretariat',
+          village_ward: 'Operations Room',
+          pincode: '110001',
+          language_preference: 'en',
+          contribution_score: 0,
+          avatar_url: 'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?q=80&w=200&auto=format&fit=crop',
+          role: 'admin'
+        };
+      } else if (email.includes('mp') || role === 'mp') {
         mockProfile = {
           id: 'mp-varanasi',
           full_name: 'Dr. Vikram Singh',
