@@ -73,7 +73,11 @@ function AuthForm() {
   useEffect(() => {
     // Redirection if already authenticated
     if (user) {
-      router.push('/dashboard');
+      if (user.role === 'mp') {
+        router.push('/mp');
+      } else {
+        router.push('/dashboard');
+      }
     }
   }, [user, router]);
 
@@ -127,9 +131,13 @@ function AuthForm() {
         return;
       }
       
-      const success = await login(email);
+      const success = await login(email, email.includes('mp') ? 'mp' : 'citizen');
       if (success) {
-        router.push('/dashboard');
+        if (email.includes('mp')) {
+          router.push('/mp');
+        } else {
+          router.push('/dashboard');
+        }
       } else {
         setError('Login failed. Please check credentials.');
       }
@@ -224,6 +232,35 @@ function AuthForm() {
           <div className="bg-red-500/15 border border-red-500/30 rounded-xl p-4 mb-6 flex items-start space-x-3 text-red-200 text-xs">
             <AlertCircle className="w-4 h-4 shrink-0 text-red-400" />
             <span>{error}</span>
+          </div>
+        )}
+
+        {/* Demo Roles Quick Login */}
+        {isLogin && (
+          <div className="mb-6 p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
+            <p className="text-[10px] text-slate-500 uppercase font-bold text-center tracking-wider">Demo Quick Access</p>
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail('aarav@mail.com');
+                  setPassword('password');
+                }}
+                className="px-2.5 py-1.5 rounded-lg bg-indigo-950/40 border border-indigo-900/30 hover:border-indigo-600 hover:bg-indigo-900/10 text-[10px] font-semibold text-indigo-300 transition-colors text-center"
+              >
+                Citizen Demo
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setEmail('mp@jansunwai.gov.in');
+                  setPassword('password');
+                }}
+                className="px-2.5 py-1.5 rounded-lg bg-amber-950/40 border border-amber-900/30 hover:border-amber-600 hover:bg-amber-900/10 text-[10px] font-semibold text-amber-300 transition-colors text-center"
+              >
+                MP Demo
+              </button>
+            </div>
           </div>
         )}
 

@@ -142,13 +142,17 @@ export default function LandingPage() {
           <nav className="hidden md:flex items-center space-x-8 text-sm font-medium text-slate-300">
             <a href="#features" className="hover:text-white transition-colors">Features</a>
             <a href="#how-it-works" className="hover:text-white transition-colors">How It Works</a>
-            <a href="#impact" className="hover:text-white transition-colors">Impact</a>
             <a href="#faq" className="hover:text-white transition-colors">FAQ</a>
+            {user?.role === 'mp' ? (
+              <Link href="/mp" className="text-slate-300 hover:text-white transition-colors">MP Portal</Link>
+            ) : (
+              <Link href="/auth" className="text-slate-300 hover:text-white transition-colors">MP Portal</Link>
+            )}
           </nav>
           <div className="flex items-center space-x-4">
             {user ? (
               <Link 
-                href="/dashboard" 
+                href={user.role === 'mp' ? '/mp' : '/dashboard'} 
                 className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 sm:px-5 py-2 rounded-xl text-sm font-semibold transition-all shadow-md shadow-indigo-600/30"
               >
                 Go to Dashboard

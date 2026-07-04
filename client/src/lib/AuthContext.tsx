@@ -55,8 +55,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // Fetch or simulate profile sync
       let mockProfile: UserProfile;
       
-      // If citizen-123 email, load the pre-seeded Varanasi profile
-      if (email.includes('citizen') || email.includes('aarav')) {
+      // If MP login
+      if (email.includes('mp') || role === 'mp') {
+        mockProfile = {
+          id: 'mp-varanasi',
+          full_name: 'Dr. Vikram Singh',
+          email: email,
+          phone: '+91 9999888877',
+          state: 'Uttar Pradesh',
+          district: 'Varanasi',
+          parliamentary_constituency: 'Varanasi',
+          assembly_constituency: 'Varanasi Cantonment',
+          village_ward: 'Secretariat',
+          pincode: '221001',
+          language_preference: 'en',
+          contribution_score: 0,
+          avatar_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200&auto=format&fit=crop',
+          role: 'mp'
+        };
+      } else if (email.includes('citizen') || email.includes('aarav')) {
         mockProfile = {
           id: 'citizen-123',
           full_name: 'Aarav Sharma',

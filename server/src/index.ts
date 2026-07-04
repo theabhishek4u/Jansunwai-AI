@@ -3,6 +3,7 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import aiRoutes from './routes/ai.routes';
 import suggestionRoutes from './routes/suggestion.routes';
+import mpRoutes from './routes/mp.routes';
 
 dotenv.config();
 
@@ -23,6 +24,7 @@ app.use((req, res, next) => {
 // Register routes
 app.use('/api/ai', aiRoutes);
 app.use('/api', suggestionRoutes);
+app.use('/api/mp', mpRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {
