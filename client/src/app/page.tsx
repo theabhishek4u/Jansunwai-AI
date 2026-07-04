@@ -131,11 +131,11 @@ export default function LandingPage() {
       <header className="sticky top-0 z-50 backdrop-blur-md bg-slate-950/80 border-b border-slate-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-orange-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+            <div className="w-10 h-10 rounded-xl bg-linear-to-tr from-orange-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
               <Vote className="w-6 h-6 text-white" />
             </div>
             <div>
-              <span className="font-extrabold text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-indigo-400">Jansunwai AI</span>
+              <span className="font-extrabold text-xl tracking-tight bg-clip-text text-transparent bg-linear-to-r from-orange-400 to-indigo-400">Jansunwai AI</span>
               <p className="text-[9px] text-slate-400 tracking-wider uppercase font-semibold">Constituency Planning</p>
             </div>
           </div>
@@ -143,30 +143,51 @@ export default function LandingPage() {
             <a href="#features" className="hover:text-white transition-colors">Features</a>
             <a href="#how-it-works" className="hover:text-white transition-colors">How It Works</a>
             <a href="#faq" className="hover:text-white transition-colors">FAQ</a>
-            {user?.role === 'mp' ? (
-              <Link href="/mp" className="text-slate-300 hover:text-white transition-colors">MP Portal</Link>
-            ) : (
-              <Link href="/auth" className="text-slate-300 hover:text-white transition-colors">MP Portal</Link>
-            )}
           </nav>
-          <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-3">
             {user ? (
-              <Link 
-                href={user.role === 'mp' ? '/mp' : '/dashboard'} 
-                className="bg-indigo-600 hover:bg-indigo-500 text-white px-4 sm:px-5 py-2 rounded-xl text-sm font-semibold transition-all shadow-md shadow-indigo-600/30"
-              >
-                Go to Dashboard
-              </Link>
+              <div className="flex items-center space-x-3">
+                <Link 
+                  href={user.role === 'admin' ? '/admin' : user.role === 'mp' ? '/mp' : '/dashboard'} 
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition-all shadow-md ${
+                    user.role === 'admin' 
+                      ? 'bg-cyan-600 hover:bg-cyan-500 text-slate-950 shadow-cyan-600/30' 
+                      : user.role === 'mp' 
+                        ? 'bg-amber-600 hover:bg-amber-500 text-slate-950 shadow-amber-600/30' 
+                        : 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-600/30'
+                  }`}
+                >
+                  {user.role === 'admin' ? 'Command Center' : user.role === 'mp' ? 'MP Portal' : 'My Dashboard'}
+                </Link>
+                <button
+                  onClick={() => {
+                    localStorage.removeItem('jansunwai_user');
+                    window.location.reload();
+                  }}
+                  className="px-3 py-2 rounded-xl border border-slate-800 text-xs text-slate-400 hover:text-slate-200 hover:bg-slate-900 transition-all"
+                >
+                  Log Out
+                </button>
+              </div>
             ) : (
               <>
-                <Link href="/auth" className="text-slate-300 hover:text-white text-sm font-medium transition-colors">
-                  Log In
+                <Link 
+                  href="/auth?role=citizen" 
+                  className="px-3.5 py-2 rounded-xl border border-indigo-600/20 text-indigo-400 hover:bg-indigo-600/10 text-xs font-bold transition-all"
+                >
+                  Citizen Login
                 </Link>
                 <Link 
-                  href="/auth?tab=register" 
-                  className="bg-gradient-to-r from-orange-500 to-indigo-600 hover:from-orange-400 hover:to-indigo-500 text-white px-4 sm:px-5 py-2 rounded-xl text-sm font-semibold transition-all shadow-md shadow-indigo-600/20"
+                  href="/auth?role=mp" 
+                  className="px-3.5 py-2 rounded-xl border border-amber-500/20 text-amber-400 hover:bg-amber-500/10 text-xs font-bold transition-all"
                 >
-                  Register
+                  MP Portal
+                </Link>
+                <Link 
+                  href="/auth?role=admin" 
+                  className="px-3.5 py-2 rounded-xl border border-cyan-500/20 text-cyan-400 hover:bg-cyan-500/10 text-xs font-bold transition-all"
+                >
+                  Super Admin
                 </Link>
               </>
             )}
@@ -183,19 +204,29 @@ export default function LandingPage() {
           </div>
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-black tracking-tight leading-none text-white max-w-4xl mx-auto">
             Building Better Constituencies <br className="hidden sm:inline" />
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-orange-500 via-pink-500 to-indigo-500">With Artificial Intelligence</span>
+            <span className="bg-clip-text text-transparent bg-linear-to-r from-orange-500 via-pink-500 to-indigo-500">With Artificial Intelligence</span>
           </h1>
           <p className="mt-6 text-lg md:text-xl text-slate-400 max-w-2xl mx-auto leading-relaxed">
             Submit development suggestions directly to your Member of Parliament using Artificial Intelligence. Shape roads, schools, and hospitals with verified data.
           </p>
           <div className="mt-10 flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-4">
-            <Link 
-              href="/auth?tab=register" 
-              className="w-full sm:w-auto bg-gradient-to-r from-orange-500 to-indigo-600 hover:scale-[1.02] transition-transform text-white px-8 py-4 rounded-2xl font-bold flex items-center justify-center space-x-2 shadow-lg shadow-indigo-600/20"
-            >
-              <span>Get Started</span>
-              <ArrowRight className="w-5 h-5" />
-            </Link>
+            {user ? (
+              <Link 
+                href={user.role === 'admin' ? '/admin' : user.role === 'mp' ? '/mp' : '/dashboard'} 
+                className="w-full sm:w-auto bg-linear-to-r from-indigo-550 to-indigo-650 hover:scale-[1.02] transition-transform text-white px-8 py-4 rounded-2xl font-bold flex items-center justify-center space-x-2"
+              >
+                <span>Go to Dashboard</span>
+                <ArrowRight className="w-5 h-5" />
+              </Link>
+            ) : (
+              <Link 
+                href="/auth?role=citizen" 
+                className="w-full sm:w-auto bg-linear-to-r from-orange-500 to-indigo-600 hover:scale-[1.02] transition-transform text-white px-8 py-4 rounded-2xl font-bold flex items-center justify-center space-x-2 shadow-lg shadow-indigo-600/20"
+              >
+                <span>Get Started (Citizen Portal)</span>
+                <ArrowRight className="w-5 h-5" />
+              </Link>
+            )}
             <a 
               href="#features" 
               className="w-full sm:w-auto bg-slate-900 hover:bg-slate-850 border border-slate-800 text-slate-200 px-8 py-4 rounded-2xl font-bold flex items-center justify-center space-x-2 transition-colors"
@@ -269,7 +300,7 @@ export default function LandingPage() {
       {/* Live Statistics Section */}
       <section id="impact" className="py-24 border-t border-slate-900 bg-slate-950">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-gradient-to-tr from-slate-900 to-indigo-950/40 border border-slate-900 rounded-[3rem] p-10 md:p-16 relative overflow-hidden">
+          <div className="bg-linear-to-tr from-slate-900 to-indigo-950/40 border border-slate-900 rounded-[3rem] p-10 md:p-16 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-96 h-96 bg-indigo-500/5 blur-[120px] rounded-full" />
             <div className="text-center max-w-3xl mx-auto mb-16">
               <h2 className="text-3xl font-extrabold text-white">Our Real-time Impact</h2>

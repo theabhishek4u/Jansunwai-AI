@@ -91,7 +91,7 @@ export default function MpDashboard() {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="flex flex-col items-center space-y-4">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-amber-500 to-amber-700 animate-pulse flex items-center justify-center">
+          <div className="w-12 h-12 rounded-2xl bg-linear-to-br from-amber-500 to-amber-700 animate-pulse flex items-center justify-center">
             <Activity className="w-6 h-6 text-white" />
           </div>
           <p className="text-slate-400 text-sm">Loading Executive Dashboard...</p>
@@ -120,7 +120,7 @@ export default function MpDashboard() {
           <p className="text-sm text-slate-400 mt-1">AI-powered constituency intelligence for data-driven decisions</p>
         </div>
         <div className="flex items-center space-x-3">
-          <Link href="/mp/copilot" className="flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-violet-600 to-fuchsia-600 text-white text-xs font-semibold hover:shadow-lg hover:shadow-violet-500/20 transition-all">
+          <Link href="/mp/copilot" className="flex items-center space-x-2 px-4 py-2.5 rounded-xl bg-linear-to-r from-violet-600 to-fuchsia-600 text-white text-xs font-semibold hover:shadow-lg hover:shadow-violet-500/20 transition-all">
             <Bot className="w-4 h-4" />
             <span>Ask AI Copilot</span>
           </Link>
@@ -142,7 +142,7 @@ export default function MpDashboard() {
             className="bg-[#111827] rounded-2xl p-4 border border-slate-800/50 hover:border-slate-700/80 transition-all group"
           >
             <div className="flex items-center justify-between mb-3">
-              <div className={`w-9 h-9 rounded-xl bg-gradient-to-br ${card.color} flex items-center justify-center text-white shadow-lg`}>
+              <div className={`w-9 h-9 rounded-xl bg-linear-to-br ${card.color} flex items-center justify-center text-white shadow-lg`}>
                 {card.icon}
               </div>
               {card.change && (
@@ -248,7 +248,7 @@ export default function MpDashboard() {
                 key={p.id}
                 className="flex items-center space-x-4 p-3 rounded-xl bg-slate-800/30 hover:bg-slate-800/60 transition-all group cursor-pointer"
               >
-                <div className="flex-shrink-0 w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500/20 to-amber-500/5 flex items-center justify-center">
+                <div className="shrink-0 w-8 h-8 rounded-lg bg-linear-to-br from-amber-500/20 to-amber-500/5 flex items-center justify-center">
                   <span className="text-xs font-black text-amber-400">#{i + 1}</span>
                 </div>
                 <div className="flex-1 min-w-0">
@@ -261,7 +261,7 @@ export default function MpDashboard() {
                     <span className="text-[10px] text-slate-500">{p.populationAffected.toLocaleString()} people</span>
                   </div>
                 </div>
-                <div className="flex items-center space-x-3 flex-shrink-0">
+                <div className="flex items-center space-x-3 shrink-0">
                   <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold ${urgencyColor[p.urgency]}`}>
                     {p.urgency.toUpperCase()}
                   </span>
@@ -368,7 +368,7 @@ export default function MpDashboard() {
           <div className="space-y-3">
             {health?.recommendations.map((rec, i) => (
               <div key={i} className="flex space-x-3 p-3 rounded-lg bg-violet-500/5 border border-violet-500/10">
-                <div className="w-5 h-5 rounded-md bg-violet-500/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                <div className="w-5 h-5 rounded-md bg-violet-500/10 flex items-center justify-center shrink-0 mt-0.5">
                   <span className="text-[9px] font-bold text-violet-400">{i + 1}</span>
                 </div>
                 <p className="text-xs text-slate-300 leading-relaxed">{rec}</p>
@@ -395,7 +395,7 @@ export default function MpDashboard() {
               <Link
                 key={action.href}
                 href={action.href}
-                className={`flex flex-col items-center justify-center text-center p-5 rounded-xl bg-gradient-to-br border hover:scale-[1.02] transition-all ${action.color}`}
+                className={`flex flex-col items-center justify-center text-center p-5 rounded-xl bg-linear-to-br border hover:scale-[1.02] transition-all ${action.color}`}
               >
                 {action.icon}
                 <p className="text-xs font-semibold mt-2">{action.label}</p>

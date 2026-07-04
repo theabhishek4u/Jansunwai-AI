@@ -47,7 +47,7 @@ export default function MpLayout({ children }: { children: React.ReactNode }) {
     return (
       <div className="min-h-screen bg-[#0a0e1a] flex items-center justify-center">
         <div className="flex flex-col items-center space-y-4">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-amber-500 to-amber-700 animate-pulse flex items-center justify-center">
+          <div className="w-14 h-14 rounded-2xl bg-linear-to-br from-amber-500 to-amber-700 animate-pulse flex items-center justify-center">
             <Shield className="w-7 h-7 text-white" />
           </div>
           <p className="text-slate-400 text-sm font-semibold tracking-wide">Initializing MP Dashboard...</p>
@@ -80,11 +80,11 @@ export default function MpLayout({ children }: { children: React.ReactNode }) {
         {/* Brand */}
         <div className="px-5 pt-6 pb-5 border-b border-slate-800/50">
           <Link href="/mp" className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center shadow-lg shadow-amber-500/20">
+            <div className="w-10 h-10 rounded-xl bg-linear-to-br from-amber-500 to-amber-700 flex items-center justify-center shadow-lg shadow-amber-500/20">
               <Shield className="w-5 h-5 text-white" />
             </div>
             <div>
-              <span className="font-extrabold text-sm tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-amber-400 to-amber-200">Jansunwai AI</span>
+              <span className="font-extrabold text-sm tracking-tight bg-clip-text text-transparent bg-linear-to-r from-amber-400 to-amber-200">Jansunwai AI</span>
               <p className="text-[9px] text-amber-500/60 uppercase tracking-widest font-bold">MP Dashboard</p>
             </div>
           </Link>
@@ -93,7 +93,7 @@ export default function MpLayout({ children }: { children: React.ReactNode }) {
         {/* MP Info */}
         <div className="px-5 py-4 border-b border-slate-800/50">
           <div className="flex items-center space-x-3">
-            <div className="w-9 h-9 rounded-full bg-gradient-to-br from-amber-600 to-amber-800 flex items-center justify-center text-white text-xs font-bold">
+            <div className="w-9 h-9 rounded-full bg-linear-to-br from-amber-600 to-amber-800 flex items-center justify-center text-white text-xs font-bold">
               {user.full_name?.charAt(0) || 'M'}
             </div>
             <div className="flex-1 min-w-0">
@@ -118,7 +118,7 @@ export default function MpLayout({ children }: { children: React.ReactNode }) {
               <span className={isActive(link) ? 'text-amber-400' : 'text-slate-500 group-hover:text-slate-300'}>{link.icon}</span>
               <span className="flex-1">{link.label}</span>
               {(link as { badge?: string }).badge && (
-                <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-gradient-to-r from-violet-500 to-fuchsia-500 text-white">
+                <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-linear-to-r from-violet-500 to-fuchsia-500 text-white">
                   {(link as { badge?: string }).badge}
                 </span>
               )}
@@ -166,7 +166,7 @@ export default function MpLayout({ children }: { children: React.ReactNode }) {
 
             {/* Right actions */}
             <div className="flex items-center space-x-3">
-              <div className="hidden sm:flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-gradient-to-r from-violet-500/10 to-fuchsia-500/10 border border-violet-500/20">
+              <div className="hidden sm:flex items-center space-x-1 px-2.5 py-1 rounded-lg bg-linear-to-r from-violet-500/10 to-fuchsia-500/10 border border-violet-500/20">
                 <Sparkles className="w-3 h-3 text-violet-400" />
                 <span className="text-[10px] font-semibold text-violet-300">AI Active</span>
               </div>
@@ -197,7 +197,7 @@ export default function MpLayout({ children }: { children: React.ReactNode }) {
               </div>
 
               {/* Avatar */}
-              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-600 to-amber-800 flex items-center justify-center text-white text-xs font-bold">
+              <div className="w-8 h-8 rounded-full bg-linear-to-br from-amber-600 to-amber-800 flex items-center justify-center text-white text-xs font-bold">
                 {user.full_name?.charAt(0) || 'M'}
               </div>
             </div>
@@ -217,7 +217,7 @@ export default function MpLayout({ children }: { children: React.ReactNode }) {
           <div className="absolute inset-y-0 left-0 w-72 bg-[#0d1220] border-r border-amber-900/10 flex flex-col animate-in slide-in-from-left">
             <div className="flex items-center justify-between px-5 pt-5 pb-4">
               <div className="flex items-center space-x-2">
-                <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-amber-500 to-amber-700 flex items-center justify-center">
+                <div className="w-8 h-8 rounded-lg bg-linear-to-br from-amber-500 to-amber-700 flex items-center justify-center">
                   <Shield className="w-4 h-4 text-white" />
                 </div>
                 <span className="text-sm font-bold text-amber-400">MP Dashboard</span>

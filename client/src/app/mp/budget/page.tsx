@@ -96,7 +96,7 @@ export default function BudgetPlannerPage() {
           <button
             onClick={planBudget}
             disabled={loading}
-            className="flex items-center space-x-2 px-6 py-3 rounded-xl bg-gradient-to-r from-amber-600 to-amber-700 text-white text-sm font-semibold hover:shadow-lg hover:shadow-amber-500/20 transition-all disabled:opacity-50"
+            className="flex items-center space-x-2 px-6 py-3 rounded-xl bg-linear-to-r from-amber-600 to-amber-700 text-white text-sm font-semibold hover:shadow-lg hover:shadow-amber-500/20 transition-all disabled:opacity-50"
           >
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
             <span>{loading ? 'Planning...' : 'Generate AI Plan'}</span>
@@ -131,7 +131,7 @@ export default function BudgetPlannerPage() {
             {/* Summary */}
             <div className="bg-violet-500/5 rounded-2xl p-5 border border-violet-500/10">
               <p className="text-xs text-violet-300 leading-relaxed flex items-start space-x-2">
-                <Sparkles className="w-4 h-4 text-violet-400 flex-shrink-0 mt-0.5" />
+                <Sparkles className="w-4 h-4 text-violet-400 shrink-0 mt-0.5" />
                 <span>{result.summary}</span>
               </p>
             </div>
@@ -147,7 +147,8 @@ export default function BudgetPlannerPage() {
                         <Cell key={`cell-${idx}`} fill={COLORS[idx % COLORS.length]} />
                       ))}
                     </Pie>
-                    <Tooltip contentStyle={{ background: '#1e293b', border: '1px solid #334155', borderRadius: '12px', fontSize: '11px', color: '#e2e8f0' }} formatter={(value: number) => [`₹${(value / 100).toFixed(2)} Cr`, 'Allocated']} />
+                    {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                    <Tooltip contentStyle={{ background: '#1e293b', border: '1px solid #334155', borderRadius: '12px', fontSize: '11px', color: '#e2e8f0' }} formatter={(value: any) => [`₹${(value / 100).toFixed(2)} Cr`, 'Allocated']} />
                   </PieChart>
                 </ResponsiveContainer>
                 <div className="space-y-1 mt-2">

@@ -105,7 +105,7 @@ export default function CategoriesPage() {
             {categories.map((c) => (
               <div key={c.id} className="p-4 flex items-center justify-between hover:bg-slate-900/20 transition-all">
                 <div className="flex items-center space-x-3.5 min-w-0">
-                  <div className="w-9 h-9 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 flex-shrink-0">
+                  <div className="w-9 h-9 rounded-lg bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-400 shrink-0">
                     <Grid className="w-4.5 h-4.5 text-cyan-400/80" />
                   </div>
                   <div className="min-w-0">
@@ -114,7 +114,7 @@ export default function CategoriesPage() {
                   </div>
                 </div>
 
-                <div className="flex items-center space-x-3 flex-shrink-0">
+                <div className="flex items-center space-x-3 shrink-0">
                   <span className="px-2 py-0.5 rounded-full bg-slate-900 text-slate-500 text-[9px] font-bold">
                     {c.count} suggestions
                   </span>

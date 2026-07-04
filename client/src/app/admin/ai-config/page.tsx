@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
-  Bot, Save, RefreshCw, Slider,
+  Bot, Save, RefreshCw,
   Sparkles, CheckCircle, Shield, Loader2,
   AlertCircle
 } from 'lucide-react';

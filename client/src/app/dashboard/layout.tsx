@@ -75,11 +75,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <aside className="hidden md:flex flex-col w-64 bg-slate-900 border-r border-slate-900 p-6 shrink-0">
         {/* Brand */}
         <div className="flex items-center space-x-3 mb-8">
-          <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-orange-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+          <div className="w-9 h-9 rounded-xl bg-linear-to-tr from-orange-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
             <Vote className="w-5 h-5 text-white" />
           </div>
           <div>
-            <span className="font-extrabold text-md tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-orange-400 to-indigo-400">Jansunwai AI</span>
+            <span className="font-extrabold text-md tracking-tight bg-clip-text text-transparent bg-linear-to-r from-orange-400 to-indigo-400">Jansunwai AI</span>
             <p className="text-[8px] text-slate-400 uppercase tracking-wider font-semibold">Citizen Portal</p>
           </div>
         </div>

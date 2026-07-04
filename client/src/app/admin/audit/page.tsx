@@ -83,7 +83,7 @@ export default function AuditLogsPage() {
                     <span className="text-slate-200">{log.action}</span>
                   </div>
                 </div>
-                <div className="flex items-center space-x-3 text-[9px] text-slate-500 flex-shrink-0">
+                <div className="flex items-center space-x-3 text-[9px] text-slate-500 shrink-0">
                   <span>{log.ipAddress}</span>
                   <span>•</span>
                   <span>{new Date(log.timestamp).toLocaleString('en-IN')}</span>

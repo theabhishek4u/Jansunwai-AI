@@ -87,7 +87,7 @@ export default function CopilotPage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-4 shrink-0">
         <div className="flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-600 to-fuchsia-600 flex items-center justify-center shadow-lg shadow-violet-500/20">
+          <div className="w-10 h-10 rounded-xl bg-linear-to-br from-violet-600 to-fuchsia-600 flex items-center justify-center shadow-lg shadow-violet-500/20">
             <Bot className="w-5 h-5 text-white" />
           </div>
           <div>
@@ -111,7 +111,7 @@ export default function CopilotPage() {
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full space-y-8">
             <div className="flex flex-col items-center space-y-4">
-              <div className="w-16 h-16 rounded-2xl bg-gradient-to-br from-violet-600/20 to-fuchsia-600/20 flex items-center justify-center border border-violet-500/20">
+              <div className="w-16 h-16 rounded-2xl bg-linear-to-br from-violet-600/20 to-fuchsia-600/20 flex items-center justify-center border border-violet-500/20">
                 <Bot className="w-8 h-8 text-violet-400" />
               </div>
               <div className="text-center">
@@ -129,7 +129,7 @@ export default function CopilotPage() {
                   onClick={() => sendMessage(q)}
                   className="flex items-center space-x-2.5 px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700/50 text-xs text-slate-300 hover:bg-slate-800 hover:border-slate-600 hover:text-white transition-all text-left group"
                 >
-                  <Lightbulb className="w-3.5 h-3.5 text-amber-500/60 group-hover:text-amber-400 flex-shrink-0" />
+                  <Lightbulb className="w-3.5 h-3.5 text-amber-500/60 group-hover:text-amber-400 shrink-0" />
                   <span>{q}</span>
                 </button>
               ))}
@@ -147,7 +147,7 @@ export default function CopilotPage() {
                 <div className={`max-w-[85%] ${msg.role === 'user' ? 'order-1' : 'order-2'}`}>
                   <div className="flex items-start space-x-3">
                     {msg.role === 'ai' && (
-                      <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-600 to-fuchsia-600 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <div className="w-7 h-7 rounded-lg bg-linear-to-br from-violet-600 to-fuchsia-600 flex items-center justify-center shrink-0 mt-0.5">
                         <Bot className="w-3.5 h-3.5 text-white" />
                       </div>
                     )}
@@ -206,7 +206,7 @@ export default function CopilotPage() {
                     </div>
 
                     {msg.role === 'user' && (
-                      <div className="w-7 h-7 rounded-lg bg-amber-600/20 flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <div className="w-7 h-7 rounded-lg bg-amber-600/20 flex items-center justify-center shrink-0 mt-0.5">
                         <User className="w-3.5 h-3.5 text-amber-400" />
                       </div>
                     )}
@@ -220,7 +220,7 @@ export default function CopilotPage() {
         {/* Loading indicator */}
         {isLoading && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-start space-x-3">
-            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-violet-600 to-fuchsia-600 flex items-center justify-center">
+            <div className="w-7 h-7 rounded-lg bg-linear-to-br from-violet-600 to-fuchsia-600 flex items-center justify-center">
               <Bot className="w-3.5 h-3.5 text-white" />
             </div>
             <div className="flex items-center space-x-2 px-4 py-3 rounded-2xl bg-slate-800/50 border border-slate-700/30">
@@ -254,7 +254,7 @@ export default function CopilotPage() {
           <button
             onClick={() => sendMessage(input)}
             disabled={!input.trim() || isLoading}
-            className="w-12 h-12 rounded-xl bg-gradient-to-br from-violet-600 to-fuchsia-600 flex items-center justify-center text-white hover:shadow-lg hover:shadow-violet-500/20 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+            className="w-12 h-12 rounded-xl bg-linear-to-br from-violet-600 to-fuchsia-600 flex items-center justify-center text-white hover:shadow-lg hover:shadow-violet-500/20 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
           >
             <Send className="w-4.5 h-4.5" />
           </button>

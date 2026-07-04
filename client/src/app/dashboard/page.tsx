@@ -87,7 +87,7 @@ export default function DashboardHome() {
   return (
     <div className="space-y-8">
       {/* Welcome Banner */}
-      <div className="bg-gradient-to-r from-indigo-900/40 via-indigo-950/20 to-slate-900 border border-slate-900 rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden">
+      <div className="bg-linear-to-r from-indigo-900/40 via-indigo-950/20 to-slate-900 border border-slate-900 rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-500/5 blur-3xl -z-10" />
         <div className="space-y-2">
           <h1 className="text-2xl sm:text-3xl font-black text-white">Jai Hind, {user?.full_name}! 🇮🇳</h1>
@@ -97,7 +97,7 @@ export default function DashboardHome() {
         </div>
         <Link 
           href="/dashboard/submit" 
-          className="bg-gradient-to-r from-orange-500 to-indigo-600 hover:from-orange-400 hover:to-indigo-500 text-white font-bold text-sm px-6 py-4 rounded-xl shadow-md shadow-indigo-600/20 flex items-center space-x-2 shrink-0 self-stretch md:self-auto text-center justify-center transition-all"
+          className="bg-linear-to-r from-orange-500 to-indigo-600 hover:from-orange-400 hover:to-indigo-500 text-white font-bold text-sm px-6 py-4 rounded-xl shadow-md shadow-indigo-600/20 flex items-center space-x-2 shrink-0 self-stretch md:self-auto text-center justify-center transition-all"
         >
           <PlusCircle className="w-5 h-5" />
           <span>New Suggestion</span>
@@ -218,7 +218,7 @@ export default function DashboardHome() {
         {/* Gamification Sidebar summary */}
         <div className="space-y-6">
           <h2 className="text-lg font-bold text-white">Gamification Leaderboard</h2>
-          <div className="bg-gradient-to-b from-slate-900/60 to-slate-900 border border-slate-900 rounded-3xl p-6 relative overflow-hidden">
+          <div className="bg-linear-to-b from-slate-900/60 to-slate-900 border border-slate-900 rounded-3xl p-6 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/5 blur-xl rounded-full" />
             <div className="flex items-center space-x-3 mb-6">
               <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center">
@@ -239,7 +239,7 @@ export default function DashboardHome() {
                 <div className="w-full h-2 bg-slate-950 rounded-full overflow-hidden">
                   {/* Progress bar to next levels */}
                   <div 
-                    className="h-full bg-gradient-to-r from-orange-500 to-amber-400 rounded-full" 
+                    className="h-full bg-linear-to-r from-orange-500 to-amber-400 rounded-full" 
                     style={{ width: `${Math.min(100, ((user?.contribution_score || 0) / 250) * 100)}%` }} 
                   />
                 </div>

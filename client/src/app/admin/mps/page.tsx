@@ -132,7 +132,7 @@ export default function MpManagementPage() {
         </div>
         <button
           onClick={() => setShowAddForm(!showAddForm)}
-          className="flex items-center space-x-1.5 px-4 py-2.5 rounded-xl bg-gradient-to-r from-cyan-500 to-indigo-600 text-white text-xs font-semibold hover:shadow-lg hover:shadow-cyan-500/20 transition-all"
+          className="flex items-center space-x-1.5 px-4 py-2.5 rounded-xl bg-linear-to-r from-cyan-500 to-indigo-600 text-white text-xs font-semibold hover:shadow-lg hover:shadow-cyan-500/20 transition-all"
         >
           <Plus className="w-4 h-4" />
           <span>Add MP Profile</span>
@@ -248,7 +248,7 @@ export default function MpManagementPage() {
               className="bg-[#0b1329]/80 rounded-2xl p-5 border border-cyan-500/10 hover:border-cyan-500/20 transition-all flex flex-col justify-between"
             >
               <div className="flex items-start space-x-4">
-                <div className="w-12 h-12 rounded-full bg-slate-900 border border-slate-800 overflow-hidden flex-shrink-0 flex items-center justify-center text-slate-400 font-bold text-sm">
+                <div className="w-12 h-12 rounded-full bg-slate-900 border border-slate-800 overflow-hidden shrink-0 flex items-center justify-center text-slate-400 font-bold text-sm">
                   {mp.avatar_url ? (
                     <img src={mp.avatar_url} alt={mp.full_name} className="w-full h-full object-cover" />
                   ) : (

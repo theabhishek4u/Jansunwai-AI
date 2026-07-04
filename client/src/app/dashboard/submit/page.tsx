@@ -313,7 +313,7 @@ export default function SubmitSuggestion() {
         <div className="lg:col-span-2 bg-slate-900/40 border border-slate-900 rounded-3xl p-6 sm:p-8 space-y-6">
           
           {/* Voice Input Assist */}
-          <div className="bg-gradient-to-r from-slate-950 to-indigo-950/40 border border-slate-850 p-6 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-6">
+          <div className="bg-linear-to-r from-slate-950 to-indigo-950/40 border border-slate-850 p-6 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-6">
             <div className="space-y-1 text-center sm:text-left">
               <h3 className="text-sm font-bold text-white flex items-center justify-center sm:justify-start space-x-2">
                 <Mic className="w-4 h-4 text-indigo-400" />

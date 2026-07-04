@@ -158,7 +158,7 @@ export default function PriorityEnginePage() {
 
       {/* AI Reasoning Note */}
       <div className="flex items-start space-x-3 p-4 rounded-xl bg-violet-500/5 border border-violet-500/10">
-        <Info className="w-5 h-5 text-violet-400 flex-shrink-0 mt-0.5" />
+        <Info className="w-5 h-5 text-violet-400 shrink-0 mt-0.5" />
         <div>
           <p className="text-xs font-semibold text-violet-300 mb-1">How AI Priority Score Works</p>
           <p className="text-[11px] text-slate-400 leading-relaxed">

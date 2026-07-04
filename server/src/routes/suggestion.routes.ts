@@ -8,6 +8,7 @@ import {
   syncProfile,
   getProfileDetails
 } from '../controllers/suggestion.controller';
+import { asyncHandler } from '../middlewares/asyncHandler';
 
 const router = Router();
 const storage = multer.memoryStorage();
@@ -19,13 +20,13 @@ const upload = multer({
 });
 
 // Suggestions Routing
-router.post('/suggestions', upload.single('image'), createSuggestion);
-router.get('/suggestions', getSuggestions);
-router.get('/suggestions/:id', getSuggestionDetails);
-router.post('/suggestions/:id/timeline', addTimelineStatus);
+router.post('/suggestions', upload.single('image'), asyncHandler(createSuggestion));
+router.get('/suggestions', asyncHandler(getSuggestions));
+router.get('/suggestions/:id', asyncHandler(getSuggestionDetails));
+router.post('/suggestions/:id/timeline', asyncHandler(addTimelineStatus));
 
 // Profile Routing
-router.post('/profile/sync', syncProfile);
-router.get('/profile/:id', getProfileDetails);
+router.post('/profile/sync', asyncHandler(syncProfile));
+router.get('/profile/:id', asyncHandler(getProfileDetails));
 
 export default router;

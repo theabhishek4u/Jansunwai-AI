@@ -5,6 +5,7 @@ import aiRoutes from './routes/ai.routes';
 import suggestionRoutes from './routes/suggestion.routes';
 import mpRoutes from './routes/mp.routes';
 import adminRoutes from './routes/admin.routes';
+import { errorHandler } from './middlewares/errorHandler';
 
 dotenv.config();
 
@@ -39,6 +40,9 @@ app.get('/health', (req, res) => {
     }
   });
 });
+
+// Global Error Handler Middleware
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`Jansunwai AI Backend is running on port ${PORT}`);

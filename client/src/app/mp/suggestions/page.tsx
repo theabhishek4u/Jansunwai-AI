@@ -170,7 +170,7 @@ export default function MpSuggestionsPage() {
                 className="flex items-center gap-4 p-4 rounded-2xl bg-[#111827] border border-slate-800/50 hover:border-slate-700/80 transition-all group"
               >
                 {/* Rank */}
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500/10 to-amber-500/5 flex items-center justify-center flex-shrink-0 border border-amber-500/10">
+                <div className="w-10 h-10 rounded-xl bg-linear-to-br from-amber-500/10 to-amber-500/5 flex items-center justify-center shrink-0 border border-amber-500/10">
                   <span className="text-xs font-black text-amber-400">#{i + 1}</span>
                 </div>
 
@@ -195,7 +195,7 @@ export default function MpSuggestionsPage() {
                 </div>
 
                 {/* Meta */}
-                <div className="flex items-center gap-3 flex-shrink-0">
+                <div className="flex items-center gap-3 shrink-0">
                   <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold border ${urgencyBadge[s.urgency]}`}>
                     {s.urgency.toUpperCase()}
                   </span>

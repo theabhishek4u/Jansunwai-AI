@@ -114,7 +114,8 @@ export default function AnalyticsPage() {
               <CartesianGrid strokeDasharray="3 3" stroke="#1e293b" />
               <XAxis dataKey="name" tick={{ fill: '#64748b', fontSize: 9 }} angle={-30} textAnchor="end" height={60} />
               <YAxis tick={{ fill: '#64748b', fontSize: 10 }} />
-              <Tooltip contentStyle={tooltipStyle} formatter={(value: number) => [`₹${value} Cr`, 'Budget']} />
+              {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+              <Tooltip contentStyle={tooltipStyle} formatter={(value: any) => [`₹${value} Cr`, 'Budget']} />
               <Bar dataKey="valueCrore" radius={[6, 6, 0, 0]}>
                 {data.budgetChart.map((_, idx) => (
                   <Cell key={`bud-${idx}`} fill={COLORS[idx % COLORS.length]} />

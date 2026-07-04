@@ -128,7 +128,7 @@ export default function MpSuggestionDetailPage({ params }: { params: Promise<{ i
 
           {/* Action Buttons */}
           {!actionTaken && suggestion.status !== 'completed' && suggestion.status !== 'rejected' && (
-            <div className="flex items-center space-x-2 flex-shrink-0">
+            <div className="flex items-center space-x-2 shrink-0">
               <button onClick={() => handleAction('accept')} className="flex items-center space-x-1.5 px-4 py-2.5 rounded-xl bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-500 transition-colors">
                 <CheckCircle2 className="w-4 h-4" /><span>Accept</span>
               </button>
@@ -167,7 +167,7 @@ export default function MpSuggestionDetailPage({ params }: { params: Promise<{ i
               <span className="text-sm font-bold text-white">{suggestion.ai_score_completeness || 'N/A'}%</span>
             </div>
             <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
-              <div className="h-full rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500" style={{ width: `${suggestion.ai_score_completeness || 0}%` }} />
+              <div className="h-full rounded-full bg-linear-to-r from-violet-500 to-fuchsia-500" style={{ width: `${suggestion.ai_score_completeness || 0}%` }} />
             </div>
             <div className="flex justify-between items-center">
               <span className="text-[11px] text-slate-400">AI Confidence</span>

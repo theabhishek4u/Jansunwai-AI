@@ -4,7 +4,7 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@/lib/AuthContext';
-import { Vote, ArrowLeft, Mail, Lock, User, Phone, MapPin, Globe, Sparkles, AlertCircle } from 'lucide-react';
+import { Vote, ArrowLeft, Mail, Lock, User, Phone, MapPin, Globe, Sparkles, AlertCircle, Shield } from 'lucide-react';
 
 // Indian Location Metadata for dynamic selector
 const locationData: Record<string, {
@@ -60,15 +60,20 @@ function AuthForm() {
   const [isLogin, setIsLogin] = useState<boolean>(true);
   const [error, setError] = useState<string>('');
   const [loading, setLoading] = useState<boolean>(false);
+  const role = searchParams.get('role') || 'citizen';
 
   useEffect(() => {
-    const tab = searchParams.get('tab');
-    if (tab === 'register') {
-      setIsLogin(false);
-    } else {
+    if (role !== 'citizen') {
       setIsLogin(true);
+    } else {
+      const tab = searchParams.get('tab');
+      if (tab === 'register') {
+        setIsLogin(false);
+      } else {
+        setIsLogin(true);
+      }
     }
-  }, [searchParams]);
+  }, [searchParams, role]);
 
   useEffect(() => {
     // Redirection if already authenticated
@@ -84,6 +89,22 @@ function AuthForm() {
   }, [user, router]);
 
   // Form states
+  const inputClass = `w-full bg-slate-950 border border-slate-850 rounded-xl py-3 pl-10 pr-4 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-1 ` +
+    (role === 'mp' 
+      ? 'focus:border-amber-500 focus:ring-amber-500' 
+      : role === 'admin' 
+        ? 'focus:border-cyan-500 focus:ring-cyan-500' 
+        : 'focus:border-indigo-500 focus:ring-indigo-500');
+
+  const textLinkClass = `text-xs hover:underline ` +
+    (role === 'mp' 
+      ? 'text-amber-400' 
+      : role === 'admin' 
+        ? 'text-cyan-400' 
+        : 'text-indigo-400');
+
+
+
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -209,28 +230,36 @@ function AuthForm() {
       <div className="max-w-md w-full mx-auto bg-slate-900/60 border border-slate-900 backdrop-blur-md rounded-3xl p-8 sm:p-10 shadow-2xl">
         {/* Brand */}
         <div className="text-center mb-8">
-          <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-orange-500 to-indigo-600 flex items-center justify-center mx-auto shadow-md mb-4">
-            <Vote className="w-7 h-7 text-white" />
+          <div className={`w-12 h-12 rounded-2xl bg-linear-to-tr ${
+            role === 'mp' ? 'from-orange-500 to-amber-600' : role === 'admin' ? 'from-cyan-500 to-indigo-600' : 'from-orange-500 to-indigo-600'
+          } flex items-center justify-center mx-auto shadow-md mb-4`}>
+            {role === 'mp' ? <Sparkles className="w-7 h-7 text-white" /> : role === 'admin' ? <Shield className="w-7 h-7 text-white" /> : <Vote className="w-7 h-7 text-white" />}
           </div>
-          <h2 className="text-2xl font-black text-white">Jansunwai AI</h2>
-          <p className="text-xs text-slate-400 mt-1">AI-Powered Constituency Development Planning</p>
+          <h2 className="text-2xl font-black text-white">
+            {role === 'mp' ? 'MP Intelligence Portal' : role === 'admin' ? 'Operations CommandCenter' : 'Jansunwai AI'}
+          </h2>
+          <p className="text-xs text-slate-400 mt-1">
+            {role === 'mp' ? 'Constituency Decision Suite' : role === 'admin' ? 'NIC Platform Super Admin Control' : 'AI-Powered Constituency Development Planning'}
+          </p>
         </div>
 
-        {/* Tab switcher */}
-        <div className="flex border-b border-slate-800 mb-8 p-1 bg-slate-950 rounded-xl">
-          <button
-            onClick={() => { setIsLogin(true); setError(''); }}
-            className={`w-1/2 py-2.5 text-sm font-bold rounded-lg transition-all ${isLogin ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'}`}
-          >
-            Log In
-          </button>
-          <button
-            onClick={() => { setIsLogin(false); setError(''); }}
-            className={`w-1/2 py-2.5 text-sm font-bold rounded-lg transition-all ${!isLogin ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'}`}
-          >
-            Register
-          </button>
-        </div>
+        {/* Tab switcher - Only for Citizen role */}
+        {role === 'citizen' && (
+          <div className="flex border-b border-slate-800 mb-8 p-1 bg-slate-950 rounded-xl">
+            <button
+              onClick={() => { setIsLogin(true); setError(''); }}
+              className={`w-1/2 py-2.5 text-sm font-bold rounded-lg transition-all ${isLogin ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'}`}
+            >
+              Log In
+            </button>
+            <button
+              onClick={() => { setIsLogin(false); setError(''); }}
+              className={`w-1/2 py-2.5 text-sm font-bold rounded-lg transition-all ${!isLogin ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-white'}`}
+            >
+              Register
+            </button>
+          </div>
+        )}
 
         {error && (
           <div className="bg-red-500/15 border border-red-500/30 rounded-xl p-4 mb-6 flex items-start space-x-3 text-red-200 text-xs">
@@ -239,41 +268,47 @@ function AuthForm() {
           </div>
         )}
 
-        {/* Demo Roles Quick Login */}
+        {/* Demo Roles Quick Login - Tailored to the active role */}
         {isLogin && (
           <div className="mb-6 p-3 rounded-xl bg-slate-950 border border-slate-800 space-y-2">
             <p className="text-[10px] text-slate-500 uppercase font-bold text-center tracking-wider">Demo Quick Access</p>
-            <div className="grid grid-cols-3 gap-2">
-              <button
-                type="button"
-                onClick={() => {
-                  setEmail('aarav@mail.com');
-                  setPassword('password');
-                }}
-                className="px-2 py-1.5 rounded-lg bg-indigo-950/40 border border-indigo-900/30 hover:border-indigo-600 hover:bg-indigo-900/10 text-[9px] font-semibold text-indigo-300 transition-colors text-center truncate"
-              >
-                Citizen
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setEmail('mp@jansunwai.gov.in');
-                  setPassword('password');
-                }}
-                className="px-2 py-1.5 rounded-lg bg-amber-950/40 border border-amber-900/30 hover:border-amber-600 hover:bg-amber-900/10 text-[9px] font-semibold text-amber-300 transition-colors text-center truncate"
-              >
-                MP Demo
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  setEmail('admin@jansunwai.gov.in');
-                  setPassword('password');
-                }}
-                className="px-2 py-1.5 rounded-lg bg-cyan-950/40 border border-cyan-900/30 hover:border-cyan-600 hover:bg-cyan-900/10 text-[9px] font-semibold text-cyan-300 transition-colors text-center truncate"
-              >
-                Admin
-              </button>
+            <div className="flex justify-center">
+              {role === 'citizen' && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEmail('aarav@mail.com');
+                    setPassword('password');
+                  }}
+                  className="w-full px-3 py-2.5 rounded-lg bg-indigo-950/40 border border-indigo-900/30 hover:border-indigo-600 hover:bg-indigo-900/10 text-[10px] font-semibold text-indigo-300 transition-all text-center"
+                >
+                  Citizen Demo: Aarav Sharma (Sigra)
+                </button>
+              )}
+              {role === 'mp' && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEmail('mp@jansunwai.gov.in');
+                    setPassword('password');
+                  }}
+                  className="w-full px-3 py-2.5 rounded-lg bg-amber-950/40 border border-amber-900/30 hover:border-amber-600 hover:bg-amber-900/10 text-[10px] font-semibold text-amber-300 transition-all text-center"
+                >
+                  MP Demo: Dr. Vikram Singh (Varanasi)
+                </button>
+              )}
+              {role === 'admin' && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setEmail('admin@jansunwai.gov.in');
+                    setPassword('password');
+                  }}
+                  className="w-full px-3 py-2.5 rounded-lg bg-cyan-950/40 border border-cyan-900/30 hover:border-cyan-600 hover:bg-cyan-900/10 text-[10px] font-semibold text-cyan-300 transition-all text-center"
+                >
+                  Admin Demo: System Operations Room
+                </button>
+              )}
             </div>
           </div>
         )}
@@ -294,7 +329,7 @@ function AuthForm() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="name@example.com"
-                    className="w-full bg-slate-950 border border-slate-850 rounded-xl py-3 pl-10 pr-4 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                    className={inputClass}
                   />
                 </div>
               </div>
@@ -302,7 +337,7 @@ function AuthForm() {
               <div>
                 <div className="flex justify-between items-center mb-2">
                   <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider">Password</label>
-                  <a href="#" className="text-xs text-indigo-400 hover:underline">Forgot password?</a>
+                  <a href="#" className={textLinkClass}>Forgot password?</a>
                 </div>
                 <div className="relative">
                   <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-500">
@@ -314,7 +349,7 @@ function AuthForm() {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full bg-slate-950 border border-slate-850 rounded-xl py-3 pl-10 pr-4 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500"
+                    className={inputClass}
                   />
                 </div>
               </div>
@@ -496,36 +531,44 @@ function AuthForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-orange-500 to-indigo-600 hover:from-orange-400 hover:to-indigo-500 disabled:opacity-55 text-white py-3.5 px-4 rounded-xl text-sm font-bold shadow-md shadow-indigo-600/20 transition-all flex items-center justify-center space-x-2"
+            className={`w-full bg-linear-to-r ${
+              role === 'mp' 
+                ? 'from-orange-500 to-amber-600 hover:from-orange-400 hover:to-amber-500 shadow-amber-600/20' 
+                : role === 'admin' 
+                  ? 'from-cyan-500 to-indigo-600 hover:from-cyan-400 hover:to-indigo-500 shadow-cyan-600/20' 
+                  : 'from-orange-500 to-indigo-600 hover:from-orange-400 hover:to-indigo-500 shadow-indigo-600/20'
+            } disabled:opacity-55 text-white py-3.5 px-4 rounded-xl text-sm font-bold shadow-md transition-all flex items-center justify-center space-x-2`}
           >
             {loading ? (
               <span>Processing...</span>
             ) : (
               <>
-                <Sparkles className="w-4 h-4" />
-                <span>{isLogin ? 'Log In to Portal' : 'Create Account'}</span>
+                {role === 'mp' ? <Sparkles className="w-4 h-4" /> : role === 'admin' ? <Shield className="w-4 h-4" /> : <Vote className="w-4 h-4" />}
+                <span>{isLogin ? (role === 'mp' ? 'Access MP Portal' : role === 'admin' ? 'Access Command Center' : 'Log In to Portal') : 'Create Account'}</span>
               </>
             )}
           </button>
         </form>
 
-        <div className="mt-6 text-center text-xs text-slate-400">
-          {isLogin ? (
-            <span>
-              Don&apos;t have an account?{' '}
-              <button onClick={() => setIsLogin(false)} className="text-indigo-400 font-bold hover:underline">
-                Register now
-              </button>
-            </span>
-          ) : (
-            <span>
-              Already registered?{' '}
-              <button onClick={() => setIsLogin(true)} className="text-indigo-400 font-bold hover:underline">
-                Log In here
-              </button>
-            </span>
-          )}
-        </div>
+        {role === 'citizen' && (
+          <div className="mt-6 text-center text-xs text-slate-400">
+            {isLogin ? (
+              <span>
+                Don&apos;t have an account?{' '}
+                <button onClick={() => setIsLogin(false)} className="text-indigo-400 font-bold hover:underline">
+                  Register now
+                </button>
+              </span>
+            ) : (
+              <span>
+                Already registered?{' '}
+                <button onClick={() => setIsLogin(true)} className="text-indigo-400 font-bold hover:underline">
+                  Log In here
+                </button>
+              </span>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

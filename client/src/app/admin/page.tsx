@@ -121,7 +121,7 @@ export default function AdminDashboard() {
         <div>
           <h1 className="text-xl font-extrabold text-white tracking-tight flex items-center space-x-2">
             <Radio className="w-5 h-5 text-cyan-400 animate-pulse" />
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-indigo-400">National Governance Command Center</span>
+            <span className="bg-clip-text text-transparent bg-linear-to-r from-cyan-400 to-indigo-400">National Governance Command Center</span>
           </h1>
           <p className="text-xs text-slate-500 mt-0.5">Real-time nationwide overview of Jansunwai AI public demand systems</p>
         </div>
@@ -268,7 +268,7 @@ export default function AdminDashboard() {
                     exit={{ opacity: 0 }}
                     className="p-2.5 rounded-lg bg-slate-900/50 border border-slate-800/40 text-[10px] text-slate-300 leading-relaxed font-mono flex items-start space-x-2"
                   >
-                    <span className="text-cyan-500/60 font-bold flex-shrink-0">&gt;</span>
+                    <span className="text-cyan-500/60 font-bold shrink-0">&gt;</span>
                     <span>{log}</span>
                   </motion.div>
                 ))}

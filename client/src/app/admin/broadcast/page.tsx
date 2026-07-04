@@ -145,7 +145,7 @@ export default function BroadcastPage() {
               <button
                 type="submit"
                 disabled={sending}
-                className="flex items-center space-x-1.5 px-4.5 py-2.5 rounded-xl bg-gradient-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white text-xs font-bold transition-all disabled:opacity-50"
+                className="flex items-center space-x-1.5 px-4.5 py-2.5 rounded-xl bg-linear-to-r from-cyan-600 to-indigo-600 hover:from-cyan-500 hover:to-indigo-500 text-white text-xs font-bold transition-all disabled:opacity-50"
               >
                 {sending ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
                 <span>Push Broadcast</span>
@@ -161,7 +161,7 @@ export default function BroadcastPage() {
           <div className="space-y-3">
             {broadcasts.map((b) => (
               <div key={b.id} className="p-4 bg-slate-900/40 rounded-xl border border-slate-850 flex items-start space-x-3 hover:border-slate-800 transition-all">
-                <div className="flex-shrink-0 mt-0.5">
+                <div className="shrink-0 mt-0.5">
                   <Bell className="w-4 h-4 text-cyan-400" />
                 </div>
                 <div className="flex-1 min-w-0">

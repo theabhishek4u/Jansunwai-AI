@@ -101,7 +101,7 @@ export default function CitizenProfile() {
         {/* Profile Card - Left Column */}
         <div className="md:col-span-1 space-y-6">
           <div className="bg-slate-900/40 border border-slate-900 rounded-3xl p-6 text-center space-y-4 relative overflow-hidden">
-            <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-orange-500 to-indigo-600" />
+            <div className="absolute top-0 left-0 right-0 h-2 bg-linear-to-r from-orange-500 to-indigo-600" />
             <div className="w-20 h-20 rounded-full bg-indigo-600 mx-auto flex items-center justify-center font-bold text-white uppercase text-2xl border-2 border-indigo-400 mt-2">
               {user?.full_name[0]}
             </div>

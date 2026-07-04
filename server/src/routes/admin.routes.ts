@@ -10,17 +10,18 @@ import {
   updateMpStatus,
   broadcastNotification
 } from '../controllers/admin.controller';
+import { asyncHandler } from '../middlewares/asyncHandler';
 
 const router = Router();
 
-router.get('/command-center-stats', getCommandCenterStats);
-router.get('/prompts', getPrompts);
-router.post('/prompts', updatePrompt);
-router.get('/datasets', getDatasets);
-router.post('/datasets', addDataset);
-router.get('/audit-logs', getAuditLogs);
-router.get('/mps', getMps);
-router.post('/mps/status', updateMpStatus);
-router.post('/notifications/broadcast', broadcastNotification);
+router.get('/command-center-stats', asyncHandler(getCommandCenterStats));
+router.get('/prompts', asyncHandler(getPrompts));
+router.post('/prompts', asyncHandler(updatePrompt));
+router.get('/datasets', asyncHandler(getDatasets));
+router.post('/datasets', asyncHandler(addDataset));
+router.get('/audit-logs', asyncHandler(getAuditLogs));
+router.get('/mps', asyncHandler(getMps));
+router.post('/mps/status', asyncHandler(updateMpStatus));
+router.post('/notifications/broadcast', asyncHandler(broadcastNotification));
 
 export default router;

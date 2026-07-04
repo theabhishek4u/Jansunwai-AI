@@ -96,7 +96,7 @@ export default function ReportsPage() {
             className="bg-[#111827] rounded-2xl p-6 border border-slate-800/50 hover:border-slate-700/80 transition-all group"
           >
             <div className="flex items-start space-x-4">
-              <div className={`w-12 h-12 rounded-xl bg-gradient-to-br ${report.color} flex items-center justify-center text-white shadow-lg flex-shrink-0`}>
+              <div className={`w-12 h-12 rounded-xl bg-linear-to-br ${report.color} flex items-center justify-center text-white shadow-lg shrink-0`}>
                 {report.icon}
               </div>
               <div className="flex-1 min-w-0">

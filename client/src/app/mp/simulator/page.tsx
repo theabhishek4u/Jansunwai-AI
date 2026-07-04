@@ -151,7 +151,7 @@ export default function SimulatorPage() {
           <button
             onClick={simulate}
             disabled={loading || !projectA || !projectB}
-            className="flex items-center space-x-2 px-6 py-3 rounded-xl bg-gradient-to-r from-amber-600 to-amber-700 text-white text-sm font-semibold hover:shadow-lg hover:shadow-amber-500/20 transition-all disabled:opacity-50 shrink-0"
+            className="flex items-center space-x-2 px-6 py-3 rounded-xl bg-linear-to-r from-amber-600 to-amber-700 text-white text-sm font-semibold hover:shadow-lg hover:shadow-amber-500/20 transition-all disabled:opacity-50 shrink-0"
           >
             {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <FlaskConical className="w-4 h-4" />}
             <span>{loading ? 'Simulating...' : 'Run Simulation'}</span>

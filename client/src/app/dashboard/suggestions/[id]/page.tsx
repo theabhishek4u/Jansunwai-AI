@@ -341,7 +341,7 @@ export default function SuggestionDetails() {
                 type="button"
                 disabled={simulating || sugg.status === 'completed'}
                 onClick={() => handleSimulateStatus('completed')}
-                className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-[11px] text-white py-2.5 px-4 rounded-xl transition-all disabled:opacity-40 font-bold"
+                className="w-full bg-linear-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-[11px] text-white py-2.5 px-4 rounded-xl transition-all disabled:opacity-40 font-bold"
               >
                 Mark Project Completed
               </button>
