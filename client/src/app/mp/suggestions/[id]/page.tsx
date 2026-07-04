@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useEffect, useState, use } from 'react';
+import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {
   ArrowLeft, MapPin, Users, AlertTriangle,
@@ -52,8 +53,9 @@ const statusLabels: Record<string, { label: string; color: string }> = {
   accepted: { label: 'Accepted', color: 'text-green-400 bg-green-500/10 border-green-500/20' },
 };
 
-export default function MpSuggestionDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = use(params);
+export default function MpSuggestionDetailPage() {
+  const params = useParams();
+  const id = params?.id as string;
   const [suggestion, setSuggestion] = useState<SuggestionDetail | null>(null);
   const [timeline, setTimeline] = useState<TimelineEvent[]>([]);
   const [loading, setLoading] = useState(true);

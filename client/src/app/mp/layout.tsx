@@ -39,7 +39,7 @@ export default function MpLayout({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     if (!loading && (!user || user.role !== 'mp')) {
-      router.push('/auth');
+      router.push('/auth/mp');
     }
   }, [user, loading, router]);
 

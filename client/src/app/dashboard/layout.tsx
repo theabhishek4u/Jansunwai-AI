@@ -33,7 +33,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   useEffect(() => {
     if (!loading) {
       if (!user) {
-        router.push('/auth');
+        router.push('/auth/citizen');
       } else if (user.role === 'admin') {
         router.push('/admin');
       } else if (user.role === 'mp') {

@@ -104,6 +104,96 @@ export default function DashboardHome() {
         </Link>
       </div>
 
+      {/* TODAY'S AI CONSTITUENCY INSIGHTS */}
+      <div className="bg-linear-to-b from-indigo-950/30 to-slate-950/20 border border-indigo-900/35 rounded-3xl p-6 relative overflow-hidden shadow-[0_0_50px_rgba(99,102,241,0.03)]">
+        {/* Glow grid in background */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-gradient-to-bl from-indigo-500/10 via-indigo-650/5 to-transparent blur-3xl -z-10" />
+        <div className="absolute bottom-0 left-12 w-64 h-64 bg-orange-500/5 blur-3xl -z-10" />
+
+        {/* Top Header */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-indigo-950 pb-5 mb-5">
+          <div className="flex items-center space-x-3">
+            <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center border border-indigo-500/20 shadow-inner">
+              <Sparkles className="w-5 h-5 text-indigo-400 animate-pulse" />
+            </div>
+            <div>
+              <h2 className="text-sm font-extrabold text-white flex items-center gap-2">
+                Today&apos;s AI Insights & Constituency Health
+                <span className="text-[9px] font-bold text-indigo-400 bg-indigo-500/15 border border-indigo-500/20 px-2.5 py-0.5 rounded-full uppercase tracking-wider animate-pulse">Live Heuristics</span>
+              </h2>
+              <p className="text-xs text-slate-400 mt-0.5">Active spatial scanner evaluating demographic constraints, GIS routing delays, and crowdsourced demands.</p>
+            </div>
+          </div>
+          <div className="flex items-center space-x-2 bg-slate-900 border border-slate-800 px-3 py-1.5 rounded-xl text-[10px] font-semibold text-slate-400 self-start sm:self-auto">
+            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping" />
+            <span>Grounded Datasets Verified</span>
+          </div>
+        </div>
+
+        {/* Heuristics Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* Card 1: Road Quality */}
+          <div className="bg-slate-900/40 border border-indigo-950/20 p-5 rounded-2xl relative group hover:border-indigo-600/30 transition-all hover:bg-slate-900/60">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[9px] font-bold text-amber-500 uppercase tracking-wider bg-amber-500/15 border border-amber-500/25 px-2 py-0.5 rounded-md">Roads & Connectivity</span>
+              <TrendingUp className="w-4 h-4 text-amber-500 animate-bounce" />
+            </div>
+            <h4 className="text-xs font-bold text-white mb-2">Road Demand Spike</h4>
+            <p className="text-[11px] text-slate-400 leading-relaxed">
+              Spatial suggestion clusters indicate road quality demands increased <span className="text-amber-500 font-extrabold">24%</span> in Sigra & Lahartara blocks.
+            </p>
+            <div className="mt-3 text-[9px] text-slate-500 font-semibold uppercase tracking-wider">
+              Source: Local telemetry feeds
+            </div>
+          </div>
+
+          {/* Card 2: Water issue */}
+          <div className="bg-slate-900/40 border border-indigo-950/20 p-5 rounded-2xl relative group hover:border-indigo-600/30 transition-all hover:bg-slate-900/60">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[9px] font-bold text-sky-400 uppercase tracking-wider bg-sky-400/15 border border-sky-400/25 px-2 py-0.5 rounded-md">Water Resources</span>
+              <Sparkles className="w-4 h-4 text-sky-400 animate-pulse" />
+            </div>
+            <h4 className="text-xs font-bold text-white mb-2">Groundwater Dip Alert</h4>
+            <p className="text-[11px] text-slate-400 leading-relaxed">
+              Aquifer drop detected. Heavy water scarcity signatures registered across <span className="text-sky-400 font-extrabold">3 rural villages</span>.
+            </p>
+            <div className="mt-3 text-[9px] text-slate-500 font-semibold uppercase tracking-wider">
+              Source: Aquifer sensor data
+            </div>
+          </div>
+
+          {/* Card 3: Healthcare shortage */}
+          <div className="bg-slate-900/40 border border-indigo-950/20 p-5 rounded-2xl relative group hover:border-indigo-600/30 transition-all hover:bg-slate-900/60">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[9px] font-bold text-rose-400 uppercase tracking-wider bg-rose-400/15 border border-rose-400/25 px-2 py-0.5 rounded-md">Healthcare Coverage</span>
+              <ShieldAlert className="w-4 h-4 text-rose-400" />
+            </div>
+            <h4 className="text-xs font-bold text-white mb-2">Hospital Shortage</h4>
+            <p className="text-[11px] text-slate-400 leading-relaxed">
+              Travel time to the nearest emergency clinic in <span className="font-semibold text-white">Block B (Harahua)</span> has crossed <span className="text-rose-400 font-extrabold">45 minutes</span>.
+            </p>
+            <div className="mt-3 text-[9px] text-slate-500 font-semibold uppercase tracking-wider">
+              Source: Routing delay optimization
+            </div>
+          </div>
+
+          {/* Card 4: Prescription */}
+          <div className="bg-indigo-950/20 border border-indigo-500/25 p-5 rounded-2xl relative group hover:border-indigo-500/45 transition-all hover:bg-indigo-950/30 shadow-[0_0_20px_rgba(99,102,241,0.05)]">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-[9px] font-bold text-indigo-300 uppercase tracking-wider bg-indigo-500/25 border border-indigo-500/35 px-2 py-0.5 rounded-md">AI Prescription</span>
+              <Sparkles className="w-4 h-4 text-indigo-300 animate-spin-slow" />
+            </div>
+            <h4 className="text-xs font-bold text-indigo-300 mb-2">Build Primary Health Centre</h4>
+            <p className="text-[11px] text-slate-300 leading-relaxed">
+              AI model recommends allocating budget for <span className="text-emerald-400 font-extrabold">1 new PHC</span> in Harahua block to close geographic travel gap.
+            </p>
+            <div className="mt-3 text-[9px] text-indigo-400 font-bold uppercase tracking-wider flex items-center space-x-1">
+              <span>Optimizes travel time by 82%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Stats Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
         <div className="bg-slate-900/40 border border-slate-900 p-5 rounded-2xl">

@@ -172,19 +172,19 @@ export default function LandingPage() {
             ) : (
               <>
                 <Link 
-                  href="/auth?role=citizen" 
+                  href="/auth/citizen" 
                   className="px-3.5 py-2 rounded-xl border border-indigo-600/20 text-indigo-400 hover:bg-indigo-600/10 text-xs font-bold transition-all"
                 >
                   Citizen Login
                 </Link>
                 <Link 
-                  href="/auth?role=mp" 
+                  href="/auth/mp" 
                   className="px-3.5 py-2 rounded-xl border border-amber-500/20 text-amber-400 hover:bg-amber-500/10 text-xs font-bold transition-all"
                 >
                   MP Portal
                 </Link>
                 <Link 
-                  href="/auth?role=admin" 
+                  href="/auth/admin" 
                   className="px-3.5 py-2 rounded-xl border border-cyan-500/20 text-cyan-400 hover:bg-cyan-500/10 text-xs font-bold transition-all"
                 >
                   Super Admin
@@ -220,7 +220,7 @@ export default function LandingPage() {
               </Link>
             ) : (
               <Link 
-                href="/auth?role=citizen" 
+                href="/auth/citizen" 
                 className="w-full sm:w-auto bg-linear-to-r from-orange-500 to-indigo-600 hover:scale-[1.02] transition-transform text-white px-8 py-4 rounded-2xl font-bold flex items-center justify-center space-x-2 shadow-lg shadow-indigo-600/20"
               >
                 <span>Get Started (Citizen Portal)</span>
