@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/AuthContext';
 import { 
@@ -11,9 +11,8 @@ import {
   HelpCircle, 
   AlertTriangle, 
   CheckCircle,
-  FileImage, 
+  FileText,
   MapIcon, 
-  HelpCircleIcon, 
   ArrowRight,
   TrendingUp,
   XCircle,
@@ -64,6 +63,32 @@ export default function SubmitSuggestion() {
   const [aiScore, setAiScore] = useState<number | null>(null);
   const [activeQuestionIndex, setActiveQuestionIndex] = useState<number | null>(null);
   const [questionAnswer, setQuestionAnswer] = useState('');
+
+  // Drag & drop state and handlers
+  const [isDragging, setIsDragging] = useState(false);
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file && file.type.startsWith('image/')) {
+      setImageFile(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   // Submit Result Modal
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -300,34 +325,62 @@ export default function SubmitSuggestion() {
     }
   };
 
+  // Circular progress math
+  const radius = 45;
+  const circumference = 2 * Math.PI * radius; // ~282.74
+  const strokeDashoffset = aiScore !== null ? circumference - (aiScore / 100) * circumference : circumference;
+
   return (
-    <div className="space-y-6 max-w-6xl mx-auto">
+    <div className="space-y-8 max-w-6xl mx-auto animate-fadeIn">
       {/* Header */}
-      <div>
-        <h1 className="text-2xl font-black text-white">Submit Development Suggestion</h1>
-        <p className="text-xs text-slate-400 mt-1">Submit actionable proposals for constituency improvement. AI reviews and groups them automatically.</p>
+      <div className="relative p-6 sm:p-8 bg-slate-900/40 border border-slate-800/80 rounded-3xl overflow-hidden flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow-xl">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 blur-3xl rounded-full pointer-events-none" />
+        <div className="space-y-1">
+          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-2">
+            Submit Development Suggestion
+            <span className="text-[10px] font-bold text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2.5 py-0.5 rounded-full uppercase tracking-wider animate-pulse">Citizen Voice</span>
+          </h1>
+          <p className="text-xs text-slate-400">Submit actionable proposals for constituency improvement. AI reviews and groups them automatically.</p>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Suggestion Form - Left 2 Columns */}
-        <div className="lg:col-span-2 bg-slate-900/40 border border-slate-900 rounded-3xl p-6 sm:p-8 space-y-6">
+        <div className="lg:col-span-2 bg-slate-900/60 backdrop-blur-md border border-slate-800/80 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xl relative overflow-hidden">
           
           {/* Voice Input Assist */}
-          <div className="bg-linear-to-r from-slate-950 to-indigo-950/40 border border-slate-850 p-6 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-6">
-            <div className="space-y-1 text-center sm:text-left">
-              <h3 className="text-sm font-bold text-white flex items-center justify-center sm:justify-start space-x-2">
-                <Mic className="w-4 h-4 text-indigo-400" />
+          <div className="bg-gradient-to-r from-slate-950 via-indigo-950/20 to-slate-950 border border-slate-800 p-6 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-6 shadow-[0_4px_30px_rgba(99,102,241,0.03)] hover:border-slate-700/85 transition-all duration-300">
+            <div className="space-y-2 text-center sm:text-left">
+              <h3 className="text-sm font-bold text-white flex items-center justify-center sm:justify-start gap-2">
+                <div className="w-7 h-7 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-400 border border-indigo-500/20 shadow-inner">
+                  <Mic className="w-4 h-4" />
+                </div>
                 <span>Speak Your Suggestion</span>
               </h3>
-              <p className="text-xs text-slate-400">Record in Hindi, Hinglish, Bhojpuri, or English. AI generates title, text and fields.</p>
+              <p className="text-xs text-slate-400 max-w-md">Record in Hindi, Hinglish, Bhojpuri, or English. AI automatically structures the title, description, and key metadata.</p>
+              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-1.5 pt-1">
+                {['Hindi', 'Hinglish', 'Bhojpuri', 'English'].map(lang => (
+                  <span key={lang} className="text-[9px] font-semibold text-slate-400 bg-slate-900 border border-slate-800 px-2.5 py-0.5 rounded-full">{lang}</span>
+                ))}
+              </div>
             </div>
             
-            <div className="shrink-0 flex items-center space-x-3">
+            <div className="shrink-0 flex items-center space-x-4">
+              {isRecording && (
+                <div className="flex items-center space-x-1 h-6 px-2">
+                  <span className="w-1 bg-red-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s', height: '14px' }} />
+                  <span className="w-1 bg-red-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s', height: '22px' }} />
+                  <span className="w-1 bg-red-500 rounded-full animate-bounce" style={{ animationDelay: '0.3s', height: '10px' }} />
+                  <span className="w-1 bg-red-500 rounded-full animate-bounce" style={{ animationDelay: '0.4s', height: '18px' }} />
+                  <span className="w-1 bg-red-500 rounded-full animate-bounce" style={{ animationDelay: '0.5s', height: '12px' }} />
+                </div>
+              )}
+              
               {isRecording ? (
                 <button
                   type="button"
                   onClick={stopRecording}
-                  className="bg-red-600 hover:bg-red-500 text-white font-bold text-xs px-5 py-3 rounded-xl flex items-center space-x-2 shadow-lg shadow-red-600/20 animate-pulse"
+                  className="bg-red-600 hover:bg-red-500 text-white font-bold text-xs px-5 py-3.5 rounded-xl flex items-center space-x-2 shadow-lg shadow-red-600/20 active:scale-95 transition-all cursor-pointer animate-pulse"
                 >
                   <span className="w-2.5 h-2.5 rounded-full bg-white mr-1" />
                   <span>Stop ({recordingTime}s)</span>
@@ -336,7 +389,7 @@ export default function SubmitSuggestion() {
                 <button
                   type="button"
                   onClick={startRecording}
-                  className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs px-5 py-3 rounded-xl flex items-center space-x-2 shadow-lg shadow-indigo-600/20"
+                  className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs px-5 py-3.5 rounded-xl flex items-center space-x-2 shadow-lg shadow-indigo-600/20 hover:-translate-y-0.5 active:scale-95 transition-all cursor-pointer"
                 >
                   <Mic className="w-4 h-4" />
                   <span>Record Suggestion</span>
@@ -346,7 +399,7 @@ export default function SubmitSuggestion() {
           </div>
 
           {isTranscribing && (
-            <div className="flex items-center justify-center space-x-3 p-4 bg-slate-950 rounded-xl border border-slate-850 text-indigo-400 text-xs">
+            <div className="flex items-center justify-center space-x-3 p-4 bg-slate-950 rounded-xl border border-slate-800 text-indigo-400 text-xs shadow-inner">
               <div className="w-4 h-4 border-2 border-indigo-400 border-t-transparent animate-spin rounded-full" />
               <span>Transcribing and structuring audio using Gemini...</span>
             </div>
@@ -357,179 +410,267 @@ export default function SubmitSuggestion() {
             {/* Title */}
             <div>
               <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Suggestion Title</label>
-              <input
-                type="text"
-                required
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                placeholder="Briefly state what needs development (e.g., Road repairs connecting village school)"
-                className="w-full bg-slate-950 border border-slate-850 rounded-xl py-3 px-4 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-indigo-500"
-              />
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                  <FileText className="w-4 h-4" />
+                </div>
+                <input
+                  type="text"
+                  required
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  placeholder="Briefly state what needs development (e.g., Road repairs connecting village school)"
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl py-3.5 pl-10 pr-4 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all duration-300"
+                />
+              </div>
             </div>
 
             {/* Category */}
             <div>
               <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Category</label>
-              <select
-                required
-                value={category}
-                onChange={(e) => setCategory(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-850 rounded-xl py-3 px-4 text-sm text-slate-100 focus:outline-none focus:border-indigo-500"
-              >
-                <option value="">Select category</option>
-                {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                  <HelpCircle className="w-4 h-4" />
+                </div>
+                <select
+                  required
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value)}
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl py-3.5 pl-10 pr-10 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all duration-300 appearance-none"
+                >
+                  <option value="">Select category</option>
+                  {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+                </select>
+                <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-slate-500">
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </div>
+              </div>
             </div>
 
             {/* Description */}
-            <div className="relative">
-              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Description</label>
-              <textarea
-                required
-                rows={5}
-                value={description}
-                onChange={(e) => setDescription(e.target.value)}
-                placeholder="Describe the developmental need. Mention the current issue, how it impacts residents, land details if any, etc."
-                className="w-full bg-slate-950 border border-slate-850 rounded-xl py-3 px-4 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-indigo-500 font-sans"
-              />
-              {description.length > 10 && (
-                <button
-                  type="button"
-                  onClick={handleAiAssist}
-                  disabled={aiLoading}
-                  className="absolute bottom-3 right-3 bg-slate-900 hover:bg-slate-800 border border-slate-800 text-indigo-400 text-xs px-3 py-1.5 rounded-lg flex items-center space-x-1.5 shadow"
-                >
-                  <Sparkles className="w-3.5 h-3.5" />
-                  <span>{aiLoading ? 'Analyzing...' : 'AI Writing Assistant'}</span>
-                </button>
-              )}
+            <div className="space-y-2">
+              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider">Description</label>
+              <div className="relative">
+                <textarea
+                  required
+                  rows={5}
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  placeholder="Describe the developmental need. Mention the current issue, how it impacts residents, land details if any, etc."
+                  className="w-full bg-slate-950 border border-slate-800 rounded-xl py-3.5 px-4 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all duration-300 font-sans"
+                />
+                {description.length > 10 && (
+                  <button
+                    type="button"
+                    onClick={handleAiAssist}
+                    disabled={aiLoading}
+                    className="absolute bottom-3.5 right-3.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-xs px-4 py-2 rounded-xl flex items-center space-x-1.5 shadow-md shadow-indigo-600/20 hover:scale-102 transition-all font-bold cursor-pointer disabled:opacity-50"
+                  >
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>{aiLoading ? 'Analyzing...' : 'AI Writing Assistant'}</span>
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* Beneficiaries & Urgency */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Estimated People Benefited</label>
-                <input
-                  type="number"
-                  value={beneficiaries}
-                  onChange={(e) => setBeneficiaries(e.target.value)}
-                  placeholder="e.g. 500"
-                  className="w-full bg-slate-950 border border-slate-850 rounded-xl py-3 px-4 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-indigo-500"
-                />
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                    <TrendingUp className="w-4 h-4" />
+                  </div>
+                  <input
+                    type="number"
+                    value={beneficiaries}
+                    onChange={(e) => setBeneficiaries(e.target.value)}
+                    placeholder="e.g. 500"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl py-3.5 pl-10 pr-4 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all duration-300"
+                  />
+                </div>
               </div>
               <div>
                 <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Urgency Level</label>
-                <select
-                  value={urgency}
-                  onChange={(e) => setUrgency(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-850 rounded-xl py-3 px-4 text-sm text-slate-100 focus:outline-none focus:border-indigo-500"
-                >
-                  <option value="low">Low - Routine Planning</option>
-                  <option value="medium">Medium - Important Improvement</option>
-                  <option value="high">High - High Priority</option>
-                  <option value="critical">Critical - Urgent Public Hazard / Complete Absence</option>
-                </select>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                    <AlertTriangle className="w-4 h-4" />
+                  </div>
+                  <select
+                    value={urgency}
+                    onChange={(e) => setUrgency(e.target.value)}
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl py-3.5 pl-10 pr-10 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all duration-300 appearance-none"
+                  >
+                    <option value="low">Low - Routine Planning</option>
+                    <option value="medium">Medium - Important Improvement</option>
+                    <option value="high">High - High Priority</option>
+                    <option value="critical">Critical - Urgent Public Hazard / Complete Absence</option>
+                  </select>
+                  <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-slate-500">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </div>
               </div>
             </div>
 
             {/* Image upload */}
             <div>
               <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Image Evidence</label>
-              <div className="flex flex-col sm:flex-row items-center gap-4">
-                <label className="w-full sm:w-auto flex items-center justify-center space-x-2 border border-dashed border-slate-850 hover:border-indigo-500 rounded-xl py-4 px-6 cursor-pointer bg-slate-950 text-slate-400 text-xs font-bold hover:text-white transition-all">
-                  <Upload className="w-4 h-4 text-indigo-400" />
-                  <span>Choose Photo</span>
-                  <input type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
-                </label>
-                {imagePreview && (
-                  <div className="flex items-center space-x-3 bg-slate-950 p-2 rounded-xl border border-slate-850">
-                    <img src={imagePreview} alt="Preview" className="w-12 h-12 object-cover rounded-lg border border-slate-800" />
-                    <div className="min-w-0 pr-4">
-                      <span className="block text-xs font-semibold text-slate-300 truncate max-w-[150px]">{imageFile?.name}</span>
-                      <button type="button" onClick={() => { setImageFile(null); setImagePreview(null); }} className="text-[10px] text-red-400 font-bold hover:underline block">Remove</button>
+              <div className="space-y-4">
+                <div 
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                  className={`w-full border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-all duration-300 ${
+                    isDragging 
+                      ? 'border-indigo-500 bg-indigo-500/5' 
+                      : 'border-slate-800 bg-slate-950/40 hover:border-slate-750 hover:bg-slate-950/60'
+                  }`}
+                >
+                  <label className="cursor-pointer flex flex-col items-center justify-center space-y-2">
+                    <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 border border-indigo-500/20">
+                      <Upload className="w-5 h-5" />
                     </div>
+                    <div className="space-y-1">
+                      <span className="text-xs font-bold text-slate-300 block">Drag & Drop Image Evidence here</span>
+                      <span className="text-[11px] text-slate-500 block">or click to browse local files</span>
+                    </div>
+                    <input type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
+                  </label>
+                </div>
+                {imagePreview && (
+                  <div className="flex items-center justify-between bg-slate-950 border border-slate-800 p-3 rounded-2xl shadow-inner">
+                    <div className="flex items-center space-x-3">
+                      <img src={imagePreview} alt="Preview" className="w-14 h-14 object-cover rounded-xl border border-slate-800" />
+                      <div className="min-w-0 pr-4">
+                        <span className="block text-xs font-semibold text-slate-200 truncate max-w-[200px]">{imageFile?.name}</span>
+                        <span className="block text-[10px] text-slate-500">{(imageFile?.size ? (imageFile.size / 1024 / 1024).toFixed(2) : 0) } MB</span>
+                      </div>
+                    </div>
+                    <button 
+                      type="button" 
+                      onClick={() => { setImageFile(null); setImagePreview(null); }} 
+                      className="text-xs text-red-400 hover:text-red-300 font-bold hover:underline px-3 py-1 cursor-pointer"
+                    >
+                      Remove
+                    </button>
                   </div>
                 )}
               </div>
             </div>
 
             {/* Location Section */}
-            <div className="border-t border-slate-900 pt-6 space-y-4">
+            <div className="border-t border-slate-900/60 pt-6 space-y-4">
               <div className="flex items-center justify-between">
                 <span className="block text-xs font-bold text-slate-400 uppercase tracking-wider">Location Metadata</span>
                 <button
                   type="button"
                   onClick={handleGetLocation}
-                  className="text-xs font-bold text-indigo-400 hover:underline flex items-center space-x-1"
+                  className="flex items-center space-x-1.5 px-3 py-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 text-indigo-400 rounded-xl text-xs font-bold transition-all shadow-sm shadow-indigo-500/5 hover:-translate-y-0.5 cursor-pointer"
                 >
-                  <MapPin className="w-3.5 h-3.5" />
+                  <MapPin className="w-3.5 h-3.5 animate-pulse" />
                   <span>Fetch Geolocation</span>
                 </button>
               </div>
 
               {lat && lng && (
-                <div className="bg-slate-950 border border-slate-850 p-3 rounded-xl text-slate-400 text-[11px] flex items-center space-x-2">
-                  <MapPin className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                  <span>Coordinates Verified: Lat {lat.toFixed(5)}, Lng {lng.toFixed(5)}</span>
+                <div className="bg-emerald-500/5 border border-emerald-500/20 p-3.5 rounded-xl text-emerald-400 text-[11px] flex items-center justify-between shadow-sm animate-fadeIn">
+                  <div className="flex items-center space-x-2">
+                    <div className="w-5 h-5 rounded-full bg-emerald-500/10 flex items-center justify-center">
+                      <CheckCircle className="w-3 h-3 text-emerald-400" />
+                    </div>
+                    <span className="font-medium">Coordinates GPS Verified: <span className="font-bold text-white ml-1">{lat.toFixed(5)}, {lng.toFixed(5)}</span></span>
+                  </div>
+                  <span className="text-[9px] uppercase tracking-wider bg-emerald-500/15 border border-emerald-500/25 px-2 py-0.5 rounded-md font-bold">GIS Locked</span>
                 </div>
               )}
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">State</label>
-                  <input
-                    type="text"
-                    required
-                    value={state}
-                    onChange={(e) => setState(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-850 rounded-xl py-3 px-4 text-sm text-slate-100"
-                  />
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                      <MapPin className="w-4 h-4" />
+                    </div>
+                    <input
+                      type="text"
+                      required
+                      value={state}
+                      onChange={(e) => setState(e.target.value)}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl py-3.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all duration-300"
+                    />
+                  </div>
                 </div>
                 <div>
                   <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">District</label>
-                  <input
-                    type="text"
-                    required
-                    value={district}
-                    onChange={(e) => setDistrict(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-850 rounded-xl py-3 px-4 text-sm text-slate-100"
-                  />
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                      <MapIcon className="w-4 h-4" />
+                    </div>
+                    <input
+                      type="text"
+                      required
+                      value={district}
+                      onChange={(e) => setDistrict(e.target.value)}
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl py-3.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all duration-300"
+                    />
+                  </div>
                 </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Block Name</label>
-                  <input
-                    type="text"
-                    value={block}
-                    onChange={(e) => setBlock(e.target.value)}
-                    placeholder="e.g. Kashi Vidyapeeth"
-                    className="w-full bg-slate-950 border border-slate-850 rounded-xl py-3 px-4 text-sm text-slate-100 placeholder-slate-600 focus:outline-none"
-                  />
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                      <Info className="w-4 h-4" />
+                    </div>
+                    <input
+                      type="text"
+                      value={block}
+                      onChange={(e) => setBlock(e.target.value)}
+                      placeholder="e.g. Kashi Vidyapeeth"
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl py-3.5 pl-10 pr-4 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all duration-300"
+                    />
+                  </div>
                 </div>
                 <div>
                   <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Village / Ward</label>
-                  <input
-                    type="text"
-                    value={village}
-                    onChange={(e) => setVillage(e.target.value)}
-                    placeholder="e.g. Sigra"
-                    className="w-full bg-slate-950 border border-slate-850 rounded-xl py-3 px-4 text-sm text-slate-100 placeholder-slate-600 focus:outline-none"
-                  />
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                      <MapPin className="w-4 h-4" />
+                    </div>
+                    <input
+                      type="text"
+                      value={village}
+                      onChange={(e) => setVillage(e.target.value)}
+                      placeholder="e.g. Sigra"
+                      className="w-full bg-slate-950 border border-slate-800 rounded-xl py-3.5 pl-10 pr-4 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all duration-300"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
 
             {/* Submission buttons */}
-            <div className="pt-6 border-t border-slate-900">
+            <div className="pt-6 border-t border-slate-900/60">
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-indigo-600 hover:bg-indigo-500 disabled:opacity-55 text-white py-4 rounded-xl text-sm font-bold shadow-md shadow-indigo-600/30 transition-all flex items-center justify-center space-x-2"
+                className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 disabled:opacity-50 text-white py-4 rounded-xl text-sm font-bold shadow-lg shadow-indigo-500/25 transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center space-x-2 cursor-pointer"
               >
                 {isSubmitting ? (
-                  <span>Saving proposal to blockchain database...</span>
+                  <span className="flex items-center space-x-2 animate-pulse">
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span>Saving proposal to blockchain database...</span>
+                  </span>
                 ) : (
                   <>
                     <CheckCircle className="w-5 h-5" />
@@ -544,38 +685,77 @@ export default function SubmitSuggestion() {
         {/* AI Assistant Sidebar - Right 1 Column */}
         <div className="space-y-6">
           {/* Completeness score card */}
-          <div className="bg-slate-900/40 border border-slate-900 rounded-3xl p-6 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-20 h-20 bg-indigo-500/5 blur-xl rounded-full" />
+          <div className="bg-slate-900/60 backdrop-blur-md border border-slate-800/80 rounded-3xl p-6 relative overflow-hidden shadow-xl">
+            <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/5 blur-2xl rounded-full pointer-events-none" />
             <h3 className="text-sm font-bold text-white flex items-center space-x-2 mb-6">
               <TrendingUp className="w-5 h-5 text-indigo-400" />
               <span>AI Analysis Summary</span>
             </h3>
 
             <div className="flex flex-col items-center justify-center py-6 text-center space-y-4">
-              <div className="relative w-28 h-28 flex items-center justify-center bg-slate-950 rounded-full border-4 border-slate-850">
-                <span className="text-3xl font-black text-white">{aiScore !== null ? `${aiScore}%` : '--'}</span>
-                {aiScore !== null && (
-                  <div className="absolute inset-0 border-4 border-indigo-500 rounded-full animate-pulse opacity-20" />
-                )}
+              <div className="relative w-32 h-32 flex items-center justify-center">
+                <svg className="w-full h-full transform -rotate-90">
+                  <circle
+                    cx="64"
+                    cy="64"
+                    r={radius}
+                    className="stroke-slate-800/80"
+                    strokeWidth="7"
+                    fill="transparent"
+                  />
+                  {aiScore !== null && (
+                    <circle
+                      cx="64"
+                      cy="64"
+                      r={radius}
+                      className="stroke-indigo-500 transition-all duration-700 ease-out"
+                      strokeWidth="7"
+                      fill="transparent"
+                      strokeDasharray={circumference}
+                      strokeDashoffset={strokeDashoffset}
+                      strokeLinecap="round"
+                    />
+                  )}
+                </svg>
+                <div className="absolute flex flex-col items-center justify-center">
+                  <span className="text-3xl font-black text-white tracking-tight">
+                    {aiScore !== null ? `${aiScore}%` : '--'}
+                  </span>
+                  {aiScore !== null && (
+                    <span className={`text-[8px] font-extrabold uppercase px-2 py-0.5 rounded-full mt-1.5 tracking-wider ${
+                      aiScore >= 80 
+                        ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' 
+                        : aiScore >= 50 
+                          ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' 
+                          : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+                    }`}>
+                      {aiScore >= 80 ? 'MP Ready' : aiScore >= 50 ? 'Improving' : 'Needs Info'}
+                    </span>
+                  )}
+                </div>
               </div>
               <div className="space-y-1">
                 <span className="block text-xs font-bold uppercase tracking-wider text-slate-400">Completeness Index</span>
-                <p className="text-[11px] text-slate-500 px-4">Aim for &gt;80% completeness to trigger instant priority sorting for the MP.</p>
+                <p className="text-[11px] text-slate-500 px-4 leading-relaxed">Aim for &gt;80% completeness to trigger instant priority sorting for the MP.</p>
               </div>
             </div>
           </div>
 
           {/* AI Helper Clarifying Dialog */}
-          <div className="bg-slate-900/40 border border-slate-900 rounded-3xl p-6 space-y-4">
+          <div className="bg-slate-900/60 backdrop-blur-md border border-slate-800/80 rounded-3xl p-6 space-y-4 shadow-xl">
             <h3 className="text-sm font-bold text-white flex items-center space-x-2">
               <Sparkles className="w-5 h-5 text-indigo-400" />
               <span>AI Clarifying Questions</span>
             </h3>
 
             {aiQuestions.length === 0 ? (
-              <div className="p-4 bg-slate-950 rounded-2xl border border-slate-850 text-slate-500 text-xs flex items-start space-x-2.5">
-                <Info className="w-4 h-4 shrink-0 text-slate-600 mt-0.5" />
-                <p>Submit description and click &apos;AI Writing Assistant&apos; to generate custom clarifying questions.</p>
+              <div className="p-5 bg-slate-950/60 rounded-2xl border border-slate-800 text-slate-400 text-xs flex flex-col items-center text-center space-y-3">
+                <div className="w-10 h-10 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-500 shadow-inner">
+                  <Sparkles className="w-5 h-5 text-indigo-400" />
+                </div>
+                <p className="leading-relaxed">
+                  Provide a description and click the <strong className="text-indigo-400">Sparkles AI button</strong> in the editor to unlock custom clarifying questions.
+                </p>
               </div>
             ) : (
               <div className="space-y-3">
@@ -588,13 +768,18 @@ export default function SubmitSuggestion() {
                       setActiveQuestionIndex(idx);
                       setQuestionAnswer('');
                     }}
-                    className={`w-full text-left p-3.5 bg-slate-950 border text-xs text-slate-300 rounded-xl transition-all ${
+                    className={`w-full text-left p-3.5 bg-slate-950/50 border text-xs text-slate-300 rounded-xl transition-all duration-300 ${
                       activeQuestionIndex === idx 
-                        ? 'border-indigo-500 bg-indigo-950/20 text-white font-semibold' 
-                        : 'border-slate-850 hover:border-slate-750'
+                        ? 'border-indigo-500 bg-indigo-950/30 text-white font-semibold shadow-[0_0_15px_rgba(99,102,241,0.1)]' 
+                        : 'border-slate-800 hover:border-slate-750 hover:bg-slate-900/50 hover:text-white'
                     }`}
                   >
-                    {q}
+                    <div className="flex items-start space-x-2.5">
+                      <span className="flex items-center justify-center w-5 h-5 rounded-full bg-slate-900 border border-slate-800 text-[10px] text-indigo-400 shrink-0 font-bold">
+                        {idx + 1}
+                      </span>
+                      <span className="flex-1 leading-relaxed">{q}</span>
+                    </div>
                   </button>
                 ))}
               </div>
@@ -602,29 +787,35 @@ export default function SubmitSuggestion() {
 
             {/* Clarification input */}
             {activeQuestionIndex !== null && (
-              <div className="bg-slate-950 border border-slate-850 p-4 rounded-xl space-y-3">
-                <span className="block text-[10px] font-bold uppercase tracking-wider text-indigo-400">Answer question:</span>
+              <div className="bg-slate-950/80 border border-indigo-500/30 p-4 rounded-2xl space-y-3 shadow-lg shadow-indigo-950/30 animate-fadeIn">
+                <div className="flex items-center justify-between">
+                  <span className="block text-[10px] font-bold uppercase tracking-wider text-indigo-400">AI Response Assistant</span>
+                  <span className="text-[10px] text-slate-500">Question {activeQuestionIndex + 1}</span>
+                </div>
+                <p className="text-xs text-slate-300 italic bg-slate-900/50 p-2.5 rounded-lg border border-slate-900 leading-relaxed">
+                  &ldquo;{aiQuestions[activeQuestionIndex]}&rdquo;
+                </p>
                 <input
                   type="text"
                   value={questionAnswer}
                   onChange={(e) => setQuestionAnswer(e.target.value)}
-                  placeholder="Type your answer here..."
-                  className="w-full bg-slate-900 border border-slate-800 rounded-lg py-2 px-3 text-xs text-slate-100 placeholder-slate-600 focus:outline-none"
+                  placeholder="Provide details to append to description..."
+                  className="w-full bg-slate-900 border border-slate-800 rounded-xl py-3 px-4 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all duration-300"
                 />
-                <div className="flex items-center space-x-2 justify-end">
+                <div className="flex items-center space-x-2 justify-end pt-1">
                   <button
                     type="button"
                     onClick={() => setActiveQuestionIndex(null)}
-                    className="text-[10px] text-slate-500 hover:text-white"
+                    className="text-xs font-semibold text-slate-400 hover:text-white px-3 py-1.5 transition-colors cursor-pointer"
                   >
                     Cancel
                   </button>
                   <button
                     type="button"
                     onClick={handleAnswerQuestion}
-                    className="bg-indigo-600 hover:bg-indigo-500 text-white text-[10px] px-3 py-1.5 rounded-md font-bold"
+                    className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-4 py-2 rounded-xl font-bold transition-all shadow-sm shadow-indigo-600/10 cursor-pointer"
                   >
-                    Apply Answer
+                    Apply & Improve
                   </button>
                 </div>
               </div>
@@ -635,24 +826,25 @@ export default function SubmitSuggestion() {
 
       {/* Success Modal */}
       {submitResult && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 z-50">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full p-8 text-center space-y-6 shadow-2xl">
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-fadeIn">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full p-8 text-center space-y-6 shadow-2xl relative overflow-hidden">
+            <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-emerald-500 to-indigo-500 pointer-events-none" />
             {submitResult.success ? (
               <>
                 <div className="w-16 h-16 rounded-full bg-emerald-500/10 flex items-center justify-center mx-auto text-emerald-400 border border-emerald-500/20">
                   <CheckCircle className="w-10 h-10 animate-bounce" />
                 </div>
                 <div className="space-y-2">
-                  <h3 className="text-xl font-bold text-white">Proposal Registered!</h3>
+                  <h3 className="text-xl font-bold text-white animate-pulse">Proposal Registered!</h3>
                   <p className="text-xs text-slate-400 leading-relaxed">
                     Your suggestion has been logged on the constituency map. AI verification completed.
                   </p>
                 </div>
 
-                <div className="bg-slate-950 p-4 rounded-2xl border border-slate-850 space-y-2">
-                  <div className="flex justify-between text-xs">
-                    <span className="text-slate-500">Contribution Points:</span>
-                    <span className="font-bold text-orange-500">+{submitResult.pointsAwarded} XP Earned</span>
+                <div className="bg-slate-950/80 p-4 rounded-2xl border border-slate-800 space-y-2 shadow-inner">
+                  <div className="flex justify-between text-xs items-center">
+                    <span className="text-slate-500 font-semibold">Contribution Points:</span>
+                    <span className="font-bold text-orange-500 bg-orange-500/10 border border-orange-500/20 px-2 py-0.5 rounded-full">+{submitResult.pointsAwarded} XP Earned</span>
                   </div>
                   {submitResult.isDuplicate && (
                     <div className="border-t border-slate-850 pt-2 flex flex-col space-y-1.5 text-left text-xs bg-indigo-950/20 p-2.5 rounded-lg border border-indigo-900/30">
@@ -660,7 +852,7 @@ export default function SubmitSuggestion() {
                         <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0" />
                         <span>Duplicate Match Detected!</span>
                       </span>
-                      <p className="text-[11px] text-slate-400">
+                      <p className="text-[11px] text-slate-400 leading-relaxed">
                         This development request has already been supported by 742 citizens. Your request is linked to ensure group impact.
                       </p>
                     </div>
@@ -669,7 +861,7 @@ export default function SubmitSuggestion() {
 
                 <button
                   onClick={() => router.push(`/dashboard/suggestions/${submitResult.suggestionId}`)}
-                  className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3.5 rounded-xl text-xs transition-colors flex items-center justify-center space-x-2"
+                  className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3.5 rounded-xl text-xs transition-colors flex items-center justify-center space-x-2 cursor-pointer shadow-md shadow-indigo-600/20"
                 >
                   <span>Track Suggestion Timeline</span>
                   <ArrowRight className="w-4 h-4" />
@@ -682,13 +874,13 @@ export default function SubmitSuggestion() {
                 </div>
                 <div className="space-y-2">
                   <h3 className="text-xl font-bold text-white">Submission Failed</h3>
-                  <p className="text-xs text-slate-400">
+                  <p className="text-xs text-slate-400 leading-relaxed">
                     {submitResult.message}
                   </p>
                 </div>
                 <button
                   onClick={() => setSubmitResult(null)}
-                  className="w-full bg-slate-950 hover:bg-slate-850 border border-slate-850 text-white font-bold py-3 rounded-xl text-xs"
+                  className="w-full bg-slate-950 hover:bg-slate-850 border border-slate-850 text-white font-bold py-3.5 rounded-xl text-xs cursor-pointer"
                 >
                   Try Again
                 </button>

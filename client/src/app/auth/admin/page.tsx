@@ -38,7 +38,7 @@ function AdminAuthForm() {
       return;
     }
     
-    const success = await login(email, 'admin');
+    const success = await login(email, password);
     if (success) {
       router.push('/admin');
     } else {

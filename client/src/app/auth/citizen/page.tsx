@@ -119,7 +119,7 @@ function CitizenAuthForm() {
         return;
       }
       
-      const success = await login(email, 'citizen');
+      const success = await login(email, password);
       if (success) {
         router.push('/dashboard');
       } else {
@@ -141,6 +141,7 @@ function CitizenAuthForm() {
       const success = await register({
         full_name: fullName,
         email: email,
+        password: password,
         phone: phone,
         state: selectedState,
         district: selectedDistrict,

@@ -38,7 +38,7 @@ function MPAuthForm() {
       return;
     }
     
-    const success = await login(email, 'mp');
+    const success = await login(email, password);
     if (success) {
       router.push('/mp');
     } else {
