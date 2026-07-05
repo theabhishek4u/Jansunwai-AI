@@ -13,7 +13,8 @@ import {
   MessageSquare, 
   ArrowRight,
   ShieldAlert,
-  Sparkles
+  Sparkles,
+  Map
 } from 'lucide-react';
 
 interface Suggestion {
@@ -30,6 +31,7 @@ export default function DashboardHome() {
   const { user } = useAuth();
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [loading, setLoading] = useState(true);
+  const [activeMapLayer, setActiveMapLayer] = useState<'roads' | 'water' | 'hospitals' | 'green'>('roads');
 
   useEffect(() => {
     if (user) {
@@ -307,7 +309,178 @@ export default function DashboardHome() {
 
         {/* Gamification Sidebar summary */}
         <div className="space-y-6">
-          <h2 className="text-lg font-bold text-white">Gamification Leaderboard</h2>
+          {/* MINI HEATMAP WIDGET */}
+          <div className="bg-slate-900/60 border border-slate-900 rounded-3xl p-6 relative overflow-hidden space-y-4 shadow-[0_0_20px_rgba(99,102,241,0.02)]">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2">
+                <Map className="w-4 h-4 text-indigo-400" />
+                <h3 className="text-xs font-bold text-white uppercase tracking-wider">GIS Priority Heatmap</h3>
+              </div>
+              <span className="text-[8px] font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full uppercase tracking-wider animate-pulse flex items-center space-x-1">
+                <span className="w-1 h-1 rounded-full bg-emerald-400 mr-1 animate-ping" />
+                <span>Live Feed</span>
+              </span>
+            </div>
+
+            {/* Map Area Mockup (SVG based) */}
+            <div className="relative">
+              <svg viewBox="0 0 200 120" className="w-full h-36 rounded-2xl bg-slate-950 border border-slate-800/80 p-2 shadow-inner">
+                {/* stylized map grid */}
+                <defs>
+                  <radialGradient id="glow-amber" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stopColor="#f59e0b" stopOpacity={0.6} />
+                    <stop offset="100%" stopColor="#f59e0b" stopOpacity={0} />
+                  </radialGradient>
+                  <radialGradient id="glow-blue" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stopColor="#38bdf8" stopOpacity={0.6} />
+                    <stop offset="100%" stopColor="#38bdf8" stopOpacity={0} />
+                  </radialGradient>
+                  <radialGradient id="glow-red" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stopColor="#f43f5e" stopOpacity={0.6} />
+                    <stop offset="100%" stopColor="#f43f5e" stopOpacity={0} />
+                  </radialGradient>
+                  <radialGradient id="glow-green" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stopColor="#10b981" stopOpacity={0.6} />
+                    <stop offset="100%" stopColor="#10b981" stopOpacity={0} />
+                  </radialGradient>
+                </defs>
+
+                {/* Grid lines representing street overlay */}
+                <path d="M10,0 L10,120 M40,0 L40,120 M80,0 L80,120 M120,0 L120,120 M160,0 L160,120" stroke="#334155" strokeWidth="0.5" strokeDasharray="2,2" opacity={0.3} />
+                <path d="M0,20 L200,20 M0,50 L200,50 M0,80 L200,80 M0,110 L200,110" stroke="#334155" strokeWidth="0.5" strokeDasharray="2,2" opacity={0.3} />
+
+                {/* Varanasi River Ganga boundary curve mockup */}
+                <path d="M 0,90 Q 70,80 120,120" fill="none" stroke="#1d4ed8" strokeWidth="3" opacity={0.3} />
+                <text x="35" y="112" fill="#3b82f6" fontSize="5" fontWeight="bold" opacity={0.4}>Ganga River</text>
+
+                {/* Major streets */}
+                <line x1="20" y1="0" x2="180" y2="120" stroke="#1e293b" strokeWidth="2.5" />
+                <line x1="0" y1="40" x2="200" y2="40" stroke="#1e293b" strokeWidth="2" />
+                <line x1="100" y1="0" x2="100" y2="120" stroke="#1e293b" strokeWidth="2" />
+
+                {/* Dynamic Heat Zones based on layer selection */}
+                {activeMapLayer === 'roads' && (
+                  <>
+                    {/* Sigra road quality heat dot */}
+                    <circle cx="65" cy="35" r="22" fill="url(#glow-amber)" />
+                    <circle cx="65" cy="35" r="4" fill="#f59e0b" />
+                    {/* Lahartara connector heat dot */}
+                    <circle cx="130" cy="78" r="18" fill="url(#glow-amber)" />
+                    <circle cx="130" cy="78" r="3.5" fill="#f59e0b" />
+                    
+                    <text x="65" y="27" fill="#fde047" fontSize="5" fontWeight="bold" textAnchor="middle">Sigra Bottleneck (24% Spike)</text>
+                    <text x="130" y="70" fill="#fde047" fontSize="5" fontWeight="bold" textAnchor="middle">Lahartara Road</text>
+                  </>
+                )}
+
+                {activeMapLayer === 'water' && (
+                  <>
+                    <circle cx="45" cy="70" r="20" fill="url(#glow-blue)" />
+                    <circle cx="45" cy="70" r="4.5" fill="#38bdf8" />
+                    <circle cx="160" cy="30" r="24" fill="url(#glow-blue)" />
+                    <circle cx="160" cy="30" r="5" fill="#38bdf8" />
+
+                    <text x="45" y="62" fill="#7dd3fc" fontSize="5" fontWeight="bold" textAnchor="middle">Susuwahi Aquifer (Crit)</text>
+                    <text x="160" y="22" fill="#7dd3fc" fontSize="5" fontWeight="bold" textAnchor="middle">Kapoori Village</text>
+                  </>
+                )}
+
+                {activeMapLayer === 'hospitals' && (
+                  <>
+                    <circle cx="110" cy="45" r="25" fill="url(#glow-red)" />
+                    <circle cx="110" cy="45" r="5" fill="#f43f5e" />
+                    
+                    <text x="110" y="36" fill="#fda4af" fontSize="5" fontWeight="bold" textAnchor="middle">Harahua Travel Exclusion Zone</text>
+                  </>
+                )}
+
+                {activeMapLayer === 'green' && (
+                  <>
+                    <circle cx="85" cy="55" r="20" fill="url(#glow-green)" />
+                    <circle cx="85" cy="55" r="4" fill="#10b981" />
+                    <circle cx="140" cy="50" r="24" fill="url(#glow-green)" />
+                    <circle cx="140" cy="50" r="5" fill="#10b981" />
+
+                    <text x="85" y="47" fill="#6ee7b7" fontSize="5" fontWeight="bold" textAnchor="middle">Cantonment Park Area</text>
+                  </>
+                )}
+              </svg>
+            </div>
+
+            {/* Layer Selection buttons */}
+            <div className="grid grid-cols-4 gap-1 bg-slate-950 p-1 rounded-xl">
+              <button
+                type="button"
+                onClick={() => setActiveMapLayer('roads')}
+                className={`py-1.5 px-0.5 rounded-lg text-[9px] font-bold transition-all text-center ${activeMapLayer === 'roads' ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'text-slate-400 hover:text-white'}`}
+              >
+                Roads
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveMapLayer('water')}
+                className={`py-1.5 px-0.5 rounded-lg text-[9px] font-bold transition-all text-center ${activeMapLayer === 'water' ? 'bg-sky-500/10 text-sky-400 border border-sky-500/20' : 'text-slate-400 hover:text-white'}`}
+              >
+                Water
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveMapLayer('hospitals')}
+                className={`py-1.5 px-0.5 rounded-lg text-[9px] font-bold transition-all text-center ${activeMapLayer === 'hospitals' ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20' : 'text-slate-400 hover:text-white'}`}
+              >
+                Hospital
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveMapLayer('green')}
+                className={`py-1.5 px-0.5 rounded-lg text-[9px] font-bold transition-all text-center ${activeMapLayer === 'green' ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' : 'text-slate-400 hover:text-white'}`}
+              >
+                Green
+              </button>
+            </div>
+
+            {/* Selected Layer Heuristics Info */}
+            <div className="bg-slate-950 border border-slate-900/60 p-3 rounded-xl text-[10px] text-slate-400 space-y-1">
+              {activeMapLayer === 'roads' && (
+                <>
+                  <div className="flex justify-between">
+                    <span className="font-bold text-slate-300">Active Road Works</span>
+                    <span className="text-amber-400 font-bold">4 Projects</span>
+                  </div>
+                  <p className="text-[9px] text-slate-500 leading-relaxed">Sigra road widening scheduled for Q3. Lahartara bypass proposal approved.</p>
+                </>
+              )}
+              {activeMapLayer === 'water' && (
+                <>
+                  <div className="flex justify-between">
+                    <span className="font-bold text-slate-300">Tube-well Audit</span>
+                    <span className="text-sky-400 font-bold">3 Mandated</span>
+                  </div>
+                  <p className="text-[9px] text-slate-500 leading-relaxed">Central water conservation audit running across Susuwahi blocks to resolve aquifer drop alerts.</p>
+                </>
+              )}
+              {activeMapLayer === 'hospitals' && (
+                <>
+                  <div className="flex justify-between">
+                    <span className="font-bold text-slate-300">Healthcare Gap</span>
+                    <span className="text-rose-400 font-bold">Critical</span>
+                  </div>
+                  <p className="text-[9px] text-slate-500 leading-relaxed">AI recommends a Primary Health Centre in Harahua. Travel exclusion index currently at high risk.</p>
+                </>
+              )}
+              {activeMapLayer === 'green' && (
+                <>
+                  <div className="flex justify-between">
+                    <span className="font-bold text-slate-300">Park Afforestation</span>
+                    <span className="text-emerald-400 font-bold">2 Greenways</span>
+                  </div>
+                  <p className="text-[9px] text-slate-500 leading-relaxed">Afforestation drives active near Cantonment boundary paths to increase canopy indexes.</p>
+                </>
+              )}
+            </div>
+          </div>
+
+          <h2 className="text-lg font-bold text-white pt-2">Gamification Leaderboard</h2>
           <div className="bg-linear-to-b from-slate-900/60 to-slate-900 border border-slate-900 rounded-3xl p-6 relative overflow-hidden">
             <div className="absolute top-0 right-0 w-24 h-24 bg-amber-500/5 blur-xl rounded-full" />
             <div className="flex items-center space-x-3 mb-6">
