@@ -349,7 +349,7 @@ export default function SubmitSuggestion() {
         <div className="lg:col-span-2 bg-slate-900/60 backdrop-blur-md border border-slate-800/80 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xl relative overflow-hidden">
           
           {/* Voice Input Assist */}
-          <div className="bg-gradient-to-r from-slate-950 via-indigo-950/20 to-slate-950 border border-slate-800 p-6 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-6 shadow-[0_4px_30px_rgba(99,102,241,0.03)] hover:border-slate-700/85 transition-all duration-300">
+          <div className="bg-linear-to-r from-slate-950 via-indigo-950/20 to-slate-950 border border-slate-800 p-6 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-6 shadow-[0_4px_30px_rgba(99,102,241,0.03)] hover:border-slate-700/85 transition-all duration-300">
             <div className="space-y-2 text-center sm:text-left">
               <h3 className="text-sm font-bold text-white flex items-center justify-center sm:justify-start gap-2">
                 <div className="w-7 h-7 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-400 border border-indigo-500/20 shadow-inner">
@@ -466,7 +466,7 @@ export default function SubmitSuggestion() {
                     type="button"
                     onClick={handleAiAssist}
                     disabled={aiLoading}
-                    className="absolute bottom-3.5 right-3.5 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-xs px-4 py-2 rounded-xl flex items-center space-x-1.5 shadow-md shadow-indigo-600/20 hover:scale-102 transition-all font-bold cursor-pointer disabled:opacity-50"
+                    className="absolute bottom-3.5 right-3.5 bg-linear-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-xs px-4 py-2 rounded-xl flex items-center space-x-1.5 shadow-md shadow-indigo-600/20 hover:scale-102 transition-all font-bold cursor-pointer disabled:opacity-50"
                   >
                     <Sparkles className="w-3.5 h-3.5" />
                     <span>{aiLoading ? 'Analyzing...' : 'AI Writing Assistant'}</span>
@@ -661,7 +661,7 @@ export default function SubmitSuggestion() {
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 disabled:opacity-50 text-white py-4 rounded-xl text-sm font-bold shadow-lg shadow-indigo-500/25 transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center space-x-2 cursor-pointer"
+                className="w-full bg-linear-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 disabled:opacity-50 text-white py-4 rounded-xl text-sm font-bold shadow-lg shadow-indigo-500/25 transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center space-x-2 cursor-pointer"
               >
                 {isSubmitting ? (
                   <span className="flex items-center space-x-2 animate-pulse">
@@ -828,7 +828,7 @@ export default function SubmitSuggestion() {
       {submitResult && (
         <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-fadeIn">
           <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full p-8 text-center space-y-6 shadow-2xl relative overflow-hidden">
-            <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-emerald-500 to-indigo-500 pointer-events-none" />
+            <div className="absolute top-0 inset-x-0 h-1 bg-linear-to-r from-emerald-500 to-indigo-500 pointer-events-none" />
             {submitResult.success ? (
               <>
                 <div className="w-16 h-16 rounded-full bg-emerald-500/10 flex items-center justify-center mx-auto text-emerald-400 border border-emerald-500/20">

@@ -201,7 +201,7 @@ function CitizenAuthForm() {
     <div className="min-h-screen bg-[#030712] flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden font-sans">
       {/* Decorative Gradients & Mesh Pattern */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-20%,rgba(99,102,241,0.15),transparent_60%)] -z-10" />
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#1f293708_1px,transparent_1px),linear-gradient(to_bottom,#1f293708_1px,transparent_1px)] bg-[size:4rem_4rem] -z-10" />
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#1f293708_1px,transparent_1px),linear-gradient(to_bottom,#1f293708_1px,transparent_1px)] bg-size-[4rem_4rem] -z-10" />
       <div className="absolute top-1/4 left-1/4 w-[450px] h-[450px] bg-indigo-500/5 blur-[120px] rounded-full -z-10" />
       <div className="absolute bottom-1/4 right-1/4 w-[450px] h-[450px] bg-purple-500/5 blur-[120px] rounded-full -z-10" />
 
@@ -214,10 +214,10 @@ function CitizenAuthForm() {
 
       <div className="max-w-md w-full mx-auto bg-slate-900/40 border border-slate-800/80 backdrop-blur-xl rounded-3xl p-8 sm:p-10 shadow-2xl relative shadow-indigo-500/5">
         <div className="text-center mb-8">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center mx-auto shadow-lg shadow-indigo-500/20 mb-4 animate-pulse">
+          <div className="w-14 h-14 rounded-2xl bg-linear-to-tr from-indigo-500 via-purple-500 to-pink-500 flex items-center justify-center mx-auto shadow-lg shadow-indigo-500/20 mb-4 animate-pulse">
             <Vote className="w-8 h-8 text-white" />
           </div>
-          <h2 className="text-3xl font-black bg-gradient-to-r from-white via-slate-100 to-indigo-300 bg-clip-text text-transparent">Jansunwai AI</h2>
+          <h2 className="text-3xl font-black bg-linear-to-r from-white via-slate-100 to-indigo-300 bg-clip-text text-transparent">Jansunwai AI</h2>
           <p className="text-xs text-slate-400 mt-1.5 font-medium tracking-wide">AI-Powered Citizen Grievance Planning</p>
         </div>
 
@@ -227,14 +227,14 @@ function CitizenAuthForm() {
             onClick={() => { setIsLogin(true); setError(''); setSuccessMsg(''); }}
             className={`w-1/2 py-2.5 text-xs uppercase tracking-wider font-extrabold rounded-xl transition-all duration-300 relative z-10 ${isLogin ? 'text-white' : 'text-slate-500 hover:text-slate-300'}`}
           >
-            {isLogin && <span className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl -z-10 shadow-md shadow-indigo-600/30" />}
+            {isLogin && <span className="absolute inset-0 bg-linear-to-r from-indigo-600 to-purple-600 rounded-xl -z-10 shadow-md shadow-indigo-600/30" />}
             Log In
           </button>
           <button
             onClick={() => { setIsLogin(false); setError(''); setSuccessMsg(''); setRegisterStep(1); }}
             className={`w-1/2 py-2.5 text-xs uppercase tracking-wider font-extrabold rounded-xl transition-all duration-300 relative z-10 ${!isLogin ? 'text-white' : 'text-slate-500 hover:text-slate-300'}`}
           >
-            {!isLogin && <span className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-xl -z-10 shadow-md shadow-indigo-600/30" />}
+            {!isLogin && <span className="absolute inset-0 bg-linear-to-r from-indigo-600 to-purple-600 rounded-xl -z-10 shadow-md shadow-indigo-600/30" />}
             Register
           </button>
         </div>
@@ -535,7 +535,7 @@ function CitizenAuthForm() {
             <button
               type="submit"
               disabled={loading}
-              className={`bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500 bg-[size:200%_auto] hover:bg-[right_center] disabled:opacity-55 text-white py-3.5 px-4 rounded-2xl text-sm font-bold shadow-lg shadow-indigo-500/20 transition-all duration-500 flex items-center justify-center space-x-2 focus:outline-none active:scale-[0.98] ${
+              className={`bg-linear-to-r from-indigo-500 via-purple-500 to-indigo-500 bg-size-[200%_auto] hover:bg-position-[right_center] disabled:opacity-55 text-white py-3.5 px-4 rounded-2xl text-sm font-bold shadow-lg shadow-indigo-500/20 transition-all duration-500 flex items-center justify-center space-x-2 focus:outline-none active:scale-[0.98] ${
                 !isLogin && registerStep === 2 ? 'w-2/3' : 'w-full'
               }`}
             >

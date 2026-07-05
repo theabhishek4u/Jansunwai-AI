@@ -52,7 +52,7 @@ function MPAuthForm() {
     <div className="min-h-screen bg-[#030712] flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8 relative overflow-hidden font-sans">
       {/* Premium Amber/Gold Decorative Elements */}
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_-20%,rgba(245,158,11,0.08),transparent_60%)] -z-10" />
-      <div className="absolute inset-0 bg-[linear-gradient(to_right,#1f293708_1px,transparent_1px),linear-gradient(to_bottom,#1f293708_1px,transparent_1px)] bg-[size:4rem_4rem] -z-10" />
+      <div className="absolute inset-0 bg-[linear-gradient(to_right,#1f293708_1px,transparent_1px),linear-gradient(to_bottom,#1f293708_1px,transparent_1px)] bg-size-[4rem_4rem] -z-10" />
       <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-amber-500/5 blur-[120px] rounded-full -z-10" />
       <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-orange-600/5 blur-[120px] rounded-full -z-10" />
 
@@ -65,10 +65,10 @@ function MPAuthForm() {
 
       <div className="max-w-md w-full mx-auto bg-slate-900/40 border border-slate-800/80 backdrop-blur-xl rounded-3xl p-8 sm:p-10 shadow-2xl relative shadow-amber-500/5">
         <div className="text-center mb-8">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-600 flex items-center justify-center mx-auto shadow-lg shadow-amber-500/20 mb-4 animate-pulse">
+          <div className="w-14 h-14 rounded-2xl bg-linear-to-tr from-amber-500 to-orange-600 flex items-center justify-center mx-auto shadow-lg shadow-amber-500/20 mb-4 animate-pulse">
             <Award className="w-8 h-8 text-white" />
           </div>
-          <h2 className="text-3xl font-black bg-gradient-to-r from-white via-slate-100 to-amber-300 bg-clip-text text-transparent">Jansunwai AI</h2>
+          <h2 className="text-3xl font-black bg-linear-to-r from-white via-slate-100 to-amber-300 bg-clip-text text-transparent">Jansunwai AI</h2>
           <p className="text-xs text-amber-500 mt-1.5 font-bold uppercase tracking-widest">MP Decision Intelligence Portal</p>
         </div>
 
@@ -136,7 +136,7 @@ function MPAuthForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 disabled:opacity-55 text-white py-3.5 px-4 rounded-2xl text-sm font-bold shadow-lg shadow-amber-600/25 transition-all duration-300 flex items-center justify-center space-x-2 focus:outline-none active:scale-[0.98]"
+            className="w-full bg-linear-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 disabled:opacity-55 text-white py-3.5 px-4 rounded-2xl text-sm font-bold shadow-lg shadow-amber-600/25 transition-all duration-300 flex items-center justify-center space-x-2 focus:outline-none active:scale-[0.98]"
           >
             {loading ? (
               <span>Authorizing Portal...</span>
