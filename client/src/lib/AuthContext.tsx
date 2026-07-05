@@ -8,8 +8,8 @@ import { profileService, ProfileData } from '../services/profileService';
 interface AuthContextType {
   user: ProfileData | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<boolean>;
-  register: (profile: Omit<ProfileData, 'contribution_score' | 'id'> & { password?: string }) => Promise<boolean>;
+  login: (email: string, password: string) => Promise<void>;
+  register: (profile: Omit<ProfileData, 'contribution_score' | 'id'> & { password?: string }) => Promise<void>;
   logout: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
@@ -63,19 +63,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     };
   }, []);
 
-  const login = async (email: string, password: string): Promise<boolean> => {
+  const login = async (email: string, password: string): Promise<void> => {
     setLoading(true);
     try {
       await authService.signIn(email, password);
-      return true;
     } catch (err) {
-      console.error('Login failed:', err);
       setLoading(false);
-      return false;
+      throw err;
     }
   };
 
-  const register = async (profileData: Omit<ProfileData, 'contribution_score' | 'id'> & { password?: string }): Promise<boolean> => {
+  const register = async (profileData: Omit<ProfileData, 'contribution_score' | 'id'> & { password?: string }): Promise<void> => {
     setLoading(true);
     try {
       const { email, password, role, ...metadata } = profileData;
@@ -83,11 +81,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         throw new Error('Missing required fields for signup');
       }
       await authService.signUp(email, password, role, metadata);
-      return true;
     } catch (err) {
-      console.error('Registration failed:', err);
       setLoading(false);
-      return false;
+      throw err;
     }
   };
 
