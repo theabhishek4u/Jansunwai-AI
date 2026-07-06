@@ -20,6 +20,8 @@ export interface ProfileData {
   parliamentary_constituency_id?: number;
   assembly_constituency_id?: number;
   village_id?: number;
+  aadhaar_number?: string;
+  verification_status?: 'incomplete' | 'pending' | 'verified' | 'rejected';
 }
 
 export const profileService = {

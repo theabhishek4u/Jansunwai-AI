@@ -8,8 +8,6 @@ import {
   Sparkles, 
   Mic, 
   MapPin, 
-  Upload, 
-  HelpCircle, 
   AlertTriangle, 
   CheckCircle,
   FileText,
@@ -26,9 +24,20 @@ import {
   FileAudio,
   Paperclip,
   Trash2,
-  FileImage,
   FilePlay,
-  FileDown
+  FileDown,
+  Shield,
+  Zap,
+  Send,
+  ChevronDown,
+  Eye,
+  Wand2,
+  MessageSquare,
+  Target,
+  BarChart3,
+  Clock,
+  Lightbulb,
+  Hash
 } from 'lucide-react';
 
 const CATEGORIES = [
@@ -83,6 +92,7 @@ export default function SubmitSuggestion() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const speechRecognitionRef = useRef<any>(null);
   const recordingTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const transcriptRef = useRef('');
 
   // AI Assistant States
   const [aiLoading, setAiLoading] = useState(false);
@@ -319,6 +329,7 @@ export default function SubmitSuggestion() {
     recognition.continuous = true;
     recognition.interimResults = true;
 
+    transcriptRef.current = description;
     let currentTranscript = description;
 
     recognition.onstart = () => {
@@ -343,6 +354,7 @@ export default function SubmitSuggestion() {
       if (finalTranscript) {
         const newText = currentTranscript ? currentTranscript + ' ' + finalTranscript : finalTranscript;
         currentTranscript = newText;
+        transcriptRef.current = newText;
         setDescription(newText);
         // Automatically suggest a title if it's empty
         if (!title && currentTranscript.length > 10) {
@@ -375,20 +387,29 @@ export default function SubmitSuggestion() {
       if (recordingTimerRef.current) {
         clearInterval(recordingTimerRef.current);
       }
+
+      // Auto trigger AI Writing Assist after transcription finishes!
+      const spokenText = transcriptRef.current;
+      if (spokenText && spokenText.trim().length > 5) {
+        setTimeout(() => {
+          handleAiAssist(spokenText);
+        }, 800);
+      }
     }
   };
 
   // AI Assistant trigger
-  const handleAiAssist = async () => {
-    if (!description) return;
+  const handleAiAssist = async (customText?: string) => {
+    const textToAnalyze = typeof customText === 'string' ? customText : description;
+    if (!textToAnalyze) return;
     setAiLoading(true);
     try {
       const response = await fetch('http://localhost:5000/api/ai/writing-assist', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          title,
-          description,
+          title: typeof customText === 'string' ? '' : title,
+          description: textToAnalyze,
           language
         })
       });
@@ -396,7 +417,10 @@ export default function SubmitSuggestion() {
       if (response.ok) {
         const data = await response.json();
         setAiQuestions(data.questions || []);
-        setDescription(data.improvedText || description);
+        setDescription(data.improvedText || textToAnalyze);
+        if (data.title) {
+          setTitle(data.title);
+        }
         setAiScore(data.completenessScore || 70);
       }
     } catch (err) {

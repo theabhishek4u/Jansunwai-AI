@@ -31,41 +31,48 @@ export const getWritingAssist = async (req: Request, res: Response) => {
   if (!ai) {
     const questions: string[] = [];
     let improvedText = description;
+    let generatedTitle = title || `Request for regional development`;
 
-    if (category === 'School' || category === 'College') {
+    if (category === 'School' || category === 'College' || description.toLowerCase().includes('school') || description.includes('स्कूल') || description.includes('कॉलेज')) {
       questions.push(
-        'How many children in the village are currently out of school or traveling far?',
-        'What is the distance to the nearest existing educational institute?',
-        'Is there any government-owned land or building available for this school/college?'
+        'आपके क्षेत्र (जैसे वार्ड संख्या, मोहल्ला) का सटीक विवरण क्या है और इस विद्यालय/कॉलेज से कितनी आबादी लाभान्वित होगी?',
+        'वर्तमान में, निकटतम सरकारी या निजी शैक्षणिक संस्थान आपके क्षेत्र से कितनी दूरी पर है?',
+        'क्या आपके विचार में इस क्षेत्र में स्कूल के निर्माण के लिए कोई उपयुक्त सरकारी या निजी भूमि उपलब्ध है?'
       );
-      improvedText = `Proposal for development: We need a new ${category} in our village. This will benefit the student community significantly. Currently, students travel a long distance. ${description}`;
-    } else if (category === 'Road' || category === 'Bridge') {
+      improvedText = `माननीय सांसद महोदय,\n\nमैं इस पत्र के माध्यम से आपके संज्ञान में लाना चाहता हूँ कि हमारे क्षेत्र में शिक्षा सुविधाओं का भारी अभाव है। उचित दूरी पर कोई ${category || 'विद्यालय'} न होने के कारण हमारे बच्चों को लंबी दूरी तय करनी पड़ती है। अतः आपसे विनम्र अनुरोध है कि इस विषय पर त्वरित कार्रवाई करते हुए यहाँ एक ${category || 'विद्यालय/कॉलेज'} की स्थापना कराने की कृपा करें।\n\nभवदीय,\nसमस्त क्षेत्रवासी`;
+      generatedTitle = `क्षेत्र में नए विद्यालय/कॉलेज के निर्माण हेतु प्रस्ताव`;
+    } else if (category === 'Road' || category === 'Bridge' || description.toLowerCase().includes('road') || description.includes('सड़क') || description.includes('सड़क') || description.includes('मार्ग')) {
       questions.push(
-        'What is the approximate length of the damaged road/bridge?',
-        'Which villages or wards does this road/bridge connect?',
-        'Has this issue caused any minor accidents or blocked transport during rains?'
+        'सड़क की कुल लंबाई और चौड़ाई कितनी है जिसके निर्माण की आवश्यकता है?',
+        'यह सड़क किन प्रमुख मुख्य मार्गों या वार्डों को जोड़ती है?',
+        'क्या जलभराव या बारिश के दिनों में यातायात पूर्ण रूप से बाधित हो जाता है?'
       );
-      improvedText = `Road Development Proposal: Urgently require repair and widening of the road. ${description}`;
-    } else if (category === 'PHC' || category === 'Hospital') {
+      improvedText = `माननीय सांसद महोदय,\n\nमैं इस पत्र के माध्यम से आपके संज्ञान में लाना चाहता हूँ कि हमारे क्षेत्र में मुख्य मार्ग की स्थिति अत्यंत जर्जर है। इस कारण क्षेत्र के नागरिकों को दैनिक आवागमन में अत्यधिक कठिनाइयों का सामना करना पड़ रहा है। आपातकालीन स्थितियों में एम्बुलेंस का पहुँचना भी दूभर हो जाता है। अतः जनहित में इस सड़क का पुनर्निर्माण व सुदृढ़ीकरण कराने की कृपा करें।\n\nभवदीय,\nक्षेत्र के जागरूक नागरिक`;
+      generatedTitle = `जर्जर सड़क/मार्ग के पुनर्निर्माण व सुदृढ़ीकरण हेतु आवेदन`;
+    } else if (category === 'PHC' || category === 'Hospital' || description.toLowerCase().includes('hospital') || description.includes('अस्पताल') || description.includes('इलाज') || description.includes('स्वास्थ्य')) {
       questions.push(
-        'What is the population of the village/block served by this health facility?',
-        'What are the main services missing? (e.g., maternity ward, pharmacy, clean water, regular doctors)',
-        'Where is the nearest alternative hospital located?'
+        'आपके क्षेत्र (जैसे वार्ड संख्या, मोहल्ला, या प्रमुख लैंडमार्क) का सटीक विवरण क्या है और इस प्रस्तावित अस्पताल से अनुमानित कितनी आबादी लाभान्वित होगी?',
+        'वर्तमान में, निकटतम सरकारी या निजी अस्पताल आपके क्षेत्र से कितनी दूरी पर है और वहाँ तक पहुँचने में औसतन कितना समय लगता है?',
+        'क्या आपके विचार में इस क्षेत्र में अस्पताल के निर्माण के लिए कोई उपयुक्त सरकारी या निजी भूमि उपलब्ध है?'
       );
-      improvedText = `Health Infrastructure Request: Improving healthcare facilities for the village. ${description}`;
+      improvedText = `माननीय सांसद महोदय,\n\nमैं इस पत्र के माध्यम से आपके संज्ञान में लाना चाहता हूँ कि हमारे क्षेत्र में किसी भी प्राथमिक या द्वितीयक स्वास्थ्य सुविधा (अस्पताल) का अभाव है। इस कारणवश क्षेत्र की आम जनता को गंभीर स्वास्थ्य समस्याओं का सामना करना पड़ रहा है। आपातकालीन स्थितियों में मरीज को समय पर अस्पताल तक ले जाने में अत्यधिक समय व्यतीत होता है, जिससे जानमाल का जोखिम बढ़ जाता है। अतः जनहित में यहाँ एक प्राथमिक स्वास्थ्य केंद्र की स्थापना करने का कष्ट करें।\n\nभवदीय,\nसमस्त क्षेत्रवासी`;
+      generatedTitle = `क्षेत्र में नए प्राथमिक स्वास्थ्य केंद्र (PHC) की स्थापना हेतु आवेदन`;
     } else {
       questions.push(
-        'Approximately how many residents will benefit from this development?',
-        'Are there existing facilities of this type nearby?',
-        'What is the main urgency level for this project?'
+        'इस विकास कार्य से लगभग कितने स्थानीय निवासी लाभान्वित होंगे?',
+        'क्या इस प्रकार की कोई अन्य सुविधा आपके वार्ड/ब्लॉक में पहले से उपलब्ध है?',
+        'इस परियोजना को शुरू करने की मुख्य तात्कालिकता (Urgency) क्या है?'
       );
+      improvedText = `माननीय सांसद महोदय,\n\nइस पत्र के माध्यम से मैं अपने क्षेत्र की महत्वपूर्ण विकास आवश्यकता: "${description}" की ओर आपका ध्यान आकर्षित करना चाहता हूँ। यह परियोजना हमारे ब्लॉक के विकास के लिए अत्यंत महत्वपूर्ण है। आशा है कि आप जनहित में इसे शीघ्र स्वीकृत करेंगे।\n\nभवदीय,\nक्षेत्र के जागरूक नागरिक`;
+      generatedTitle = `क्षेत्रीय विकास व सुधार कार्य हेतु आवेदन प्रस्ताव`;
     }
 
     return res.json({
+      title: generatedTitle,
       questions,
       improvedText,
       languageDetected: language || 'en',
-      completenessScore: description.length > 100 ? 85 : 45
+      completenessScore: description.length > 50 ? 85 : 45
     });
   }
 
@@ -81,15 +88,16 @@ export const getWritingAssist = async (req: Request, res: Response) => {
 
       Tasks:
       1. Analyze the user's input. Identify missing critical details for development planning (e.g. population size, nearest alternative, land availability, impact).
-      2. Formulate exactly 2 to 3 clarifying questions STRICTLY in ${language || 'English'} to help them improve their proposal.
-      3. Rewrite the user's suggestion to be highly professional, structured, and formal. You MUST write this improved text STRICTLY in ${language || 'English'}, regardless of the language they originally typed in.
+      2. Formulate exactly 2 to 3 clarifying questions STRICTLY in the user's selected language: "${language || 'English'}".
+      3. Generate a formal, standardized title (concise, 5-8 words max) AND rewrite the user's suggestion into a professional, formal application addressed to the Member of Parliament/MLA. You MUST write both the generated title and the rewritten suggestion STRICTLY in the user's selected language: "${language || 'English'}". Ensure the tone is polite, human-like, and official (e.g., starting with "माननीय सांसद महोदय/महोदया" for Hindi, or "Respected Member of Parliament" for English).
       4. Assign a completeness score from 0 to 100 based on the depth of information provided.
 
       Return ONLY a JSON object with this schema:
       {
+        "title": "Generated concise title in the selected language...",
         "questions": ["Question 1", "Question 2"],
-        "improvedText": "Sleek professional draft of the proposal...",
-        "languageDetected": "en or hi or bjp",
+        "improvedText": "Sleek professional application draft in the selected language...",
+        "languageDetected": "en or hi or ur",
         "completenessScore": 75
       }
     `;

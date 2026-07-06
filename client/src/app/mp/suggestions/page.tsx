@@ -25,6 +25,7 @@ interface SuggestionItem {
   estimatedCostLakhs: number;
   aiCompleteness: number;
   aiConfidence: number;
+  isVerifiedCitizen?: boolean;
 }
 
 const statusConfig: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
@@ -192,6 +193,14 @@ export default function MpSuggestionsPage() {
                     </span>
                     <span className="text-[10px] text-slate-600">•</span>
                     <span className="text-[10px] text-slate-500">₹{s.estimatedCostLakhs}L</span>
+                    {s.isVerifiedCitizen && (
+                      <>
+                        <span className="text-[10px] text-slate-600">•</span>
+                        <span className="inline-flex items-center space-x-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 px-2 py-0.5 rounded-md text-[9px] font-bold">
+                          ✓ Verified Citizen
+                        </span>
+                      </>
+                    )}
                   </div>
                 </div>
 

@@ -316,7 +316,10 @@ export const syncProfile = async (req: Request, res: Response) => {
     village_ward,
     pincode,
     language_preference,
-    role
+    role,
+    aadhaar_number,
+    verification_status,
+    avatar_url
   } = req.body;
 
   if (!id || !full_name || !state || !district) {
@@ -335,11 +338,11 @@ export const syncProfile = async (req: Request, res: Response) => {
       village_ward,
       pincode,
       language_preference: language_preference || 'en',
-      role: role || 'citizen'
+      role: role || 'citizen',
+      aadhaar_number,
+      verification_status,
+      avatar_url
     });
-
-    // Trigger base achievement badge on registration
-    await db.addBadge(id, 'verified_citizen');
 
     return res.json({ message: 'Profile synced successfully', profile });
   } catch (error: any) {

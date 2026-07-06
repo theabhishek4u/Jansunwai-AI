@@ -252,5 +252,37 @@ export const db = {
       return 0;
     }
     return mockDb.incrementScore(userId, points);
+  },
+
+  getCitizens: async () => {
+    if (supabase) {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('role', 'citizen');
+      if (error) {
+        console.error('Supabase citizens fetch error, using mockDb fallback:', error.message);
+        return mockDb.getCitizens();
+      }
+      return data;
+    }
+    return mockDb.getCitizens();
+  },
+
+  updateVerificationStatus: async (userId: string, status: 'incomplete' | 'pending' | 'verified' | 'rejected') => {
+    if (supabase) {
+      const { data, error } = await supabase
+        .from('profiles')
+        .update({ verification_status: status, updated_at: new Date().toISOString() })
+        .eq('id', userId)
+        .select()
+        .single();
+      if (error) {
+        console.error('Supabase verification status update error, using mockDb fallback:', error.message);
+        return mockDb.updateVerificationStatus(userId, status);
+      }
+      return data;
+    }
+    return mockDb.updateVerificationStatus(userId, status);
   }
 };

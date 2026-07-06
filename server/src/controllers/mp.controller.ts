@@ -73,12 +73,15 @@ export const getPriorityEngine = async (_req: Request, res: Response) => {
     const allSugg = await mockDb.getAllSuggestions();
 
     const urgencyWeight: Record<string, number> = { critical: 4, high: 3, medium: 2, low: 1 };
-    const ranked = allSugg.map(s => {
+    const ranked = await Promise.all(allSugg.map(async s => {
+      const profile = await mockDb.getProfile(s.citizen_id);
+      const isVerified = profile?.verification_status === 'verified';
+      
       const urgencyScore = (urgencyWeight[s.urgency] || 1) * 25;
       const supporterScore = Math.min(25, ((s.supporters || 0) / 100) * 5);
       const completenessScore = ((s.ai_score_completeness || 50) / 100) * 25;
       const beneficiaryScore = Math.min(25, (s.estimated_beneficiaries / 1000) * 3);
-      const priorityScore = Math.round(urgencyScore + supporterScore + completenessScore + beneficiaryScore);
+      const priorityScore = Math.round(urgencyScore + supporterScore + completenessScore + beneficiaryScore + (isVerified ? 20 : 0));
 
       return {
         id: s.id,
@@ -94,10 +97,12 @@ export const getPriorityEngine = async (_req: Request, res: Response) => {
         estimatedCostLakhs: s.estimated_cost_lakhs || 0,
         aiCompleteness: s.ai_score_completeness || 0,
         aiConfidence: s.ai_score_confidence || 0,
+        isVerifiedCitizen: isVerified
       };
-    }).sort((a, b) => b.priorityScore - a.priorityScore);
+    }));
 
-    return res.json(ranked);
+    const sortedRanked = ranked.sort((a, b) => b.priorityScore - a.priorityScore);
+    return res.json(sortedRanked);
   } catch (error) {
     return res.status(500).json({ error: 'Failed to compute priority engine' });
   }
