@@ -28,7 +28,9 @@ export const createSuggestion = async (req: Request, res: Response) => {
     urgency
   } = req.body;
 
-  const imageFile = req.file;
+  // Fallback: take the first attached file for AI processing (if any)
+  const files = req.files as Express.Multer.File[];
+  const imageFile = files && files.length > 0 ? files[0] : null;
 
   if (!citizen_id || !title || !category || !description || !state || !district) {
     return res.status(400).json({ error: 'Missing required parameters (citizen_id, title, category, description, state, district)' });

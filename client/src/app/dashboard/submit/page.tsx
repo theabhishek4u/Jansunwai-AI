@@ -15,12 +15,20 @@ import {
   FileText,
   MapIcon, 
   ArrowRight,
-  TrendingUp,
   XCircle,
   Info,
   Loader2,
   Search,
-  Globe
+  Globe,
+  TrendingUp,
+  Camera,
+  Video,
+  FileAudio,
+  Paperclip,
+  Trash2,
+  FileImage,
+  FilePlay,
+  FileDown
 } from 'lucide-react';
 
 const CATEGORIES = [
@@ -60,9 +68,14 @@ export default function SubmitSuggestion() {
   const [geoError, setGeoError] = useState<string | null>(null);
   const [geoSuccess, setGeoSuccess] = useState<string | null>(null);
 
-  // Media attachments
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  // Multi-Media Attachments
+  interface Attachment {
+    id: string;
+    file: File;
+    preview: string;
+    type: 'image' | 'video' | 'audio' | 'document';
+  }
+  const [attachments, setAttachments] = useState<Attachment[]>([]);
 
   // Audio Recorder States
   const [isRecording, setIsRecording] = useState(false);
@@ -83,6 +96,35 @@ export default function SubmitSuggestion() {
   // Drag & drop state and handlers
   const [isDragging, setIsDragging] = useState(false);
 
+  const processFiles = (files: FileList | File[]) => {
+    const newAttachments: Attachment[] = [];
+    
+    Array.from(files).forEach((file) => {
+      let type: 'image' | 'video' | 'audio' | 'document' = 'document';
+      if (file.type.startsWith('image/')) type = 'image';
+      else if (file.type.startsWith('video/')) type = 'video';
+      else if (file.type.startsWith('audio/')) type = 'audio';
+      else if (file.type === 'application/pdf' || file.name.endsWith('.pdf')) type = 'document';
+      
+      const preview = URL.createObjectURL(file);
+      newAttachments.push({
+        id: Math.random().toString(36).substr(2, 9),
+        file,
+        preview,
+        type
+      });
+    });
+    
+    setAttachments((prev) => [...prev, ...newAttachments]);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      processFiles(e.target.files);
+    }
+    e.target.value = ''; // reset so same file can be added again if removed
+  };
+
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(true);
@@ -95,15 +137,13 @@ export default function SubmitSuggestion() {
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
-    const file = e.dataTransfer.files?.[0];
-    if (file && file.type.startsWith('image/')) {
-      setImageFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+    if (e.dataTransfer.files) {
+      processFiles(e.dataTransfer.files);
     }
+  };
+
+  const removeAttachment = (idToRemove: string) => {
+    setAttachments(prev => prev.filter(att => att.id !== idToRemove));
   };
 
   // Submit Result Modal
@@ -250,18 +290,7 @@ export default function SubmitSuggestion() {
     }
   };
 
-  // Image Selection Handler
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setImageFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+  // Image Selection Handler (removed in favor of multi-media handleFileChange)
 
   // Audio Recording Handlers
   const startRecording = async () => {
@@ -411,12 +440,18 @@ export default function SubmitSuggestion() {
       formData.append('urgency', urgency);
       formData.append('estimated_beneficiaries', beneficiaries);
       
-      if (lat && lng) {
+      if (lat) {
         formData.append('location_lat', lat.toString());
+      }
+      if (lng) {
         formData.append('location_lng', lng.toString());
       }
-      if (imageFile) {
-        formData.append('image', imageFile);
+      
+      if (attachments.length > 0) {
+        attachments.forEach((att, index) => {
+          formData.append(`attachment_${index}`, att.file);
+        });
+        formData.append('attachmentCount', attachments.length.toString());
       }
 
       const response = await fetch('http://localhost:5000/api/suggestions', {
@@ -645,47 +680,94 @@ export default function SubmitSuggestion() {
               </div>
             </div>
 
-            {/* Image upload */}
+            {/* Multi-Media Evidence Hub */}
             <div>
-              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Image Evidence</label>
+              <div className="flex items-center justify-between mb-3">
+                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider">Complaint Evidence & Media</label>
+                <span className="text-[10px] text-slate-500 font-semibold">{attachments.length} items attached</span>
+              </div>
+              
               <div className="space-y-4">
+                {/* Unified Drop Zone & Buttons */}
                 <div 
                   onDragOver={handleDragOver}
                   onDragLeave={handleDragLeave}
                   onDrop={handleDrop}
-                  className={`w-full border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-all duration-300 ${
+                  className={`w-full border border-dashed rounded-2xl p-4 text-center transition-all duration-300 ${
                     isDragging 
-                      ? 'border-indigo-500 bg-indigo-500/5' 
-                      : 'border-slate-800 bg-slate-950/40 hover:border-slate-750 hover:bg-slate-950/60'
+                      ? 'border-indigo-500 bg-indigo-500/10' 
+                      : 'border-slate-700 bg-slate-900 hover:border-indigo-500/50 hover:bg-slate-800/80'
                   }`}
                 >
-                  <label className="cursor-pointer flex flex-col items-center justify-center space-y-2">
-                    <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 border border-indigo-500/20">
-                      <Upload className="w-5 h-5" />
-                    </div>
-                    <div className="space-y-1">
-                      <span className="text-xs font-bold text-slate-300 block">Drag & Drop Image Evidence here</span>
-                      <span className="text-[11px] text-slate-500 block">or click to browse local files</span>
-                    </div>
-                    <input type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
-                  </label>
-                </div>
-                {imagePreview && (
-                  <div className="flex items-center justify-between bg-slate-950 border border-slate-800 p-3 rounded-2xl shadow-inner">
-                    <div className="flex items-center space-x-3">
-                      <img src={imagePreview} alt="Preview" className="w-14 h-14 object-cover rounded-xl border border-slate-800" />
-                      <div className="min-w-0 pr-4">
-                        <span className="block text-xs font-semibold text-slate-200 truncate max-w-[200px]">{imageFile?.name}</span>
-                        <span className="block text-[10px] text-slate-500">{(imageFile?.size ? (imageFile.size / 1024 / 1024).toFixed(2) : 0) } MB</span>
+                  <p className="text-xs text-slate-400 font-semibold mb-4">Select the type of evidence to submit or drag & drop files here:</p>
+                  
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    {/* Camera / Image Button */}
+                    <label className="flex flex-col items-center justify-center py-3 bg-slate-950/50 hover:bg-slate-800 border border-slate-800 hover:border-indigo-500/50 rounded-xl cursor-pointer transition-all group">
+                      <div className="w-8 h-8 rounded-full bg-blue-500/10 flex items-center justify-center text-blue-400 mb-2 group-hover:scale-110 transition-transform">
+                        <Camera className="w-4 h-4" />
                       </div>
-                    </div>
-                    <button 
-                      type="button" 
-                      onClick={() => { setImageFile(null); setImagePreview(null); }} 
-                      className="text-xs text-red-400 hover:text-red-300 font-bold hover:underline px-3 py-1 cursor-pointer"
-                    >
-                      Remove
-                    </button>
+                      <span className="text-[11px] font-bold text-slate-300">Photo</span>
+                      <input type="file" accept="image/*" capture="environment" multiple className="hidden" onChange={handleFileChange} />
+                    </label>
+
+                    {/* Video Button */}
+                    <label className="flex flex-col items-center justify-center py-3 bg-slate-950/50 hover:bg-slate-800 border border-slate-800 hover:border-pink-500/50 rounded-xl cursor-pointer transition-all group">
+                      <div className="w-8 h-8 rounded-full bg-pink-500/10 flex items-center justify-center text-pink-400 mb-2 group-hover:scale-110 transition-transform">
+                        <Video className="w-4 h-4" />
+                      </div>
+                      <span className="text-[11px] font-bold text-slate-300">Video</span>
+                      <input type="file" accept="video/*" capture="environment" multiple className="hidden" onChange={handleFileChange} />
+                    </label>
+
+                    {/* Audio Voice Note Button */}
+                    <label className="flex flex-col items-center justify-center py-3 bg-slate-950/50 hover:bg-slate-800 border border-slate-800 hover:border-amber-500/50 rounded-xl cursor-pointer transition-all group">
+                      <div className="w-8 h-8 rounded-full bg-amber-500/10 flex items-center justify-center text-amber-400 mb-2 group-hover:scale-110 transition-transform">
+                        <FileAudio className="w-4 h-4" />
+                      </div>
+                      <span className="text-[11px] font-bold text-slate-300">Voice Note</span>
+                      <input type="file" accept="audio/*" multiple className="hidden" onChange={handleFileChange} />
+                    </label>
+
+                    {/* PDF / Document Button */}
+                    <label className="flex flex-col items-center justify-center py-3 bg-slate-950/50 hover:bg-slate-800 border border-slate-800 hover:border-emerald-500/50 rounded-xl cursor-pointer transition-all group">
+                      <div className="w-8 h-8 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-400 mb-2 group-hover:scale-110 transition-transform">
+                        <Paperclip className="w-4 h-4" />
+                      </div>
+                      <span className="text-[11px] font-bold text-slate-300">PDF/Letter</span>
+                      <input type="file" accept=".pdf,.doc,.docx" multiple className="hidden" onChange={handleFileChange} />
+                    </label>
+                  </div>
+                </div>
+
+                {/* Previews List */}
+                {attachments.length > 0 && (
+                  <div className="flex overflow-x-auto pb-2 space-x-3 snap-x scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
+                    {attachments.map((att) => (
+                      <div key={att.id} className="relative flex-none w-28 bg-slate-900 border border-slate-800 rounded-xl p-2 snap-center group shadow-sm">
+                        <div className="h-16 bg-slate-950 rounded-lg overflow-hidden flex items-center justify-center border border-slate-800/60 mb-2 relative">
+                          {att.type === 'image' && <img src={att.preview} alt="preview" className="w-full h-full object-cover" />}
+                          {att.type === 'video' && (
+                            <>
+                              <video src={att.preview} className="w-full h-full object-cover opacity-60" />
+                              <div className="absolute inset-0 flex items-center justify-center"><FilePlay className="w-6 h-6 text-white/80 drop-shadow-md" /></div>
+                            </>
+                          )}
+                          {att.type === 'audio' && <FileAudio className="w-8 h-8 text-amber-500" />}
+                          {att.type === 'document' && <FileDown className="w-8 h-8 text-emerald-500" />}
+                        </div>
+                        <div className="truncate text-[10px] font-semibold text-slate-300 px-1" title={att.file.name}>{att.file.name}</div>
+                        <div className="truncate text-[9px] text-slate-500 px-1">{(att.file.size / 1024 / 1024).toFixed(2)} MB</div>
+                        
+                        <button 
+                          type="button" 
+                          onClick={() => removeAttachment(att.id)} 
+                          className="absolute -top-2 -right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-md hover:bg-red-600 cursor-pointer"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
+                      </div>
+                    ))}
                   </div>
                 )}
               </div>
