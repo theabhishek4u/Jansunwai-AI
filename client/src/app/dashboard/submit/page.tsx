@@ -50,7 +50,6 @@ export default function SubmitSuggestion() {
 
   // General Form States
   const [title, setTitle] = useState('');
-  const [category, setCategory] = useState('');
   const [description, setDescription] = useState('');
   const [state, setState] = useState(user?.state || '');
   const [district, setDistrict] = useState(user?.district || '');
@@ -323,7 +322,6 @@ export default function SubmitSuggestion() {
       setIsTranscribing(true);
       setTimeout(() => {
         setTitle("Repair of local village water well");
-        setCategory("Water Supply");
         setDescription("Our village well has collapsed water filtration walls. Clean water is highly contaminated.");
         setUrgency("high");
         setIsTranscribing(false);
@@ -357,7 +355,6 @@ export default function SubmitSuggestion() {
       if (response.ok) {
         const data = await response.json();
         setTitle(data.title || '');
-        setCategory(data.category || '');
         setDescription(data.description || '');
         setUrgency(data.urgency || 'medium');
       }
@@ -379,7 +376,6 @@ export default function SubmitSuggestion() {
         body: JSON.stringify({
           title,
           description,
-          category,
           language: user?.language_preference || 'en'
         })
       });
@@ -421,8 +417,8 @@ export default function SubmitSuggestion() {
   // Submit Suggestion Form
   const handleSubmitForm = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!category || !description || !title) {
-      alert("Please fill in Title, Category, and Description.");
+    if (!description || !title) {
+      alert("Please fill in Title and Description.");
       return;
     }
 
@@ -431,7 +427,6 @@ export default function SubmitSuggestion() {
       const formData = new FormData();
       formData.append('citizen_id', user?.id || '');
       formData.append('title', title);
-      formData.append('category', category);
       formData.append('description', description);
       formData.append('state', state);
       formData.append('district', district);
@@ -588,29 +583,7 @@ export default function SubmitSuggestion() {
               </div>
             </div>
 
-            {/* Category */}
-            <div>
-              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Category</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
-                  <HelpCircle className="w-4 h-4" />
-                </div>
-                <select
-                  required
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl py-3.5 pl-10 pr-10 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all duration-300 appearance-none"
-                >
-                  <option value="">Select category</option>
-                  {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-                </select>
-                <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-slate-500">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
-              </div>
-            </div>
+            {/* Removed Category Dropdown - Handled by AI Backend */}
 
             {/* Description */}
             <div className="space-y-2">

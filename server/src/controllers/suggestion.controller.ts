@@ -16,7 +16,6 @@ export const createSuggestion = async (req: Request, res: Response) => {
   const {
     citizen_id,
     title,
-    category,
     description,
     state,
     district,
@@ -32,12 +31,11 @@ export const createSuggestion = async (req: Request, res: Response) => {
   const files = req.files as Express.Multer.File[];
   const imageFile = files && files.length > 0 ? files[0] : null;
 
-  if (!citizen_id || !title || !category || !description || !state || !district) {
-    return res.status(400).json({ error: 'Missing required parameters (citizen_id, title, category, description, state, district)' });
+  if (!citizen_id || !title || !description || !state || !district) {
+    return res.status(400).json({ error: 'Missing required parameters (citizen_id, title, description, state, district)' });
   }
 
   try {
-    // 1. Run AI analysis (Vision + score evaluation)
     let completenessScore = 60;
     let computedUrgency = urgency || 'medium';
     let photoVerified = !!imageFile;
@@ -45,6 +43,7 @@ export const createSuggestion = async (req: Request, res: Response) => {
     let computedBeneficiaries = Number(estimated_beneficiaries) || 100;
     let computedImpact = 'Medium';
     let confidenceScore = 80;
+    let aiCategory = 'Others';
 
     if (ai) {
       try {
@@ -62,15 +61,18 @@ export const createSuggestion = async (req: Request, res: Response) => {
         const prompt = `
           Analyze the following citizen suggestion details:
           Title: "${title}"
-          Category: "${category}"
           Description: "${description}"
           Location: Village: ${village || 'Unknown'}, Block: ${block || 'Unknown'}, District: ${district}, State: ${state}
 
+          First, classify this complaint into exactly ONE of these categories:
+          ["Road", "Bridge", "School", "College", "Hospital", "PHC", "Water Supply", "Drainage", "Street Lights", "Electricity", "Library", "Park", "Sports Ground", "Skill Center", "Women's Safety", "Public Transport", "Internet", "Waste Management", "Environment", "Agriculture", "Others"]
+
           Evaluate and output ONLY a JSON object:
           {
+            "category": "Selected Category",
             "completenessScore": (0-100),
             "urgency": "low" | "medium" | "high" | "critical",
-            "photoVerified": boolean (true if image matches description/category),
+            "photoVerified": boolean (true if image matches description),
             "locationVerified": boolean,
             "estimatedBeneficiaries": integer,
             "impact": "Low" | "Medium" | "High" | "Critical",
@@ -86,6 +88,7 @@ export const createSuggestion = async (req: Request, res: Response) => {
         });
         
         const evaluation = JSON.parse(response.text || '{}');
+        aiCategory = evaluation.category || 'Others';
         completenessScore = evaluation.completenessScore ?? completenessScore;
         computedUrgency = evaluation.urgency ?? computedUrgency;
         photoVerified = evaluation.photoVerified ?? photoVerified;
@@ -101,7 +104,7 @@ export const createSuggestion = async (req: Request, res: Response) => {
     // 2. Duplicate Detection
     let duplicateOfId: string | null = null;
     try {
-      const candidates = await db.getSuggestions({ category, district });
+      const candidates = await db.getSuggestions({ category: aiCategory, district });
       if (candidates.length > 0) {
         if (ai) {
           const listPayload = candidates.map(c => ({
@@ -114,7 +117,7 @@ export const createSuggestion = async (req: Request, res: Response) => {
           const dupPrompt = `
             Determine if the suggestion:
             Title: "${title}"
-            Category: "${category}"
+            Category: "${aiCategory}"
             Description: "${description}"
             Location: Village: ${village || 'Unknown'}, Block: ${block || 'Unknown'}
             
@@ -151,7 +154,7 @@ export const createSuggestion = async (req: Request, res: Response) => {
     const suggestionInput: Omit<Suggestion, 'id' | 'created_at' | 'updated_at'> = {
       citizen_id,
       title,
-      category,
+      category: aiCategory,
       description,
       state,
       district,
