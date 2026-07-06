@@ -146,7 +146,7 @@ export default function MpDashboard() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-slate-800/60 pb-4">
         <div>
-          <h1 className="text-2xl font-extrabold text-white tracking-tight bg-clip-text text-transparent bg-linear-to-r from-amber-400 to-amber-100">Executive Overview</h1>
+          <h1 className="text-2xl font-extrabold tracking-tight bg-clip-text text-transparent bg-linear-to-r from-amber-400 to-amber-100">Executive Overview</h1>
           <p className="text-xs text-slate-400 mt-1">AI-powered constituency intelligence for data-driven decisions</p>
         </div>
         <div className="flex items-center space-x-3 shrink-0">

@@ -56,7 +56,7 @@ const LocateControl = ({ setPosition }: { setPosition: (pos: L.LatLng) => void }
   });
 
   return (
-    <div className="absolute bottom-6 right-4 z-[1000]">
+    <div className="absolute bottom-6 right-4 z-1000">
       <button 
         type="button"
         onClick={handleLocate} 

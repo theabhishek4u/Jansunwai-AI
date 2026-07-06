@@ -543,7 +543,7 @@ export default function LandingPage() {
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 relative">
-            <div className="hidden lg:block absolute top-[32px] left-[15%] right-[15%] h-[1px] bg-slate-900 z-0" />
+            <div className="hidden lg:block absolute top-[32px] left-[15%] right-[15%] h-px bg-slate-900 z-0" />
             
             {steps.map((step, idx) => (
               <div key={idx} className="relative z-10 flex flex-col items-center text-center space-y-4">

@@ -544,12 +544,12 @@ export default function SubmitSuggestion() {
         {/* Animated mesh gradient blobs */}
         <div className="absolute -top-20 -right-20 w-72 h-72 bg-indigo-600/8 blur-[100px] rounded-full pointer-events-none animate-pulse" />
         <div className="absolute -bottom-16 -left-16 w-56 h-56 bg-violet-600/6 blur-[80px] rounded-full pointer-events-none" />
-        <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-indigo-500/40 to-transparent" />
+        <div className="absolute top-0 left-0 w-full h-px bg-linear-to-r from-transparent via-indigo-500/40 to-transparent" />
 
         <div className="relative flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="space-y-3">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-600 via-violet-600 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-600/25">
+              <div className="w-12 h-12 rounded-2xl bg-linear-to-br from-indigo-600 via-violet-600 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-600/25">
                 <Send className="w-6 h-6 text-white" />
               </div>
               <div>
@@ -570,13 +570,13 @@ export default function SubmitSuggestion() {
 
           {/* ── SECTION 1: VOICE + LANGUAGE ── */}
           <div className="relative rounded-[24px] border border-slate-800/60 overflow-hidden" style={{ background: 'linear-gradient(180deg, rgba(30,27,75,0.15) 0%, rgba(15,23,42,0.6) 100%)' }}>
-            <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-violet-500/30 to-transparent" />
+            <div className="absolute top-0 left-0 w-full h-px bg-linear-to-r from-transparent via-violet-500/30 to-transparent" />
             <div className="p-6 sm:p-7 space-y-5">
 
               {/* Language selector row */}
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-600/20 to-indigo-600/20 border border-violet-500/20 flex items-center justify-center">
+                  <div className="w-9 h-9 rounded-xl bg-linear-to-br from-violet-600/20 to-indigo-600/20 border border-violet-500/20 flex items-center justify-center">
                     <Globe className="w-4.5 h-4.5 text-violet-400" />
                   </div>
                   <div>
@@ -616,7 +616,7 @@ export default function SubmitSuggestion() {
                       <div className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-lg transition-all duration-300 ${
                         isRecording 
                           ? 'bg-red-600 shadow-red-600/30 animate-pulse' 
-                          : 'bg-gradient-to-br from-indigo-600 to-violet-600 shadow-indigo-600/20'
+                          : 'bg-linear-to-br from-indigo-600 to-violet-600 shadow-indigo-600/20'
                       }`}>
                         <Mic className="w-5 h-5 text-white" />
                       </div>
@@ -668,11 +668,11 @@ export default function SubmitSuggestion() {
                       <button
                         type="button"
                         onClick={startRecording}
-                        className="group relative bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold text-xs px-7 py-4 rounded-2xl flex items-center gap-2.5 shadow-xl shadow-indigo-600/25 hover:-translate-y-0.5 active:scale-95 transition-all cursor-pointer"
+                        className="group relative bg-linear-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold text-xs px-7 py-4 rounded-2xl flex items-center gap-2.5 shadow-xl shadow-indigo-600/25 hover:-translate-y-0.5 active:scale-95 transition-all cursor-pointer"
                       >
                         <Mic className="w-4.5 h-4.5" />
                         <span>Record Suggestion</span>
-                        <div className="absolute -inset-[1px] bg-gradient-to-r from-indigo-500/20 to-violet-500/20 rounded-2xl blur-sm -z-10 group-hover:blur-md transition-all" />
+                        <div className="absolute -inset-px bg-linear-to-r from-indigo-500/20 to-violet-500/20 rounded-2xl blur-sm -z-10 group-hover:blur-md transition-all" />
                       </button>
                     )}
                   </div>
@@ -683,7 +683,7 @@ export default function SubmitSuggestion() {
 
           {/* ── SECTION 2: FORM FIELDS ── */}
           <div className="relative rounded-[24px] border border-slate-800/60 overflow-hidden bg-slate-900/40 backdrop-blur-sm">
-            <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-indigo-500/20 to-transparent" />
+            <div className="absolute top-0 left-0 w-full h-px bg-linear-to-r from-transparent via-indigo-500/20 to-transparent" />
             
             <form onSubmit={handleSubmitForm} className="p-6 sm:p-7 space-y-6">
 
@@ -738,7 +738,7 @@ export default function SubmitSuggestion() {
                       type="button"
                       onClick={() => handleAiAssist()}
                       disabled={aiLoading}
-                      className="absolute bottom-4 right-4 bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 hover:from-indigo-500 hover:via-violet-500 hover:to-purple-500 text-white text-[11px] px-4 py-2.5 rounded-xl flex items-center gap-2 shadow-lg shadow-indigo-600/20 hover:shadow-xl hover:shadow-indigo-600/30 hover:-translate-y-0.5 transition-all font-bold cursor-pointer disabled:opacity-50 disabled:hover:translate-y-0"
+                      className="absolute bottom-4 right-4 bg-linear-to-r from-indigo-600 via-violet-600 to-purple-600 hover:from-indigo-500 hover:via-violet-500 hover:to-purple-500 text-white text-[11px] px-4 py-2.5 rounded-xl flex items-center gap-2 shadow-lg shadow-indigo-600/20 hover:shadow-xl hover:shadow-indigo-600/30 hover:-translate-y-0.5 transition-all font-bold cursor-pointer disabled:opacity-50 disabled:hover:translate-y-0"
                     >
                       {aiLoading ? (
                         <>
@@ -973,10 +973,10 @@ export default function SubmitSuggestion() {
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className="group relative w-full overflow-hidden bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 hover:from-indigo-500 hover:via-violet-500 hover:to-purple-500 disabled:opacity-50 text-white py-5 rounded-2xl text-sm font-bold shadow-xl shadow-indigo-600/25 transition-all duration-300 hover:shadow-2xl hover:shadow-indigo-600/30 hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2.5 cursor-pointer"
+                  className="group relative w-full overflow-hidden bg-linear-to-r from-indigo-600 via-violet-600 to-purple-600 hover:from-indigo-500 hover:via-violet-500 hover:to-purple-500 disabled:opacity-50 text-white py-5 rounded-2xl text-sm font-bold shadow-xl shadow-indigo-600/25 transition-all duration-300 hover:shadow-2xl hover:shadow-indigo-600/30 hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2.5 cursor-pointer"
                 >
                   {/* Shimmer sweep effect */}
-                  <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+                  <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-linear-to-r from-transparent via-white/10 to-transparent" />
                   
                   {isSubmitting ? (
                     <span className="flex items-center gap-2.5 animate-pulse relative z-10">
@@ -1006,11 +1006,11 @@ export default function SubmitSuggestion() {
           {/* Modal Container */}
           <div className="relative w-full max-w-md animate-fadeIn transition-all">
             {/* Ambient Background Glow */}
-            <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500 via-indigo-500 to-violet-500 rounded-[32px] blur-xl opacity-30" />
+            <div className="absolute -inset-1 bg-linear-to-r from-emerald-500 via-indigo-500 to-violet-500 rounded-[32px] blur-xl opacity-30" />
             
-            <div className="relative bg-[#0b0f19] border border-white/[0.08] rounded-[32px] p-8 sm:p-10 text-center shadow-2xl overflow-hidden">
+            <div className="relative bg-[#0b0f19] border border-white/8 rounded-[32px] p-8 sm:p-10 text-center shadow-2xl overflow-hidden">
               {/* Top Accent Line */}
-              <div className="absolute top-0 inset-x-0 h-[3px] bg-gradient-to-r from-emerald-400 via-indigo-400 to-violet-400" />
+              <div className="absolute top-0 inset-x-0 h-[3px] bg-linear-to-r from-emerald-400 via-indigo-400 to-violet-400" />
               
               {/* Subtle glass texture */}
               <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.03)_0%,rgba(255,255,255,0)_100%)] pointer-events-none" />
@@ -1020,15 +1020,15 @@ export default function SubmitSuggestion() {
                   {/* Floating Icon */}
                   <div className="relative mb-6 group">
                     <div className="absolute inset-0 bg-emerald-500/20 blur-2xl rounded-full animate-pulse" />
-                    <div className="relative w-24 h-24 rounded-[2.5rem] bg-gradient-to-br from-emerald-400/20 to-emerald-900/40 border border-emerald-500/30 flex items-center justify-center shadow-[0_0_40px_rgba(16,185,129,0.2)] transform hover:-translate-y-2 transition-transform duration-500">
-                      <div className="absolute inset-0 rounded-[2.5rem] bg-gradient-to-tr from-emerald-400/10 to-transparent opacity-50" />
+                    <div className="relative w-24 h-24 rounded-[2.5rem] bg-linear-to-br from-emerald-400/20 to-emerald-900/40 border border-emerald-500/30 flex items-center justify-center shadow-[0_0_40px_rgba(16,185,129,0.2)] transform hover:-translate-y-2 transition-transform duration-500">
+                      <div className="absolute inset-0 rounded-[2.5rem] bg-linear-to-tr from-emerald-400/10 to-transparent opacity-50" />
                       <CheckCircle className="w-12 h-12 text-emerald-400 drop-shadow-[0_0_15px_rgba(52,211,153,0.8)]" />
                     </div>
                   </div>
 
                   {/* Typography */}
                   <div className="space-y-3 mb-8">
-                    <h3 className="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-slate-400 tracking-tight drop-shadow-sm">
+                    <h3 className="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-linear-to-r from-white via-slate-100 to-slate-400 tracking-tight drop-shadow-sm">
                       Proposal Registered!
                     </h3>
                     <p className="text-[13px] text-slate-400 leading-relaxed max-w-[280px] mx-auto">
@@ -1042,7 +1042,7 @@ export default function SubmitSuggestion() {
                       <span className="text-[11px] text-slate-400 font-bold uppercase tracking-wider">Contribution Points</span>
                       <div className="relative">
                         <div className="absolute inset-0 bg-orange-500/20 blur-md rounded-full opacity-50" />
-                        <span className="relative flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-orange-500/10 to-amber-500/10 border border-orange-500/30 text-orange-400 font-black text-[13px] shadow-sm">
+                        <span className="relative flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-linear-to-r from-orange-500/10 to-amber-500/10 border border-orange-500/30 text-orange-400 font-black text-[13px] shadow-sm">
                           <Zap className="w-3.5 h-3.5 text-amber-400 fill-amber-400/30" />
                           +{submitResult.pointsAwarded || 50} XP
                         </span>
@@ -1066,9 +1066,9 @@ export default function SubmitSuggestion() {
                     onClick={() => router.push(`/dashboard/suggestions/${submitResult.suggestionId || 'recent'}`)}
                     className="group relative w-full overflow-hidden rounded-2xl p-[1.5px] focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
                   >
-                    <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500 animate-[spin_4s_linear_infinite] opacity-70" />
-                    <div className="relative flex items-center justify-center gap-2.5 bg-[#0b0f19] group-hover:bg-gradient-to-r group-hover:from-indigo-600/10 group-hover:to-purple-600/10 px-6 py-4 rounded-[14.5px] transition-colors">
-                      <span className="font-bold text-sm text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 to-purple-300">Track Suggestion Timeline</span>
+                    <div className="absolute inset-0 bg-linear-to-r from-indigo-500 via-purple-500 to-indigo-500 animate-[spin_4s_linear_infinite] opacity-70" />
+                    <div className="relative flex items-center justify-center gap-2.5 bg-[#0b0f19] group-hover:bg-linear-to-r group-hover:from-indigo-600/10 group-hover:to-purple-600/10 px-6 py-4 rounded-[14.5px] transition-colors">
+                      <span className="font-bold text-sm text-transparent bg-clip-text bg-linear-to-r from-indigo-300 to-purple-300">Track Suggestion Timeline</span>
                       <ArrowRight className="w-4 h-4 text-purple-400 group-hover:translate-x-1 transition-transform" />
                     </div>
                   </button>
@@ -1078,7 +1078,7 @@ export default function SubmitSuggestion() {
                   {/* Failure State */}
                   <div className="relative mb-6">
                     <div className="absolute inset-0 bg-rose-500/20 blur-2xl rounded-full animate-pulse" />
-                    <div className="relative w-24 h-24 rounded-[2.5rem] bg-gradient-to-br from-rose-400/20 to-rose-900/40 border border-rose-500/30 flex items-center justify-center">
+                    <div className="relative w-24 h-24 rounded-[2.5rem] bg-linear-to-br from-rose-400/20 to-rose-900/40 border border-rose-500/30 flex items-center justify-center">
                       <XCircle className="w-12 h-12 text-rose-400" />
                     </div>
                   </div>
@@ -1102,7 +1102,7 @@ export default function SubmitSuggestion() {
       {showMapModal && (
         <div className="fixed inset-0 bg-slate-950/85 backdrop-blur-xl flex items-center justify-center p-4 z-50 animate-fadeIn">
           <div className="bg-slate-900/95 border border-slate-800/80 rounded-[28px] max-w-3xl w-full p-6 space-y-4 shadow-2xl relative overflow-hidden">
-            <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent" />
+            <div className="absolute top-0 left-0 w-full h-px bg-linear-to-r from-transparent via-emerald-500/30 to-transparent" />
             <div className="flex justify-between items-center mb-2">
               <h3 className="text-lg font-bold text-white flex items-center gap-2">
                 <MapIcon className="w-5 h-5 text-emerald-400" />

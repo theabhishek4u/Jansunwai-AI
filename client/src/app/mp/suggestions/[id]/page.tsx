@@ -252,7 +252,7 @@ export default function MpSuggestionDetailPage() {
             className="bg-[#111827] rounded-2xl p-6 border border-slate-800/50 shadow-2xl relative overflow-hidden"
           >
             {/* Elegant accent border */}
-            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-600" />
+            <div className="absolute top-0 left-0 right-0 h-[2px] bg-linear-to-r from-amber-600 via-yellow-500 to-amber-600" />
             
             <h2 className="text-sm font-bold text-white mb-4 flex items-center space-x-2">
               <Wrench className="w-4 h-4 text-amber-400" />
