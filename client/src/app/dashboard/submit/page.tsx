@@ -1,22 +1,43 @@
-'use client';
+﻿'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/AuthContext';
 import { 
   Sparkles, 
   Mic, 
   MapPin, 
-  Upload, 
-  HelpCircle, 
   AlertTriangle, 
   CheckCircle,
   FileText,
   MapIcon, 
   ArrowRight,
-  TrendingUp,
   XCircle,
-  Info
+  Info,
+  Loader2,
+  Search,
+  Globe,
+  TrendingUp,
+  Camera,
+  Video,
+  FileAudio,
+  Paperclip,
+  Trash2,
+  FilePlay,
+  FileDown,
+  Shield,
+  Zap,
+  Send,
+  ChevronDown,
+  Eye,
+  Wand2,
+  MessageSquare,
+  Target,
+  BarChart3,
+  Clock,
+  Lightbulb,
+  Hash
 } from 'lucide-react';
 
 const CATEGORIES = [
@@ -27,13 +48,17 @@ const CATEGORIES = [
   "Agriculture", "Others"
 ];
 
+const MapPicker = dynamic(() => import('@/components/MapPicker'), { 
+  ssr: false,
+  loading: () => <div className="h-[400px] bg-slate-900 animate-pulse rounded-xl border border-slate-800 flex items-center justify-center text-slate-500">Loading Map...</div>
+});
+
 export default function SubmitSuggestion() {
   const router = useRouter();
   const { user, refreshProfile } = useAuth();
 
   // General Form States
   const [title, setTitle] = useState('');
-  const [category, setCategory] = useState('');
   const [description, setDescription] = useState('');
   const [state, setState] = useState(user?.state || '');
   const [district, setDistrict] = useState(user?.district || '');
@@ -43,19 +68,31 @@ export default function SubmitSuggestion() {
   const [beneficiaries, setBeneficiaries] = useState('');
   const [lat, setLat] = useState<number | null>(null);
   const [lng, setLng] = useState<number | null>(null);
+  const [pincode, setPincode] = useState('');
+  const [showMapModal, setShowMapModal] = useState(false);
+  const [language, setLanguage] = useState(user?.language_preference || 'Hindi');
 
-  // Media attachments
-  const [imageFile, setImageFile] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  // Reverse geocoding states
+  const [geoLoading, setGeoLoading] = useState(false);
+  const [geoError, setGeoError] = useState<string | null>(null);
+  const [geoSuccess, setGeoSuccess] = useState<string | null>(null);
+
+  // Multi-Media Attachments
+  interface Attachment {
+    id: string;
+    file: File;
+    preview: string;
+    type: 'image' | 'video' | 'audio' | 'document';
+  }
+  const [attachments, setAttachments] = useState<Attachment[]>([]);
 
   // Audio Recorder States
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
-  const [audioUrl, setAudioUrl] = useState<string | null>(null);
-  const [isTranscribing, setIsTranscribing] = useState(false);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioChunksRef = useRef<Blob[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const speechRecognitionRef = useRef<any>(null);
   const recordingTimerRef = useRef<NodeJS.Timeout | null>(null);
+  const transcriptRef = useRef('');
 
   // AI Assistant States
   const [aiLoading, setAiLoading] = useState(false);
@@ -66,6 +103,35 @@ export default function SubmitSuggestion() {
 
   // Drag & drop state and handlers
   const [isDragging, setIsDragging] = useState(false);
+
+  const processFiles = (files: FileList | File[]) => {
+    const newAttachments: Attachment[] = [];
+    
+    Array.from(files).forEach((file) => {
+      let type: 'image' | 'video' | 'audio' | 'document' = 'document';
+      if (file.type.startsWith('image/')) type = 'image';
+      else if (file.type.startsWith('video/')) type = 'video';
+      else if (file.type.startsWith('audio/')) type = 'audio';
+      else if (file.type === 'application/pdf' || file.name.endsWith('.pdf')) type = 'document';
+      
+      const preview = URL.createObjectURL(file);
+      newAttachments.push({
+        id: Math.random().toString(36).substr(2, 9),
+        file,
+        preview,
+        type
+      });
+    });
+    
+    setAttachments((prev) => [...prev, ...newAttachments]);
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      processFiles(e.target.files);
+    }
+    e.target.value = ''; // reset so same file can be added again if removed
+  };
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault();
@@ -79,15 +145,13 @@ export default function SubmitSuggestion() {
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
-    const file = e.dataTransfer.files?.[0];
-    if (file && file.type.startsWith('image/')) {
-      setImageFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+    if (e.dataTransfer.files) {
+      processFiles(e.dataTransfer.files);
     }
+  };
+
+  const removeAttachment = (idToRemove: string) => {
+    setAttachments(prev => prev.filter(att => att.id !== idToRemove));
   };
 
   // Submit Result Modal
@@ -101,136 +165,262 @@ export default function SubmitSuggestion() {
     suggestionId?: string;
   } | null>(null);
 
-  // Geolocation Handler
+  // Reverse Geocode from lat/lng using OpenStreetMap Nominatim
+  const reverseGeocodeFromCoords = useCallback(async (latitude: number, longitude: number) => {
+    setGeoLoading(true);
+    setGeoError(null);
+    setGeoSuccess(null);
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1&zoom=18&accept-language=en`,
+        { headers: { 'User-Agent': 'JansunwaiAI/1.0' } }
+      );
+      if (!response.ok) throw new Error('Geocoding service unavailable');
+      const data = await response.json();
+      if (data.error) throw new Error(data.error);
+
+      const addr = data.address || {};
+      // Extract fields with smart fallbacks
+      const resolvedState = addr.state || addr.region || '';
+      const resolvedDistrict = addr.county || addr.state_district || addr.city_district || addr.city || '';
+      const resolvedBlock = addr.suburb || addr.town || addr.municipality || '';
+      const resolvedVillage = addr.village || addr.hamlet || addr.neighbourhood || addr.residential || addr.suburb || '';
+      const resolvedPincode = addr.postcode || '';
+
+      if (resolvedState) setState(resolvedState);
+      if (resolvedDistrict) setDistrict(resolvedDistrict);
+      if (resolvedBlock) setBlock(resolvedBlock);
+      if (resolvedVillage) setVillage(resolvedVillage);
+      if (resolvedPincode) setPincode(resolvedPincode);
+
+      setGeoSuccess(`Location resolved: ${resolvedVillage || resolvedBlock || resolvedDistrict}, ${resolvedDistrict}, ${resolvedState}`);
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : 'Failed to resolve location';
+      setGeoError(`Reverse geocoding failed: ${errMsg}. You can manually fill in the fields.`);
+    } finally {
+      setGeoLoading(false);
+    }
+  }, []);
+
+  // Geocode from Pincode using Nominatim search
+  const geocodeFromPincode = useCallback(async (code: string) => {
+    if (code.length !== 6 || !/^\d{6}$/.test(code)) return;
+    setGeoLoading(true);
+    setGeoError(null);
+    setGeoSuccess(null);
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&postalcode=${code}&country=India&addressdetails=1&limit=1&accept-language=en`,
+        { headers: { 'User-Agent': 'JansunwaiAI/1.0' } }
+      );
+      if (!response.ok) throw new Error('Geocoding service unavailable');
+      const data = await response.json();
+      if (!data || data.length === 0) throw new Error('No location found for this pincode');
+
+      const result = data[0];
+      const addr = result.address || {};
+
+      // Set coordinates
+      const newLat = parseFloat(result.lat);
+      const newLng = parseFloat(result.lon);
+      if (!isNaN(newLat) && !isNaN(newLng)) {
+        setLat(newLat);
+        setLng(newLng);
+      }
+
+      // Extract location fields
+      const resolvedState = addr.state || addr.region || '';
+      const resolvedDistrict = addr.county || addr.state_district || addr.city_district || addr.city || '';
+      const resolvedBlock = addr.suburb || addr.town || addr.municipality || '';
+      const resolvedVillage = addr.village || addr.hamlet || addr.neighbourhood || addr.residential || '';
+
+      if (resolvedState) setState(resolvedState);
+      if (resolvedDistrict) setDistrict(resolvedDistrict);
+      if (resolvedBlock) setBlock(resolvedBlock);
+      if (resolvedVillage) setVillage(resolvedVillage);
+
+      setGeoSuccess(`Location resolved from pincode ${code}: ${resolvedDistrict || resolvedBlock}, ${resolvedState}`);
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : 'Pincode lookup failed';
+      setGeoError(`Pincode lookup failed: ${errMsg}. Please enter location details manually.`);
+    } finally {
+      setGeoLoading(false);
+    }
+  }, []);
+
+  // Geolocation Handler — fetches GPS + triggers reverse geocoding
+  const handleManualLocationSelect = async (newLat: number, newLng: number) => {
+    setLat(newLat);
+    setLng(newLng);
+    setShowMapModal(false);
+    await reverseGeocodeFromCoords(newLat, newLng);
+  };
+
   const handleGetLocation = () => {
+    setGeoLoading(true);
+    setGeoError(null);
+    setGeoSuccess(null);
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setLat(position.coords.latitude);
-          setLng(position.coords.longitude);
-          // Set simulated coordinates if not already present
+        async (position) => {
+          const newLat = position.coords.latitude;
+          const newLng = position.coords.longitude;
+          setLat(newLat);
+          setLng(newLng);
+          await reverseGeocodeFromCoords(newLat, newLng);
         },
-        (err) => {
+        async () => {
           console.warn("Geolocation permission denied, simulating Varanasi coordinates.");
           setLat(25.3176);
           setLng(82.9739);
+          await reverseGeocodeFromCoords(25.3176, 82.9739);
         }
       );
     } else {
       setLat(25.3176);
       setLng(82.9739);
+      reverseGeocodeFromCoords(25.3176, 82.9739);
     }
   };
 
-  // Image Selection Handler
-  const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setImageFile(file);
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+  // Handle pincode input with debounced auto-lookup
+  const pincodeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const handlePincodeChange = (value: string) => {
+    // Only allow digits, max 6
+    const cleaned = value.replace(/\D/g, '').slice(0, 6);
+    setPincode(cleaned);
+    // Auto-trigger lookup when 6 digits entered
+    if (cleaned.length === 6) {
+      if (pincodeTimeoutRef.current) clearTimeout(pincodeTimeoutRef.current);
+      pincodeTimeoutRef.current = setTimeout(() => {
+        geocodeFromPincode(cleaned);
+      }, 400);
     }
   };
+
+  // Image Selection Handler (removed in favor of multi-media handleFileChange)
 
   // Audio Recording Handlers
-  const startRecording = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      mediaRecorderRef.current = new MediaRecorder(stream);
-      audioChunksRef.current = [];
-      mediaRecorderRef.current.ondataavailable = (event) => {
-        audioChunksRef.current.push(event.data);
-      };
+  const startRecording = () => {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      alert("Speech recognition is not supported in this browser. Please use Chrome or Edge.");
+      return;
+    }
 
-      mediaRecorderRef.current.onstop = async () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-        const url = URL.createObjectURL(audioBlob);
-        setAudioUrl(url);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    
+    // Map our language names to BCP-47 tags
+    const langMap: Record<string, string> = {
+      'English': 'en-IN',
+      'Hindi': 'hi-IN',
+      'Bengali': 'bn-IN',
+      'Marathi': 'mr-IN',
+      'Telugu': 'te-IN',
+      'Tamil': 'ta-IN',
+      'Gujarati': 'gu-IN',
+      'Urdu': 'ur-IN',
+      'Odia': 'or-IN',
+      'Punjabi': 'pa-IN'
+    };
 
-        // Upload to voice transcription API
-        await transcribeAudio(audioBlob);
-      };
+    recognition.lang = langMap[language] || 'hi-IN';
+    recognition.continuous = true;
+    recognition.interimResults = true;
 
-      mediaRecorderRef.current.start();
+    transcriptRef.current = description;
+    let currentTranscript = description;
+
+    recognition.onstart = () => {
       setIsRecording(true);
       setRecordingTime(0);
+      if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
       recordingTimerRef.current = setInterval(() => {
         setRecordingTime(prev => prev + 1);
       }, 1000);
-    } catch (err) {
-      alert("Microphone permission denied or not supported on this device. Simulating voice transcription...");
-      // Simulate Voice Transcription fallback
-      setIsTranscribing(true);
-      setTimeout(() => {
-        setTitle("Repair of local village water well");
-        setCategory("Water Supply");
-        setDescription("Our village well has collapsed water filtration walls. Clean water is highly contaminated.");
-        setUrgency("high");
-        setIsTranscribing(false);
-      }, 2000);
-    }
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    recognition.onresult = (event: any) => {
+      let finalTranscript = '';
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        if (event.results[i].isFinal) {
+          finalTranscript += event.results[i][0].transcript;
+        }
+      }
+      
+      // We only append final transcript to avoid text jumping wildly
+      if (finalTranscript) {
+        const newText = currentTranscript ? currentTranscript + ' ' + finalTranscript : finalTranscript;
+        currentTranscript = newText;
+        transcriptRef.current = newText;
+        setDescription(newText);
+        // Automatically suggest a title if it's empty
+        if (!title && currentTranscript.length > 10) {
+          setTitle("Voice Complaint / Suggestion");
+        }
+      }
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    recognition.onerror = (event: any) => {
+      console.error("Speech recognition error", event.error);
+      if (event.error !== 'no-speech') {
+        alert("Microphone error. Please check permissions.");
+      }
+      stopRecording();
+    };
+
+    recognition.onend = () => {
+      stopRecording();
+    };
+
+    speechRecognitionRef.current = recognition;
+    recognition.start();
   };
 
   const stopRecording = () => {
-    if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.stop();
-      // Stop stream tracks
-      mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+    if (speechRecognitionRef.current && isRecording) {
+      speechRecognitionRef.current.stop();
       setIsRecording(false);
       if (recordingTimerRef.current) {
         clearInterval(recordingTimerRef.current);
       }
-    }
-  };
 
-  const transcribeAudio = async (blob: Blob) => {
-    setIsTranscribing(true);
-    try {
-      const formData = new FormData();
-      formData.append('audio', blob, 'suggestion_audio.webm');
-
-      const response = await fetch('http://localhost:5000/api/ai/voice', {
-        method: 'POST',
-        body: formData
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setTitle(data.title || '');
-        setCategory(data.category || '');
-        setDescription(data.description || '');
-        setUrgency(data.urgency || 'medium');
+      // Auto trigger AI Writing Assist after transcription finishes!
+      const spokenText = transcriptRef.current;
+      if (spokenText && spokenText.trim().length > 5) {
+        setTimeout(() => {
+          handleAiAssist(spokenText);
+        }, 800);
       }
-    } catch (err) {
-      console.error('Audio transcription failed, using simulator:', err);
-    } finally {
-      setIsTranscribing(false);
     }
   };
 
   // AI Assistant trigger
-  const handleAiAssist = async () => {
-    if (!description) return;
+  const handleAiAssist = async (customText?: string) => {
+    const textToAnalyze = typeof customText === 'string' ? customText : description;
+    if (!textToAnalyze) return;
     setAiLoading(true);
     try {
       const response = await fetch('http://localhost:5000/api/ai/writing-assist', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          title,
-          description,
-          category,
-          language: user?.language_preference || 'en'
+          title: typeof customText === 'string' ? '' : title,
+          description: textToAnalyze,
+          language
         })
       });
 
       if (response.ok) {
         const data = await response.json();
         setAiQuestions(data.questions || []);
-        setDescription(data.improvedText || description);
+        setDescription(data.improvedText || textToAnalyze);
+        if (data.title) {
+          setTitle(data.title);
+        }
         setAiScore(data.completenessScore || 70);
       }
     } catch (err) {
@@ -264,8 +454,8 @@ export default function SubmitSuggestion() {
   // Submit Suggestion Form
   const handleSubmitForm = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!category || !description || !title) {
-      alert("Please fill in Title, Category, and Description.");
+    if (!description || !title) {
+      alert("Please fill in Title and Description.");
       return;
     }
 
@@ -274,8 +464,8 @@ export default function SubmitSuggestion() {
       const formData = new FormData();
       formData.append('citizen_id', user?.id || '');
       formData.append('title', title);
-      formData.append('category', category);
       formData.append('description', description);
+      formData.append('language', language);
       formData.append('state', state);
       formData.append('district', district);
       formData.append('village', village);
@@ -283,12 +473,18 @@ export default function SubmitSuggestion() {
       formData.append('urgency', urgency);
       formData.append('estimated_beneficiaries', beneficiaries);
       
-      if (lat && lng) {
+      if (lat) {
         formData.append('location_lat', lat.toString());
+      }
+      if (lng) {
         formData.append('location_lng', lng.toString());
       }
-      if (imageFile) {
-        formData.append('image', imageFile);
+      
+      if (attachments.length > 0) {
+        attachments.forEach((att, index) => {
+          formData.append(`attachment_${index}`, att.file);
+        });
+        formData.append('attachmentCount', attachments.length.toString());
       }
 
       const response = await fetch('http://localhost:5000/api/suggestions', {
@@ -330,525 +526,740 @@ export default function SubmitSuggestion() {
   const circumference = 2 * Math.PI * radius; // ~282.74
   const strokeDashoffset = aiScore !== null ? circumference - (aiScore / 100) * circumference : circumference;
 
-  return (
-    <div className="space-y-8 max-w-6xl mx-auto animate-fadeIn">
-      {/* Header */}
-      <div className="relative p-6 sm:p-8 bg-slate-900/40 border border-slate-800/80 rounded-3xl overflow-hidden flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 shadow-xl">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 blur-3xl rounded-full pointer-events-none" />
-        <div className="space-y-1">
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white flex items-center gap-2">
-            Submit Development Suggestion
-            <span className="text-[10px] font-bold text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2.5 py-0.5 rounded-full uppercase tracking-wider animate-pulse">Citizen Voice</span>
-          </h1>
-          <p className="text-xs text-slate-400">Submit actionable proposals for constituency improvement. AI reviews and groups them automatically.</p>
-        </div>
-      </div>
+  // Step progress helpers
+  const formSteps = [
+    { label: 'Voice / Text', icon: Mic, done: !!description },
+    { label: 'Details', icon: FileText, done: !!title && !!description },
+    { label: 'Evidence', icon: Eye, done: attachments.length > 0 },
+    { label: 'Location', icon: MapPin, done: !!state && !!district },
+  ];
+  const completedSteps = formSteps.filter(s => s.done).length;
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* Suggestion Form - Left 2 Columns */}
-        <div className="lg:col-span-2 bg-slate-900/60 backdrop-blur-md border border-slate-800/80 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xl relative overflow-hidden">
-          
-          {/* Voice Input Assist */}
-          <div className="bg-linear-to-r from-slate-950 via-indigo-950/20 to-slate-950 border border-slate-800 p-6 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-6 shadow-[0_4px_30px_rgba(99,102,241,0.03)] hover:border-slate-700/85 transition-all duration-300">
-            <div className="space-y-2 text-center sm:text-left">
-              <h3 className="text-sm font-bold text-white flex items-center justify-center sm:justify-start gap-2">
-                <div className="w-7 h-7 rounded-lg bg-indigo-500/10 flex items-center justify-center text-indigo-400 border border-indigo-500/20 shadow-inner">
-                  <Mic className="w-4 h-4" />
-                </div>
-                <span>Speak Your Suggestion</span>
-              </h3>
-              <p className="text-xs text-slate-400 max-w-md">Record in Hindi, Hinglish, Bhojpuri, or English. AI automatically structures the title, description, and key metadata.</p>
-              <div className="flex flex-wrap items-center justify-center sm:justify-start gap-1.5 pt-1">
-                {['Hindi', 'Hinglish', 'Bhojpuri', 'English'].map(lang => (
-                  <span key={lang} className="text-[9px] font-semibold text-slate-400 bg-slate-900 border border-slate-800 px-2.5 py-0.5 rounded-full">{lang}</span>
-                ))}
+  // Dynamic glow color based on AI score
+  const scoreGlowColor = aiScore !== null
+    ? aiScore >= 80 ? 'rgba(16,185,129,0.15)' : aiScore >= 50 ? 'rgba(245,158,11,0.15)' : 'rgba(239,68,68,0.12)'
+    : 'rgba(99,102,241,0.08)';
+  const scoreStrokeColor = aiScore !== null
+    ? aiScore >= 80 ? 'stroke-emerald-400' : aiScore >= 50 ? 'stroke-amber-400' : 'stroke-rose-400'
+    : 'stroke-indigo-500';
+
+  return (
+    <div className="space-y-6 max-w-7xl mx-auto animate-fadeIn">
+
+      {/* ═══════════ HERO HEADER ═══════════ */}
+      <div className="relative p-6 sm:p-8 rounded-[28px] overflow-hidden border border-slate-800/60" style={{ background: 'linear-gradient(135deg, rgba(15,23,42,0.95) 0%, rgba(30,27,75,0.4) 50%, rgba(15,23,42,0.95) 100%)' }}>
+        {/* Animated mesh gradient blobs */}
+        <div className="absolute -top-20 -right-20 w-72 h-72 bg-indigo-600/8 blur-[100px] rounded-full pointer-events-none animate-pulse" />
+        <div className="absolute -bottom-16 -left-16 w-56 h-56 bg-violet-600/6 blur-[80px] rounded-full pointer-events-none" />
+        <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-indigo-500/40 to-transparent" />
+
+        <div className="relative flex flex-col lg:flex-row lg:items-center justify-between gap-6">
+          <div className="space-y-3">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-600 via-violet-600 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-600/25">
+                <Send className="w-6 h-6 text-white" />
               </div>
-            </div>
-            
-            <div className="shrink-0 flex items-center space-x-4">
-              {isRecording && (
-                <div className="flex items-center space-x-1 h-6 px-2">
-                  <span className="w-1 bg-red-500 rounded-full animate-bounce" style={{ animationDelay: '0.1s', height: '14px' }} />
-                  <span className="w-1 bg-red-500 rounded-full animate-bounce" style={{ animationDelay: '0.2s', height: '22px' }} />
-                  <span className="w-1 bg-red-500 rounded-full animate-bounce" style={{ animationDelay: '0.3s', height: '10px' }} />
-                  <span className="w-1 bg-red-500 rounded-full animate-bounce" style={{ animationDelay: '0.4s', height: '18px' }} />
-                  <span className="w-1 bg-red-500 rounded-full animate-bounce" style={{ animationDelay: '0.5s', height: '12px' }} />
-                </div>
-              )}
-              
-              {isRecording ? (
-                <button
-                  type="button"
-                  onClick={stopRecording}
-                  className="bg-red-600 hover:bg-red-500 text-white font-bold text-xs px-5 py-3.5 rounded-xl flex items-center space-x-2 shadow-lg shadow-red-600/20 active:scale-95 transition-all cursor-pointer animate-pulse"
-                >
-                  <span className="w-2.5 h-2.5 rounded-full bg-white mr-1" />
-                  <span>Stop ({recordingTime}s)</span>
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={startRecording}
-                  className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs px-5 py-3.5 rounded-xl flex items-center space-x-2 shadow-lg shadow-indigo-600/20 hover:-translate-y-0.5 active:scale-95 transition-all cursor-pointer"
-                >
-                  <Mic className="w-4 h-4" />
-                  <span>Record Suggestion</span>
-                </button>
-              )}
+              <div>
+                <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+                  Submit Development Suggestion
+                </h1>
+                <p className="text-xs text-slate-400 mt-0.5">AI-powered proposal builder with voice input, auto-formatting & priority scoring</p>
+              </div>
             </div>
           </div>
 
-          {isTranscribing && (
-            <div className="flex items-center justify-center space-x-3 p-4 bg-slate-950 rounded-xl border border-slate-800 text-indigo-400 text-xs shadow-inner">
-              <div className="w-4 h-4 border-2 border-indigo-400 border-t-transparent animate-spin rounded-full" />
-              <span>Transcribing and structuring audio using Gemini...</span>
-            </div>
-          )}
-
-          {/* Form */}
-          <form onSubmit={handleSubmitForm} className="space-y-6">
-            {/* Title */}
-            <div>
-              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Suggestion Title</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
-                  <FileText className="w-4 h-4" />
+          {/* Mini step progress pills */}
+          <div className="flex items-center gap-2 bg-slate-950/60 border border-slate-800/60 rounded-2xl p-2 px-3">
+            {formSteps.map((step, i) => (
+              <div key={i} className="flex items-center gap-1.5">
+                <div className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all duration-500 ${
+                  step.done 
+                    ? 'bg-emerald-500/15 border border-emerald-500/30 text-emerald-400' 
+                    : 'bg-slate-900 border border-slate-800 text-slate-500'
+                }`}>
+                  {step.done ? <CheckCircle className="w-3.5 h-3.5" /> : <step.icon className="w-3.5 h-3.5" />}
                 </div>
-                <input
-                  type="text"
-                  required
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Briefly state what needs development (e.g., Road repairs connecting village school)"
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl py-3.5 pl-10 pr-4 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all duration-300"
-                />
-              </div>
-            </div>
-
-            {/* Category */}
-            <div>
-              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Category</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
-                  <HelpCircle className="w-4 h-4" />
-                </div>
-                <select
-                  required
-                  value={category}
-                  onChange={(e) => setCategory(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl py-3.5 pl-10 pr-10 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all duration-300 appearance-none"
-                >
-                  <option value="">Select category</option>
-                  {CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
-                </select>
-                <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-slate-500">
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
-              </div>
-            </div>
-
-            {/* Description */}
-            <div className="space-y-2">
-              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider">Description</label>
-              <div className="relative">
-                <textarea
-                  required
-                  rows={5}
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Describe the developmental need. Mention the current issue, how it impacts residents, land details if any, etc."
-                  className="w-full bg-slate-950 border border-slate-800 rounded-xl py-3.5 px-4 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all duration-300 font-sans"
-                />
-                {description.length > 10 && (
-                  <button
-                    type="button"
-                    onClick={handleAiAssist}
-                    disabled={aiLoading}
-                    className="absolute bottom-3.5 right-3.5 bg-linear-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-xs px-4 py-2 rounded-xl flex items-center space-x-1.5 shadow-md shadow-indigo-600/20 hover:scale-102 transition-all font-bold cursor-pointer disabled:opacity-50"
-                  >
-                    <Sparkles className="w-3.5 h-3.5" />
-                    <span>{aiLoading ? 'Analyzing...' : 'AI Writing Assistant'}</span>
-                  </button>
+                <span className={`text-[10px] font-bold uppercase tracking-wider hidden sm:inline ${step.done ? 'text-emerald-400' : 'text-slate-500'}`}>
+                  {step.label}
+                </span>
+                {i < formSteps.length - 1 && (
+                  <div className={`w-4 h-[2px] rounded-full mx-0.5 transition-all duration-500 ${step.done ? 'bg-emerald-500/40' : 'bg-slate-800'}`} />
                 )}
               </div>
+            ))}
+            <div className="ml-2 pl-2 border-l border-slate-800">
+              <span className="text-[10px] font-black text-indigo-400">{completedSteps}/{formSteps.length}</span>
             </div>
+          </div>
+        </div>
+      </div>
 
-            {/* Beneficiaries & Urgency */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Estimated People Benefited</label>
+      {/* ═══════════ MAIN GRID ═══════════ */}
+      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
+
+        {/* ═══════════ LEFT: FORM COLUMN (8 cols) ═══════════ */}
+        <div className="xl:col-span-8 space-y-6">
+
+          {/* ── SECTION 1: VOICE + LANGUAGE ── */}
+          <div className="relative rounded-[24px] border border-slate-800/60 overflow-hidden" style={{ background: 'linear-gradient(180deg, rgba(30,27,75,0.15) 0%, rgba(15,23,42,0.6) 100%)' }}>
+            <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-violet-500/30 to-transparent" />
+            <div className="p-6 sm:p-7 space-y-5">
+
+              {/* Language selector row */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-600/20 to-indigo-600/20 border border-violet-500/20 flex items-center justify-center">
+                    <Globe className="w-4.5 h-4.5 text-violet-400" />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-white">भाषा चुनें / Select Language</h3>
+                    <p className="text-[11px] text-slate-500">AI will process your input in this language</p>
+                  </div>
+                </div>
                 <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
-                    <TrendingUp className="w-4 h-4" />
+                  <select
+                    value={language}
+                    onChange={(e) => setLanguage(e.target.value)}
+                    className="bg-slate-950/80 border border-slate-700/60 text-sm text-white rounded-xl px-4 py-2.5 pr-10 focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500/50 focus:outline-none appearance-none cursor-pointer font-semibold transition-all hover:border-slate-600"
+                  >
+                    <option value="English">English</option>
+                    <option value="Hindi">Hindi (हिंदी)</option>
+                    <option value="Bengali">Bengali (বাংলা)</option>
+                    <option value="Marathi">Marathi (मराठी)</option>
+                    <option value="Telugu">Telugu (తెలుగు)</option>
+                    <option value="Tamil">Tamil (தமிழ்)</option>
+                    <option value="Gujarati">Gujarati (ગુજરાતી)</option>
+                    <option value="Urdu">Urdu (اردو)</option>
+                    <option value="Odia">Odia (ଓଡ଼ିଆ)</option>
+                    <option value="Punjabi">Punjabi (ਪੰਜਾਬੀ)</option>
+                  </select>
+                  <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                </div>
+              </div>
+
+              {/* Voice recorder card */}
+              <div className="relative rounded-2xl overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(49,46,129,0.12) 0%, rgba(15,23,42,0.8) 100%)' }}>
+                <div className="absolute inset-0 border border-indigo-500/10 rounded-2xl pointer-events-none" />
+                {isRecording && <div className="absolute inset-0 border-2 border-red-500/30 rounded-2xl pointer-events-none animate-pulse" />}
+                
+                <div className="relative p-5 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-5">
+                  <div className="space-y-3 text-center sm:text-left flex-1">
+                    <div className="flex items-center justify-center sm:justify-start gap-2.5">
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-lg transition-all duration-300 ${
+                        isRecording 
+                          ? 'bg-red-600 shadow-red-600/30 animate-pulse' 
+                          : 'bg-gradient-to-br from-indigo-600 to-violet-600 shadow-indigo-600/20'
+                      }`}>
+                        <Mic className="w-5 h-5 text-white" />
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-bold text-white">
+                          {isRecording ? `🔴 Recording... ${recordingTime}s` : 'Speak Your Suggestion'}
+                        </h3>
+                        <p className="text-[11px] text-slate-500">AI auto-structures title, description & metadata</p>
+                      </div>
+                    </div>
+
+                    {/* Supported languages */}
+                    <div className="flex flex-wrap items-center justify-center sm:justify-start gap-1.5">
+                      {['Hindi', 'Hinglish', 'Bhojpuri', 'English', 'Urdu'].map(lang => (
+                        <span key={lang} className="text-[9px] font-semibold text-slate-400 bg-slate-900/80 border border-slate-800/80 px-2.5 py-0.5 rounded-full">{lang}</span>
+                      ))}
+                    </div>
+
+                    {/* Live waveform when recording */}
+                    {isRecording && (
+                      <div className="flex items-end justify-center sm:justify-start gap-[3px] h-8 pt-1">
+                        {Array.from({ length: 20 }).map((_, i) => (
+                          <span
+                            key={i}
+                            className="w-[3px] bg-red-500 rounded-full animate-bounce"
+                            style={{
+                              animationDelay: `${i * 0.05}s`,
+                              height: `${8 + Math.random() * 20}px`,
+                              animationDuration: `${0.4 + Math.random() * 0.3}s`
+                            }}
+                          />
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Record / Stop button */}
+                  <div className="shrink-0">
+                    {isRecording ? (
+                      <button
+                        type="button"
+                        onClick={stopRecording}
+                        className="group relative bg-red-600 hover:bg-red-500 text-white font-bold text-xs px-7 py-4 rounded-2xl flex items-center gap-2.5 shadow-xl shadow-red-600/25 active:scale-95 transition-all cursor-pointer"
+                      >
+                        <span className="w-3 h-3 rounded-sm bg-white" />
+                        <span>Stop Recording</span>
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={startRecording}
+                        className="group relative bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold text-xs px-7 py-4 rounded-2xl flex items-center gap-2.5 shadow-xl shadow-indigo-600/25 hover:-translate-y-0.5 active:scale-95 transition-all cursor-pointer"
+                      >
+                        <Mic className="w-4.5 h-4.5" />
+                        <span>Record Suggestion</span>
+                        <div className="absolute -inset-[1px] bg-gradient-to-r from-indigo-500/20 to-violet-500/20 rounded-2xl blur-sm -z-10 group-hover:blur-md transition-all" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* ── SECTION 2: FORM FIELDS ── */}
+          <div className="relative rounded-[24px] border border-slate-800/60 overflow-hidden bg-slate-900/40 backdrop-blur-sm">
+            <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-indigo-500/20 to-transparent" />
+            
+            <form onSubmit={handleSubmitForm} className="p-6 sm:p-7 space-y-6">
+
+              {/* Title field with AI badge */}
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <label className="flex items-center gap-2 text-xs font-bold text-slate-300 uppercase tracking-wider">
+                    <Hash className="w-3.5 h-3.5 text-indigo-400" />
+                    Suggestion Title
+                  </label>
+                  {title && (
+                    <span className="text-[9px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full flex items-center gap-1">
+                      <Wand2 className="w-2.5 h-2.5" /> AI Generated
+                    </span>
+                  )}
+                </div>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-500 group-focus-within:text-indigo-400 transition-colors">
+                    <FileText className="w-4 h-4" />
                   </div>
                   <input
-                    type="number"
-                    value={beneficiaries}
-                    onChange={(e) => setBeneficiaries(e.target.value)}
-                    placeholder="e.g. 500"
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl py-3.5 pl-10 pr-4 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all duration-300"
+                    type="text"
+                    required
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    placeholder="AI will generate a formal title, or type your own..."
+                    className="w-full bg-slate-950/70 border border-slate-800/80 rounded-2xl py-4 pl-11 pr-4 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-indigo-500/60 focus:ring-2 focus:ring-indigo-500/10 focus:shadow-[0_0_20px_rgba(99,102,241,0.06)] transition-all duration-300"
                   />
                 </div>
               </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Urgency Level</label>
-                <div className="relative">
-                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
-                    <AlertTriangle className="w-4 h-4" />
+
+              {/* Description with AI writing assist overlay */}
+              <div className="space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <label className="flex items-center gap-2 text-xs font-bold text-slate-300 uppercase tracking-wider">
+                    <MessageSquare className="w-3.5 h-3.5 text-indigo-400" />
+                    Description
+                  </label>
+                  <span className="text-[10px] text-slate-500 font-medium">{description.length} characters</span>
+                </div>
+                <div className="relative group">
+                  <textarea
+                    required
+                    rows={6}
+                    value={description}
+                    onChange={(e) => setDescription(e.target.value)}
+                    placeholder="Describe the developmental need in detail. AI will rewrite it into a formal application letter addressed to your MP..."
+                    className="w-full bg-slate-950/70 border border-slate-800/80 rounded-2xl py-4 px-4 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-indigo-500/60 focus:ring-2 focus:ring-indigo-500/10 focus:shadow-[0_0_20px_rgba(99,102,241,0.06)] transition-all duration-300 font-sans resize-none"
+                  />
+                  {description.length > 10 && (
+                    <button
+                      type="button"
+                      onClick={() => handleAiAssist()}
+                      disabled={aiLoading}
+                      className="absolute bottom-4 right-4 bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 hover:from-indigo-500 hover:via-violet-500 hover:to-purple-500 text-white text-[11px] px-4 py-2.5 rounded-xl flex items-center gap-2 shadow-lg shadow-indigo-600/20 hover:shadow-xl hover:shadow-indigo-600/30 hover:-translate-y-0.5 transition-all font-bold cursor-pointer disabled:opacity-50 disabled:hover:translate-y-0"
+                    >
+                      {aiLoading ? (
+                        <>
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                          <span>Analyzing...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Wand2 className="w-3.5 h-3.5" />
+                          <span>AI Writing Assistant</span>
+                        </>
+                      )}
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Beneficiaries & Urgency — side by side */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2.5">
+                  <label className="flex items-center gap-2 text-xs font-bold text-slate-300 uppercase tracking-wider">
+                    <Target className="w-3.5 h-3.5 text-indigo-400" />
+                    People Benefited
+                  </label>
+                  <div className="relative group">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-500 group-focus-within:text-indigo-400 transition-colors">
+                      <TrendingUp className="w-4 h-4" />
+                    </div>
+                    <input
+                      type="number"
+                      value={beneficiaries}
+                      onChange={(e) => setBeneficiaries(e.target.value)}
+                      placeholder="e.g. 500"
+                      className="w-full bg-slate-950/70 border border-slate-800/80 rounded-2xl py-4 pl-11 pr-4 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-indigo-500/60 focus:ring-2 focus:ring-indigo-500/10 transition-all duration-300"
+                    />
                   </div>
-                  <select
-                    value={urgency}
-                    onChange={(e) => setUrgency(e.target.value)}
-                    className="w-full bg-slate-950 border border-slate-800 rounded-xl py-3.5 pl-10 pr-10 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all duration-300 appearance-none"
-                  >
-                    <option value="low">Low - Routine Planning</option>
-                    <option value="medium">Medium - Important Improvement</option>
-                    <option value="high">High - High Priority</option>
-                    <option value="critical">Critical - Urgent Public Hazard / Complete Absence</option>
-                  </select>
-                  <div className="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-slate-500">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
-                    </svg>
+                </div>
+                <div className="space-y-2.5">
+                  <label className="flex items-center gap-2 text-xs font-bold text-slate-300 uppercase tracking-wider">
+                    <Zap className="w-3.5 h-3.5 text-amber-400" />
+                    Urgency Level
+                  </label>
+                  <div className="relative group">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-500 group-focus-within:text-amber-400 transition-colors">
+                      <AlertTriangle className="w-4 h-4" />
+                    </div>
+                    <select
+                      value={urgency}
+                      onChange={(e) => setUrgency(e.target.value)}
+                      className="w-full bg-slate-950/70 border border-slate-800/80 rounded-2xl py-4 pl-11 pr-10 text-sm text-slate-100 focus:outline-none focus:border-indigo-500/60 focus:ring-2 focus:ring-indigo-500/10 transition-all duration-300 appearance-none cursor-pointer"
+                    >
+                      <option value="low">🟢 Low — Routine Planning</option>
+                      <option value="medium">🟡 Medium — Important Improvement</option>
+                      <option value="high">🟠 High — High Priority</option>
+                      <option value="critical">🔴 Critical — Urgent Public Hazard</option>
+                    </select>
+                    <ChevronDown className="w-4 h-4 text-slate-500 absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" />
                   </div>
                 </div>
               </div>
-            </div>
 
-            {/* Image upload */}
-            <div>
-              <label className="block text-xs font-bold text-slate-400 uppercase tracking-wider mb-2">Image Evidence</label>
-              <div className="space-y-4">
+              {/* ── EVIDENCE HUB ── */}
+              <div className="space-y-3 pt-2">
+                <div className="flex items-center justify-between">
+                  <label className="flex items-center gap-2 text-xs font-bold text-slate-300 uppercase tracking-wider">
+                    <Eye className="w-3.5 h-3.5 text-indigo-400" />
+                    Evidence & Media
+                  </label>
+                  <span className="text-[10px] text-slate-500 font-bold bg-slate-900 border border-slate-800 px-2 py-0.5 rounded-full">{attachments.length} attached</span>
+                </div>
+
                 <div 
                   onDragOver={handleDragOver}
                   onDragLeave={handleDragLeave}
                   onDrop={handleDrop}
-                  className={`w-full border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-all duration-300 ${
+                  className={`rounded-2xl border-2 border-dashed p-5 transition-all duration-300 ${
                     isDragging 
-                      ? 'border-indigo-500 bg-indigo-500/5' 
-                      : 'border-slate-800 bg-slate-950/40 hover:border-slate-750 hover:bg-slate-950/60'
+                      ? 'border-indigo-500 bg-indigo-500/8 scale-[1.01]' 
+                      : 'border-slate-800/60 bg-slate-950/40 hover:border-slate-700/80'
                   }`}
                 >
-                  <label className="cursor-pointer flex flex-col items-center justify-center space-y-2">
-                    <div className="w-10 h-10 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 border border-indigo-500/20">
-                      <Upload className="w-5 h-5" />
-                    </div>
-                    <div className="space-y-1">
-                      <span className="text-xs font-bold text-slate-300 block">Drag & Drop Image Evidence here</span>
-                      <span className="text-[11px] text-slate-500 block">or click to browse local files</span>
-                    </div>
-                    <input type="file" accept="image/*" className="hidden" onChange={handleImageChange} />
-                  </label>
+                  <p className="text-[11px] text-slate-500 font-medium text-center mb-4">Drag & drop files or select a category below</p>
+                  
+                  <div className="grid grid-cols-4 gap-3">
+                    {[
+                      { accept: 'image/*', capture: 'environment' as const, icon: Camera, label: 'Photo', color: 'blue', bg: 'bg-blue-500/8', border: 'hover:border-blue-500/40', text: 'text-blue-400' },
+                      { accept: 'video/*', capture: 'environment' as const, icon: Video, label: 'Video', color: 'pink', bg: 'bg-pink-500/8', border: 'hover:border-pink-500/40', text: 'text-pink-400' },
+                      { accept: 'audio/*', capture: undefined, icon: FileAudio, label: 'Audio', color: 'amber', bg: 'bg-amber-500/8', border: 'hover:border-amber-500/40', text: 'text-amber-400' },
+                      { accept: '.pdf,.doc,.docx', capture: undefined, icon: Paperclip, label: 'Document', color: 'emerald', bg: 'bg-emerald-500/8', border: 'hover:border-emerald-500/40', text: 'text-emerald-400' },
+                    ].map(({ accept, capture, icon: Icon, label, bg, border, text }) => (
+                      <label key={label} className={`flex flex-col items-center justify-center py-4 ${bg} border border-slate-800/60 ${border} rounded-xl cursor-pointer transition-all group hover:scale-[1.03] active:scale-95`}>
+                        <div className={`w-9 h-9 rounded-xl ${bg} flex items-center justify-center ${text} mb-2 group-hover:scale-110 transition-transform shadow-inner`}>
+                          <Icon className="w-4.5 h-4.5" />
+                        </div>
+                        <span className="text-[11px] font-bold text-slate-300">{label}</span>
+                        <input type="file" accept={accept} capture={capture} multiple className="hidden" onChange={handleFileChange} />
+                      </label>
+                    ))}
+                  </div>
                 </div>
-                {imagePreview && (
-                  <div className="flex items-center justify-between bg-slate-950 border border-slate-800 p-3 rounded-2xl shadow-inner">
-                    <div className="flex items-center space-x-3">
-                      <img src={imagePreview} alt="Preview" className="w-14 h-14 object-cover rounded-xl border border-slate-800" />
-                      <div className="min-w-0 pr-4">
-                        <span className="block text-xs font-semibold text-slate-200 truncate max-w-[200px]">{imageFile?.name}</span>
-                        <span className="block text-[10px] text-slate-500">{(imageFile?.size ? (imageFile.size / 1024 / 1024).toFixed(2) : 0) } MB</span>
+
+                {/* Attachment previews */}
+                {attachments.length > 0 && (
+                  <div className="flex overflow-x-auto pb-2 gap-3 snap-x scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
+                    {attachments.map((att) => (
+                      <div key={att.id} className="relative flex-none w-28 bg-slate-900/80 border border-slate-800/60 rounded-xl p-2 snap-center group shadow-sm hover:border-slate-700 transition-all">
+                        <div className="h-16 bg-slate-950 rounded-lg overflow-hidden flex items-center justify-center border border-slate-800/60 mb-2 relative">
+                          {att.type === 'image' && <img src={att.preview} alt="preview" className="w-full h-full object-cover" />}
+                          {att.type === 'video' && (
+                            <>
+                              <video src={att.preview} className="w-full h-full object-cover opacity-60" />
+                              <div className="absolute inset-0 flex items-center justify-center"><FilePlay className="w-6 h-6 text-white/80 drop-shadow-md" /></div>
+                            </>
+                          )}
+                          {att.type === 'audio' && <FileAudio className="w-8 h-8 text-amber-500" />}
+                          {att.type === 'document' && <FileDown className="w-8 h-8 text-emerald-500" />}
+                        </div>
+                        <div className="truncate text-[10px] font-semibold text-slate-300 px-1" title={att.file.name}>{att.file.name}</div>
+                        <div className="truncate text-[9px] text-slate-500 px-1">{(att.file.size / 1024 / 1024).toFixed(2)} MB</div>
+                        <button 
+                          type="button" 
+                          onClick={() => removeAttachment(att.id)} 
+                          className="absolute -top-2 -right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-md hover:bg-red-600 cursor-pointer"
+                        >
+                          <Trash2 className="w-3 h-3" />
+                        </button>
                       </div>
-                    </div>
-                    <button 
-                      type="button" 
-                      onClick={() => { setImageFile(null); setImagePreview(null); }} 
-                      className="text-xs text-red-400 hover:text-red-300 font-bold hover:underline px-3 py-1 cursor-pointer"
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* ── LOCATION SECTION ── */}
+              <div className="space-y-4 pt-4 border-t border-slate-800/40">
+                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                  <label className="flex items-center gap-2 text-xs font-bold text-slate-300 uppercase tracking-wider">
+                    <MapPin className="w-3.5 h-3.5 text-emerald-400" />
+                    Location Intelligence
+                  </label>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowMapModal(true)}
+                      className="flex items-center gap-1.5 px-3.5 py-2 bg-slate-900/80 hover:bg-slate-800 border border-slate-800/80 text-slate-300 rounded-xl text-[11px] font-bold transition-all cursor-pointer hover:border-slate-700"
                     >
-                      Remove
+                      <MapIcon className="w-3.5 h-3.5 text-indigo-400" />
+                      <span>Map Picker</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleGetLocation}
+                      disabled={geoLoading}
+                      className="flex items-center gap-1.5 px-3.5 py-2 bg-emerald-500/8 hover:bg-emerald-500/15 border border-emerald-500/20 text-emerald-400 rounded-xl text-[11px] font-bold transition-all shadow-sm hover:-translate-y-0.5 cursor-pointer disabled:opacity-50"
+                    >
+                      {geoLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <MapPin className="w-3.5 h-3.5" />}
+                      <span>{geoLoading ? 'Resolving...' : 'Auto-Detect GPS'}</span>
                     </button>
                   </div>
-                )}
-              </div>
-            </div>
+                </div>
 
-            {/* Location Section */}
-            <div className="border-t border-slate-900/60 pt-6 space-y-4">
-              <div className="flex items-center justify-between">
-                <span className="block text-xs font-bold text-slate-400 uppercase tracking-wider">Location Metadata</span>
+                {/* Pincode */}
+                <div className="relative">
+                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Pincode (auto-fill location)</label>
+                  <div className="relative group">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-500 group-focus-within:text-indigo-400 transition-colors">
+                      <Search className="w-4 h-4" />
+                    </div>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      maxLength={6}
+                      value={pincode}
+                      onChange={(e) => handlePincodeChange(e.target.value)}
+                      placeholder="Enter 6-digit pincode to auto-fill location"
+                      className="w-full bg-slate-950/70 border border-slate-800/80 rounded-2xl py-3.5 pl-11 pr-24 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-indigo-500/60 focus:ring-2 focus:ring-indigo-500/10 transition-all duration-300"
+                    />
+                    {pincode.length === 6 && (
+                      <button
+                        type="button"
+                        onClick={() => geocodeFromPincode(pincode)}
+                        disabled={geoLoading}
+                        className="absolute inset-y-0 right-0 pr-2 flex items-center"
+                      >
+                        <span className="flex items-center gap-1.5 px-3 py-1.5 bg-indigo-500/15 hover:bg-indigo-500/25 border border-indigo-500/30 text-indigo-400 rounded-lg text-[10px] font-bold transition-all cursor-pointer">
+                          {geoLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Search className="w-3 h-3" />}
+                          <span>Lookup</span>
+                        </span>
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Status banners */}
+                {geoLoading && (
+                  <div className="flex items-center gap-3 p-3.5 bg-indigo-500/5 border border-indigo-500/15 rounded-xl text-indigo-400 text-[11px] animate-fadeIn">
+                    <Loader2 className="w-4 h-4 animate-spin shrink-0" />
+                    <span className="font-medium">Resolving location from {pincode.length === 6 ? `pincode ${pincode}` : 'GPS coordinates'}...</span>
+                  </div>
+                )}
+                {geoSuccess && !geoLoading && (
+                  <div className="flex items-center gap-2 p-3.5 bg-emerald-500/5 border border-emerald-500/20 rounded-xl text-emerald-400 text-[11px] animate-fadeIn">
+                    <CheckCircle className="w-4 h-4 shrink-0" />
+                    <span className="font-medium">{geoSuccess}</span>
+                  </div>
+                )}
+                {geoError && !geoLoading && (
+                  <div className="flex items-center gap-2 p-3.5 bg-red-500/5 border border-red-500/20 rounded-xl text-red-400 text-[11px] animate-fadeIn">
+                    <XCircle className="w-4 h-4 shrink-0" />
+                    <span className="font-medium">{geoError}</span>
+                  </div>
+                )}
+                {lat && lng && !geoLoading && (
+                  <div className="bg-emerald-500/5 border border-emerald-500/20 p-3.5 rounded-xl text-emerald-400 text-[11px] flex items-center justify-between animate-fadeIn">
+                    <div className="flex items-center gap-2">
+                      <Shield className="w-4 h-4" />
+                      <span className="font-medium">GPS Verified: <span className="font-bold text-white ml-1">{lat.toFixed(5)}, {lng.toFixed(5)}</span></span>
+                    </div>
+                    <span className="text-[9px] uppercase tracking-wider bg-emerald-500/15 border border-emerald-500/25 px-2 py-0.5 rounded-md font-bold">GIS Locked</span>
+                  </div>
+                )}
+
+                {/* Location fields grid */}
+                <div className="grid grid-cols-2 gap-4">
+                  {[
+                    { label: 'State', value: state, setter: setState, icon: MapPin, placeholder: 'Auto-filled from pincode/GPS' },
+                    { label: 'District', value: district, setter: setDistrict, icon: MapIcon, placeholder: 'Auto-filled from pincode/GPS' },
+                    { label: 'Block Name', value: block, setter: setBlock, icon: Info, placeholder: 'Auto-filled or enter manually', required: false },
+                    { label: 'Village / Ward', value: village, setter: setVillage, icon: MapPin, placeholder: 'Auto-filled or enter manually', required: false },
+                  ].map(({ label, value, setter, icon: LocIcon, placeholder, required: req }) => (
+                    <div key={label}>
+                      <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">{label}</label>
+                      <div className="relative group">
+                        <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500 group-focus-within:text-indigo-400 transition-colors">
+                          <LocIcon className="w-4 h-4" />
+                        </div>
+                        <input
+                          type="text"
+                          required={req !== false}
+                          value={value}
+                          onChange={(e) => setter(e.target.value)}
+                          placeholder={placeholder}
+                          className={`w-full bg-slate-950/70 border rounded-xl py-3.5 pl-10 pr-4 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-indigo-500/60 focus:ring-2 focus:ring-indigo-500/10 transition-all duration-300 ${geoSuccess && value ? 'border-emerald-500/30' : 'border-slate-800/80'}`}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* ── SUBMIT BUTTON ── */}
+              <div className="pt-4">
                 <button
-                  type="button"
-                  onClick={handleGetLocation}
-                  className="flex items-center space-x-1.5 px-3 py-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 text-indigo-400 rounded-xl text-xs font-bold transition-all shadow-sm shadow-indigo-500/5 hover:-translate-y-0.5 cursor-pointer"
+                  type="submit"
+                  disabled={isSubmitting}
+                  className="group relative w-full overflow-hidden bg-gradient-to-r from-indigo-600 via-violet-600 to-purple-600 hover:from-indigo-500 hover:via-violet-500 hover:to-purple-500 disabled:opacity-50 text-white py-5 rounded-2xl text-sm font-bold shadow-xl shadow-indigo-600/25 transition-all duration-300 hover:shadow-2xl hover:shadow-indigo-600/30 hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center gap-2.5 cursor-pointer"
                 >
-                  <MapPin className="w-3.5 h-3.5 animate-pulse" />
-                  <span>Fetch Geolocation</span>
-                </button>
-              </div>
-
-              {lat && lng && (
-                <div className="bg-emerald-500/5 border border-emerald-500/20 p-3.5 rounded-xl text-emerald-400 text-[11px] flex items-center justify-between shadow-sm animate-fadeIn">
-                  <div className="flex items-center space-x-2">
-                    <div className="w-5 h-5 rounded-full bg-emerald-500/10 flex items-center justify-center">
-                      <CheckCircle className="w-3 h-3 text-emerald-400" />
-                    </div>
-                    <span className="font-medium">Coordinates GPS Verified: <span className="font-bold text-white ml-1">{lat.toFixed(5)}, {lng.toFixed(5)}</span></span>
-                  </div>
-                  <span className="text-[9px] uppercase tracking-wider bg-emerald-500/15 border border-emerald-500/25 px-2 py-0.5 rounded-md font-bold">GIS Locked</span>
-                </div>
-              )}
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">State</label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
-                      <MapPin className="w-4 h-4" />
-                    </div>
-                    <input
-                      type="text"
-                      required
-                      value={state}
-                      onChange={(e) => setState(e.target.value)}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl py-3.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all duration-300"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">District</label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
-                      <MapIcon className="w-4 h-4" />
-                    </div>
-                    <input
-                      type="text"
-                      required
-                      value={district}
-                      onChange={(e) => setDistrict(e.target.value)}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl py-3.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all duration-300"
-                    />
-                  </div>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Block Name</label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
-                      <Info className="w-4 h-4" />
-                    </div>
-                    <input
-                      type="text"
-                      value={block}
-                      onChange={(e) => setBlock(e.target.value)}
-                      placeholder="e.g. Kashi Vidyapeeth"
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl py-3.5 pl-10 pr-4 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all duration-300"
-                    />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Village / Ward</label>
-                  <div className="relative">
-                    <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
-                      <MapPin className="w-4 h-4" />
-                    </div>
-                    <input
-                      type="text"
-                      value={village}
-                      onChange={(e) => setVillage(e.target.value)}
-                      placeholder="e.g. Sigra"
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl py-3.5 pl-10 pr-4 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all duration-300"
-                    />
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* Submission buttons */}
-            <div className="pt-6 border-t border-slate-900/60">
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full bg-linear-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 disabled:opacity-50 text-white py-4 rounded-xl text-sm font-bold shadow-lg shadow-indigo-500/25 transition-all duration-300 hover:scale-[1.01] active:scale-[0.99] flex items-center justify-center space-x-2 cursor-pointer"
-              >
-                {isSubmitting ? (
-                  <span className="flex items-center space-x-2 animate-pulse">
-                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                    <span>Saving proposal to blockchain database...</span>
-                  </span>
-                ) : (
-                  <>
-                    <CheckCircle className="w-5 h-5" />
-                    <span>Register Suggestion</span>
-                  </>
-                )}
-              </button>
-            </div>
-          </form>
-        </div>
-
-        {/* AI Assistant Sidebar - Right 1 Column */}
-        <div className="space-y-6">
-          {/* Completeness score card */}
-          <div className="bg-slate-900/60 backdrop-blur-md border border-slate-800/80 rounded-3xl p-6 relative overflow-hidden shadow-xl">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-indigo-500/5 blur-2xl rounded-full pointer-events-none" />
-            <h3 className="text-sm font-bold text-white flex items-center space-x-2 mb-6">
-              <TrendingUp className="w-5 h-5 text-indigo-400" />
-              <span>AI Analysis Summary</span>
-            </h3>
-
-            <div className="flex flex-col items-center justify-center py-6 text-center space-y-4">
-              <div className="relative w-32 h-32 flex items-center justify-center">
-                <svg className="w-full h-full transform -rotate-90">
-                  <circle
-                    cx="64"
-                    cy="64"
-                    r={radius}
-                    className="stroke-slate-800/80"
-                    strokeWidth="7"
-                    fill="transparent"
-                  />
-                  {aiScore !== null && (
-                    <circle
-                      cx="64"
-                      cy="64"
-                      r={radius}
-                      className="stroke-indigo-500 transition-all duration-700 ease-out"
-                      strokeWidth="7"
-                      fill="transparent"
-                      strokeDasharray={circumference}
-                      strokeDashoffset={strokeDashoffset}
-                      strokeLinecap="round"
-                    />
-                  )}
-                </svg>
-                <div className="absolute flex flex-col items-center justify-center">
-                  <span className="text-3xl font-black text-white tracking-tight">
-                    {aiScore !== null ? `${aiScore}%` : '--'}
-                  </span>
-                  {aiScore !== null && (
-                    <span className={`text-[8px] font-extrabold uppercase px-2 py-0.5 rounded-full mt-1.5 tracking-wider ${
-                      aiScore >= 80 
-                        ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' 
-                        : aiScore >= 50 
-                          ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' 
-                          : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
-                    }`}>
-                      {aiScore >= 80 ? 'MP Ready' : aiScore >= 50 ? 'Improving' : 'Needs Info'}
+                  {/* Shimmer sweep effect */}
+                  <div className="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+                  
+                  {isSubmitting ? (
+                    <span className="flex items-center gap-2.5 animate-pulse relative z-10">
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      <span>Registering proposal & running AI verification...</span>
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-2.5 relative z-10">
+                      <Send className="w-5 h-5" />
+                      <span>Register Development Suggestion</span>
+                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </span>
                   )}
-                </div>
+                </button>
               </div>
-              <div className="space-y-1">
-                <span className="block text-xs font-bold uppercase tracking-wider text-slate-400">Completeness Index</span>
-                <p className="text-[11px] text-slate-500 px-4 leading-relaxed">Aim for &gt;80% completeness to trigger instant priority sorting for the MP.</p>
+            </form>
+          </div>
+        </div>
+
+        {/* ═══════════ RIGHT: AI SIDEBAR (4 cols) ═══════════ */}
+        <div className="xl:col-span-4 space-y-6">
+
+          {/* ── AI ANALYSIS SCORE CARD ── */}
+          <div className="sticky top-6 space-y-6">
+            <div className="relative rounded-[24px] border border-slate-800/60 overflow-hidden" style={{ background: `radial-gradient(circle at 50% 0%, ${scoreGlowColor}, transparent 70%), linear-gradient(180deg, rgba(15,23,42,0.9) 0%, rgba(15,23,42,0.95) 100%)` }}>
+              <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-indigo-500/30 to-transparent" />
+              
+              <div className="p-6 space-y-5">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                    <BarChart3 className="w-5 h-5 text-indigo-400" />
+                    <span>AI Analysis</span>
+                  </h3>
+                  <span className="text-[9px] font-bold text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1">
+                    <Sparkles className="w-2.5 h-2.5" /> Live
+                  </span>
+                </div>
+
+                {/* Circular gauge */}
+                <div className="flex flex-col items-center justify-center py-4 text-center space-y-4">
+                  <div className="relative w-36 h-36 flex items-center justify-center">
+                    {/* Outer glow ring */}
+                    {aiScore !== null && (
+                      <div className="absolute inset-0 rounded-full" style={{ boxShadow: `0 0 40px ${scoreGlowColor}, 0 0 80px ${scoreGlowColor}` }} />
+                    )}
+                    <svg className="w-full h-full transform -rotate-90" viewBox="0 0 128 128">
+                      <circle cx="64" cy="64" r={radius} className="stroke-slate-800/60" strokeWidth="6" fill="transparent" />
+                      {aiScore !== null && (
+                        <circle
+                          cx="64" cy="64" r={radius}
+                          className={`${scoreStrokeColor} transition-all duration-1000 ease-out`}
+                          strokeWidth="6"
+                          fill="transparent"
+                          strokeDasharray={circumference}
+                          strokeDashoffset={strokeDashoffset}
+                          strokeLinecap="round"
+                        />
+                      )}
+                    </svg>
+                    <div className="absolute flex flex-col items-center justify-center">
+                      <span className="text-4xl font-black text-white tracking-tight">
+                        {aiScore !== null ? `${aiScore}%` : '--'}
+                      </span>
+                      {aiScore !== null && (
+                        <span className={`text-[8px] font-extrabold uppercase px-2.5 py-0.5 rounded-full mt-2 tracking-wider ${
+                          aiScore >= 80 ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' 
+                          : aiScore >= 50 ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' 
+                          : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+                        }`}>
+                          {aiScore >= 80 ? '✓ MP Ready' : aiScore >= 50 ? '↗ Improving' : '! Needs Info'}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <span className="block text-xs font-bold uppercase tracking-wider text-slate-400">Completeness Index</span>
+                    <p className="text-[11px] text-slate-500 px-4 leading-relaxed">Aim for &gt;80% to trigger instant priority sorting for the MP.</p>
+                  </div>
+
+                  {/* Progress breakdown pills */}
+                  {aiScore !== null && (
+                    <div className="flex flex-wrap justify-center gap-1.5 pt-1">
+                      {[
+                        { label: 'Title', done: !!title },
+                        { label: 'Description', done: description.length > 20 },
+                        { label: 'Beneficiaries', done: !!beneficiaries },
+                        { label: 'Location', done: !!state && !!district },
+                        { label: 'Evidence', done: attachments.length > 0 },
+                      ].map(({ label, done }) => (
+                        <span key={label} className={`text-[9px] font-bold px-2 py-0.5 rounded-full border ${done ? 'bg-emerald-500/8 text-emerald-400 border-emerald-500/20' : 'bg-slate-900 text-slate-500 border-slate-800'}`}>
+                          {done ? '✓' : '○'} {label}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* AI Helper Clarifying Dialog */}
-          <div className="bg-slate-900/60 backdrop-blur-md border border-slate-800/80 rounded-3xl p-6 space-y-4 shadow-xl">
-            <h3 className="text-sm font-bold text-white flex items-center space-x-2">
-              <Sparkles className="w-5 h-5 text-indigo-400" />
-              <span>AI Clarifying Questions</span>
-            </h3>
-
-            {aiQuestions.length === 0 ? (
-              <div className="p-5 bg-slate-950/60 rounded-2xl border border-slate-800 text-slate-400 text-xs flex flex-col items-center text-center space-y-3">
-                <div className="w-10 h-10 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-500 shadow-inner">
-                  <Sparkles className="w-5 h-5 text-indigo-400" />
-                </div>
-                <p className="leading-relaxed">
-                  Provide a description and click the <strong className="text-indigo-400">Sparkles AI button</strong> in the editor to unlock custom clarifying questions.
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-3">
-                <p className="text-[10px] uppercase tracking-wider text-slate-500 font-bold">Answer these to boost score:</p>
-                {aiQuestions.map((q, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    onClick={() => {
-                      setActiveQuestionIndex(idx);
-                      setQuestionAnswer('');
-                    }}
-                    className={`w-full text-left p-3.5 bg-slate-950/50 border text-xs text-slate-300 rounded-xl transition-all duration-300 ${
-                      activeQuestionIndex === idx 
-                        ? 'border-indigo-500 bg-indigo-950/30 text-white font-semibold shadow-[0_0_15px_rgba(99,102,241,0.1)]' 
-                        : 'border-slate-800 hover:border-slate-750 hover:bg-slate-900/50 hover:text-white'
-                    }`}
-                  >
-                    <div className="flex items-start space-x-2.5">
-                      <span className="flex items-center justify-center w-5 h-5 rounded-full bg-slate-900 border border-slate-800 text-[10px] text-indigo-400 shrink-0 font-bold">
-                        {idx + 1}
-                      </span>
-                      <span className="flex-1 leading-relaxed">{q}</span>
-                    </div>
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {/* Clarification input */}
-            {activeQuestionIndex !== null && (
-              <div className="bg-slate-950/80 border border-indigo-500/30 p-4 rounded-2xl space-y-3 shadow-lg shadow-indigo-950/30 animate-fadeIn">
+            {/* ── AI CLARIFYING QUESTIONS ── */}
+            <div className="relative rounded-[24px] border border-slate-800/60 overflow-hidden bg-slate-900/40">
+              <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-violet-500/20 to-transparent" />
+              
+              <div className="p-6 space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="block text-[10px] font-bold uppercase tracking-wider text-indigo-400">AI Response Assistant</span>
-                  <span className="text-[10px] text-slate-500">Question {activeQuestionIndex + 1}</span>
+                  <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                    <Lightbulb className="w-5 h-5 text-amber-400" />
+                    <span>AI Clarifying Questions</span>
+                  </h3>
+                  {aiQuestions.length > 0 && (
+                    <span className="text-[9px] font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full">{aiQuestions.length} pending</span>
+                  )}
                 </div>
-                <p className="text-xs text-slate-300 italic bg-slate-900/50 p-2.5 rounded-lg border border-slate-900 leading-relaxed">
-                  &ldquo;{aiQuestions[activeQuestionIndex]}&rdquo;
-                </p>
-                <input
-                  type="text"
-                  value={questionAnswer}
-                  onChange={(e) => setQuestionAnswer(e.target.value)}
-                  placeholder="Provide details to append to description..."
-                  className="w-full bg-slate-900 border border-slate-800 rounded-xl py-3 px-4 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all duration-300"
-                />
-                <div className="flex items-center space-x-2 justify-end pt-1">
-                  <button
-                    type="button"
-                    onClick={() => setActiveQuestionIndex(null)}
-                    className="text-xs font-semibold text-slate-400 hover:text-white px-3 py-1.5 transition-colors cursor-pointer"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    onClick={handleAnswerQuestion}
-                    className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs px-4 py-2 rounded-xl font-bold transition-all shadow-sm shadow-indigo-600/10 cursor-pointer"
-                  >
-                    Apply & Improve
-                  </button>
-                </div>
+
+                {aiQuestions.length === 0 ? (
+                  <div className="p-5 bg-slate-950/60 rounded-2xl border border-slate-800/60 text-slate-400 text-xs flex flex-col items-center text-center space-y-3">
+                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-600/10 to-violet-600/10 border border-indigo-500/15 flex items-center justify-center text-indigo-400 shadow-inner">
+                      <Wand2 className="w-5 h-5" />
+                    </div>
+                    <p className="leading-relaxed text-slate-500">
+                      Write a description and click <strong className="text-indigo-400">AI Writing Assistant</strong> to unlock tailored questions that boost your score.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-2.5">
+                    <p className="text-[10px] uppercase tracking-wider text-slate-500 font-bold flex items-center gap-1.5">
+                      <Target className="w-3 h-3 text-indigo-400" />
+                      Answer to boost your score:
+                    </p>
+                    {aiQuestions.map((q, idx) => (
+                      <button
+                        key={idx}
+                        type="button"
+                        onClick={() => {
+                          setActiveQuestionIndex(idx);
+                          setQuestionAnswer('');
+                        }}
+                        className={`w-full text-left p-3.5 border text-xs rounded-xl transition-all duration-300 ${
+                          activeQuestionIndex === idx 
+                            ? 'border-indigo-500/50 bg-indigo-950/30 text-white font-semibold shadow-[0_0_20px_rgba(99,102,241,0.08)]' 
+                            : 'border-slate-800/60 bg-slate-950/40 text-slate-400 hover:border-slate-700 hover:bg-slate-900/50 hover:text-slate-300'
+                        }`}
+                      >
+                        <div className="flex items-start gap-2.5">
+                          <span className={`flex items-center justify-center w-5 h-5 rounded-lg text-[10px] font-bold shrink-0 transition-colors ${
+                            activeQuestionIndex === idx ? 'bg-indigo-600 text-white' : 'bg-slate-900 border border-slate-800 text-slate-500'
+                          }`}>
+                            {idx + 1}
+                          </span>
+                          <span className="flex-1 leading-relaxed">{q}</span>
+                        </div>
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {/* Clarification answer input */}
+                {activeQuestionIndex !== null && (
+                  <div className="bg-slate-950/80 border border-indigo-500/25 p-4 rounded-2xl space-y-3 shadow-lg shadow-indigo-950/20 animate-fadeIn">
+                    <div className="flex items-center justify-between">
+                      <span className="block text-[10px] font-bold uppercase tracking-wider text-indigo-400 flex items-center gap-1.5">
+                        <MessageSquare className="w-3 h-3" /> Your Answer
+                      </span>
+                      <span className="text-[10px] text-slate-500">Q{activeQuestionIndex + 1}</span>
+                    </div>
+                    <p className="text-xs text-slate-400 italic bg-slate-900/50 p-3 rounded-xl border border-slate-900 leading-relaxed">
+                      &ldquo;{aiQuestions[activeQuestionIndex]}&rdquo;
+                    </p>
+                    <input
+                      type="text"
+                      value={questionAnswer}
+                      onChange={(e) => setQuestionAnswer(e.target.value)}
+                      placeholder="Type your answer here..."
+                      className="w-full bg-slate-900 border border-slate-800/80 rounded-xl py-3 px-4 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-500/10 transition-all duration-300"
+                    />
+                    <div className="flex items-center gap-2 justify-end pt-1">
+                      <button
+                        type="button"
+                        onClick={() => setActiveQuestionIndex(null)}
+                        className="text-xs font-semibold text-slate-400 hover:text-white px-3 py-1.5 transition-colors cursor-pointer"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleAnswerQuestion}
+                        className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-xs px-4 py-2.5 rounded-xl font-bold transition-all shadow-md shadow-indigo-600/15 cursor-pointer flex items-center gap-1.5"
+                      >
+                        <Zap className="w-3 h-3" />
+                        Apply & Improve
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
-            )}
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Success Modal */}
+      {/* ═══════════ SUCCESS MODAL ═══════════ */}
       {submitResult && (
-        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-fadeIn">
-          <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-md w-full p-8 text-center space-y-6 shadow-2xl relative overflow-hidden">
-            <div className="absolute top-0 inset-x-0 h-1 bg-linear-to-r from-emerald-500 to-indigo-500 pointer-events-none" />
+        <div className="fixed inset-0 bg-slate-950/85 backdrop-blur-xl flex items-center justify-center p-4 z-50 animate-fadeIn">
+          <div className="bg-slate-900/95 backdrop-blur-md border border-slate-800/80 rounded-[28px] max-w-md w-full p-8 text-center space-y-6 shadow-2xl relative overflow-hidden">
+            <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-emerald-500 via-indigo-500 to-violet-500 pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-b from-emerald-500/3 to-transparent pointer-events-none" />
+            
             {submitResult.success ? (
               <>
-                <div className="w-16 h-16 rounded-full bg-emerald-500/10 flex items-center justify-center mx-auto text-emerald-400 border border-emerald-500/20">
-                  <CheckCircle className="w-10 h-10 animate-bounce" />
+                <div className="relative w-20 h-20 rounded-full bg-emerald-500/10 flex items-center justify-center mx-auto text-emerald-400 border border-emerald-500/20">
+                  <CheckCircle className="w-12 h-12" />
+                  <div className="absolute inset-0 rounded-full animate-ping bg-emerald-500/10" />
                 </div>
-                <div className="space-y-2">
-                  <h3 className="text-xl font-bold text-white animate-pulse">Proposal Registered!</h3>
+                <div className="space-y-2 relative z-10">
+                  <h3 className="text-xl font-black text-white">Proposal Registered! 🎉</h3>
                   <p className="text-xs text-slate-400 leading-relaxed">
                     Your suggestion has been logged on the constituency map. AI verification completed.
                   </p>
                 </div>
 
-                <div className="bg-slate-950/80 p-4 rounded-2xl border border-slate-800 space-y-2 shadow-inner">
+                <div className="bg-slate-950/80 p-4 rounded-2xl border border-slate-800/80 space-y-2.5 shadow-inner relative z-10">
                   <div className="flex justify-between text-xs items-center">
                     <span className="text-slate-500 font-semibold">Contribution Points:</span>
-                    <span className="font-bold text-orange-500 bg-orange-500/10 border border-orange-500/20 px-2 py-0.5 rounded-full">+{submitResult.pointsAwarded} XP Earned</span>
+                    <span className="font-bold text-orange-400 bg-orange-500/10 border border-orange-500/20 px-2.5 py-0.5 rounded-full flex items-center gap-1">
+                      <Zap className="w-3 h-3" /> +{submitResult.pointsAwarded} XP
+                    </span>
                   </div>
                   {submitResult.isDuplicate && (
-                    <div className="border-t border-slate-850 pt-2 flex flex-col space-y-1.5 text-left text-xs bg-indigo-950/20 p-2.5 rounded-lg border border-indigo-900/30">
-                      <span className="font-bold text-indigo-400 flex items-center space-x-1">
+                    <div className="border-t border-slate-800 pt-2.5 flex flex-col space-y-1.5 text-left text-xs bg-indigo-950/20 p-3 rounded-xl border border-indigo-900/30">
+                      <span className="font-bold text-indigo-400 flex items-center gap-1.5">
                         <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0" />
                         <span>Duplicate Match Detected!</span>
                       </span>
@@ -861,7 +1272,7 @@ export default function SubmitSuggestion() {
 
                 <button
                   onClick={() => router.push(`/dashboard/suggestions/${submitResult.suggestionId}`)}
-                  className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3.5 rounded-xl text-xs transition-colors flex items-center justify-center space-x-2 cursor-pointer shadow-md shadow-indigo-600/20"
+                  className="relative z-10 w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold py-4 rounded-2xl text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-indigo-600/20"
                 >
                   <span>Track Suggestion Timeline</span>
                   <ArrowRight className="w-4 h-4" />
@@ -869,18 +1280,16 @@ export default function SubmitSuggestion() {
               </>
             ) : (
               <>
-                <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mx-auto text-red-400 border border-red-500/20">
-                  <XCircle className="w-10 h-10" />
+                <div className="w-20 h-20 rounded-full bg-red-500/10 flex items-center justify-center mx-auto text-red-400 border border-red-500/20">
+                  <XCircle className="w-12 h-12" />
                 </div>
                 <div className="space-y-2">
-                  <h3 className="text-xl font-bold text-white">Submission Failed</h3>
-                  <p className="text-xs text-slate-400 leading-relaxed">
-                    {submitResult.message}
-                  </p>
+                  <h3 className="text-xl font-black text-white">Submission Failed</h3>
+                  <p className="text-xs text-slate-400 leading-relaxed">{submitResult.message}</p>
                 </div>
                 <button
                   onClick={() => setSubmitResult(null)}
-                  className="w-full bg-slate-950 hover:bg-slate-850 border border-slate-850 text-white font-bold py-3.5 rounded-xl text-xs cursor-pointer"
+                  className="w-full bg-slate-950 hover:bg-slate-900 border border-slate-800 text-white font-bold py-4 rounded-2xl text-xs cursor-pointer transition-colors"
                 >
                   Try Again
                 </button>
@@ -889,6 +1298,26 @@ export default function SubmitSuggestion() {
           </div>
         </div>
       )}
+
+      {/* ═══════════ MAP MODAL ═══════════ */}
+      {showMapModal && (
+        <div className="fixed inset-0 bg-slate-950/85 backdrop-blur-xl flex items-center justify-center p-4 z-50 animate-fadeIn">
+          <div className="bg-slate-900/95 border border-slate-800/80 rounded-[28px] max-w-3xl w-full p-6 space-y-4 shadow-2xl relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-emerald-500/30 to-transparent" />
+            <div className="flex justify-between items-center mb-2">
+              <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                <MapIcon className="w-5 h-5 text-emerald-400" />
+                <span>Select Location on Map</span>
+              </h3>
+              <button type="button" onClick={() => setShowMapModal(false)} className="text-slate-400 hover:text-white transition-colors cursor-pointer p-1.5 hover:bg-slate-800 rounded-lg">
+                <XCircle className="w-6 h-6" />
+              </button>
+            </div>
+            <MapPicker initialLat={lat || 25.3176} initialLng={lng || 82.9739} onLocationSelect={handleManualLocationSelect} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+          

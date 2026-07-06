@@ -154,3 +154,34 @@ export const broadcastNotification = async (req: Request, res: Response) => {
     return res.status(500).json({ error: 'Broadcast failed' });
   }
 };
+
+/**
+ * GET /api/admin/citizens
+ */
+export const getCitizens = async (_req: Request, res: Response) => {
+  try {
+    const citizens = await mockDb.getCitizens();
+    return res.json(citizens);
+  } catch (error) {
+    return res.status(500).json({ error: 'Failed to fetch citizen accounts' });
+  }
+};
+
+/**
+ * POST /api/admin/citizens/verify
+ */
+export const verifyCitizen = async (req: Request, res: Response) => {
+  const { id, status } = req.body;
+  if (!id || !status) return res.status(400).json({ error: 'ID and Status are required' });
+
+  try {
+    const citizen = await mockDb.updateVerificationStatus(id, status);
+    if (!citizen) return res.status(404).json({ error: 'Citizen profile not found' });
+    
+    await mockDb.addAuditLog('System', `Admin verified citizen ${citizen.full_name} status to ${status}`);
+    
+    return res.json({ message: `Citizen account status changed to ${status}`, citizen });
+  } catch (error) {
+    return res.status(500).json({ error: 'Failed to update citizen status' });
+  }
+};

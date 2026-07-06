@@ -20,7 +20,7 @@ const upload = multer({
 });
 
 // Suggestions Routing
-router.post('/suggestions', upload.single('image'), asyncHandler(createSuggestion));
+router.post('/suggestions', upload.any(), asyncHandler(createSuggestion));
 router.get('/suggestions', asyncHandler(getSuggestions));
 router.get('/suggestions/:id', asyncHandler(getSuggestionDetails));
 router.post('/suggestions/:id/timeline', asyncHandler(addTimelineStatus));

@@ -25,11 +25,13 @@ interface SuggestionItem {
   estimatedCostLakhs: number;
   aiCompleteness: number;
   aiConfidence: number;
+  isVerifiedCitizen?: boolean;
 }
 
 const statusConfig: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
   submitted: { label: 'Submitted', color: 'text-blue-400 bg-blue-500/10', icon: <Clock className="w-3 h-3" /> },
   under_review: { label: 'Under Review', color: 'text-amber-400 bg-amber-500/10', icon: <AlertTriangle className="w-3 h-3" /> },
+  accepted: { label: 'Accepted', color: 'text-green-400 bg-green-500/10', icon: <CheckCircle2 className="w-3 h-3" /> },
   planned: { label: 'Planned', color: 'text-violet-400 bg-violet-500/10', icon: <CheckCircle2 className="w-3 h-3" /> },
   completed: { label: 'Completed', color: 'text-emerald-400 bg-emerald-500/10', icon: <CheckCircle2 className="w-3 h-3" /> },
   rejected: { label: 'Rejected', color: 'text-red-400 bg-red-500/10', icon: <XCircle className="w-3 h-3" /> },
@@ -191,6 +193,14 @@ export default function MpSuggestionsPage() {
                     </span>
                     <span className="text-[10px] text-slate-600">•</span>
                     <span className="text-[10px] text-slate-500">₹{s.estimatedCostLakhs}L</span>
+                    {s.isVerifiedCitizen && (
+                      <>
+                        <span className="text-[10px] text-slate-600">•</span>
+                        <span className="inline-flex items-center space-x-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 px-2 py-0.5 rounded-md text-[9px] font-bold">
+                          ✓ Verified Citizen
+                        </span>
+                      </>
+                    )}
                   </div>
                 </div>
 

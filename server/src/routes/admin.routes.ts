@@ -8,7 +8,9 @@ import {
   getAuditLogs,
   getMps,
   updateMpStatus,
-  broadcastNotification
+  broadcastNotification,
+  getCitizens,
+  verifyCitizen
 } from '../controllers/admin.controller';
 import { asyncHandler } from '../middlewares/asyncHandler';
 
@@ -23,5 +25,7 @@ router.get('/audit-logs', asyncHandler(getAuditLogs));
 router.get('/mps', asyncHandler(getMps));
 router.post('/mps/status', asyncHandler(updateMpStatus));
 router.post('/notifications/broadcast', asyncHandler(broadcastNotification));
+router.get('/citizens', asyncHandler(getCitizens));
+router.post('/citizens/verify', asyncHandler(verifyCitizen));
 
 export default router;

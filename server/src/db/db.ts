@@ -7,7 +7,16 @@ dotenv.config();
 const supabaseUrl = process.env.SUPABASE_URL || '';
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || '';
 
-export const isSupabaseConfigured = !!(supabaseUrl && supabaseKey);
+let isServiceRole = false;
+try {
+  const payload = JSON.parse(Buffer.from(supabaseKey.split('.')[1], 'base64').toString());
+  isServiceRole = payload.role === 'service_role';
+} catch (e) {
+  // Ignore
+}
+
+// We require a true service role key for the backend to bypass RLS.
+export const isSupabaseConfigured = !!(supabaseUrl && supabaseKey && isServiceRole);
 
 export const supabase = isSupabaseConfigured
   ? createClient(supabaseUrl, supabaseKey, {
@@ -243,5 +252,37 @@ export const db = {
       return 0;
     }
     return mockDb.incrementScore(userId, points);
+  },
+
+  getCitizens: async () => {
+    if (supabase) {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('role', 'citizen');
+      if (error) {
+        console.error('Supabase citizens fetch error, using mockDb fallback:', error.message);
+        return mockDb.getCitizens();
+      }
+      return data;
+    }
+    return mockDb.getCitizens();
+  },
+
+  updateVerificationStatus: async (userId: string, status: 'incomplete' | 'pending' | 'verified' | 'rejected') => {
+    if (supabase) {
+      const { data, error } = await supabase
+        .from('profiles')
+        .update({ verification_status: status, updated_at: new Date().toISOString() })
+        .eq('id', userId)
+        .select()
+        .single();
+      if (error) {
+        console.error('Supabase verification status update error, using mockDb fallback:', error.message);
+        return mockDb.updateVerificationStatus(userId, status);
+      }
+      return data;
+    }
+    return mockDb.updateVerificationStatus(userId, status);
   }
 };

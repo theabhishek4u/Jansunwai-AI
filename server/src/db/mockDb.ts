@@ -16,6 +16,8 @@ export interface Profile {
   role: 'citizen' | 'mp';
   created_at: string;
   updated_at: string;
+  aadhaar_number?: string;
+  verification_status?: 'incomplete' | 'pending' | 'verified' | 'rejected';
 }
 
 export interface Suggestion {
@@ -101,7 +103,8 @@ let profiles: Profile[] = [
     avatar_url: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=200&auto=format&fit=crop',
     role: 'citizen',
     created_at: daysAgo(30),
-    updated_at: daysAgo(30)
+    updated_at: daysAgo(30),
+    verification_status: 'verified'
   },
   {
     id: 'citizen-201',
@@ -165,7 +168,8 @@ let profiles: Profile[] = [
     contribution_score: 95,
     role: 'citizen',
     created_at: daysAgo(18),
-    updated_at: daysAgo(18)
+    updated_at: daysAgo(18),
+    verification_status: 'verified'
   },
   {
     id: 'citizen-605',
@@ -475,17 +479,21 @@ export const mockDb = {
         village_ward: profile.village_ward, pincode: profile.pincode || '',
         language_preference: profile.language_preference || 'en',
         contribution_score: profile.contribution_score || 0, avatar_url: profile.avatar_url,
-        role: profile.role || 'citizen', created_at: now, updated_at: now
+        role: profile.role || 'citizen', created_at: now, updated_at: now,
+        aadhaar_number: profile.aadhaar_number,
+        verification_status: profile.verification_status || 'incomplete'
       };
       profiles.push(newProfile);
       return newProfile;
     }
   },
   getSuggestions: async (filters?: { citizen_id?: string; category?: string; district?: string }) => {
+    console.log("mockDb getSuggestions filters:", filters);
     let list = [...suggestions];
     if (filters?.citizen_id) list = list.filter(s => s.citizen_id === filters.citizen_id);
-    if (filters?.category) list = list.filter(s => s.category === filters.category);
-    if (filters?.district) list = list.filter(s => s.district.toLowerCase() === filters.district?.toLowerCase());
+    if (filters?.category && filters.category !== "undefined") list = list.filter(s => s.category === filters.category);
+    if (filters?.district && filters.district !== "undefined") list = list.filter(s => s.district.toLowerCase() === filters.district?.toLowerCase());
+    console.log(`mockDb returning ${list.length} suggestions`);
     return list.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
   },
   getAllSuggestions: async () => {
@@ -612,6 +620,30 @@ export const mockDb = {
       // simulate suspension state by updating in profiles or logs
       await mockDb.addAuditLog('System', `Admin updated status for MP ${mp.full_name} to ${status}`);
       return mp;
+    }
+    return null;
+  },
+  getCitizens: async () => {
+    return profiles.filter(p => p.role === 'citizen');
+  },
+  updateVerificationStatus: async (userId: string, status: 'incomplete' | 'pending' | 'verified' | 'rejected') => {
+    const profile = profiles.find(p => p.id === userId);
+    if (profile) {
+      profile.verification_status = status;
+      profile.updated_at = new Date().toISOString();
+      if (status === 'verified') {
+        const existingBadge = userBadges.find(b => b.user_id === userId && b.badge_type === 'verified_citizen');
+        if (!existingBadge) {
+          userBadges.push({
+            id: `badge-${uuidv4()}`,
+            user_id: userId,
+            badge_type: 'verified_citizen',
+            earned_at: new Date().toISOString()
+          });
+          profile.contribution_score += 50;
+        }
+      }
+      return profile;
     }
     return null;
   }

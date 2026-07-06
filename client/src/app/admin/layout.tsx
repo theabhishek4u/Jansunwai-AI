@@ -59,6 +59,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const sidebarLinks = [
     { href: '/admin', label: 'Command Center', icon: <LayoutDashboard className="w-5 h-5" />, exact: true },
     { href: '/admin/mps', label: 'MP Management', icon: <Users className="w-5 h-5" /> },
+    { href: '/admin/citizens', label: 'Citizen Verification', icon: <Users className="w-5 h-5" />, badge: 'VERIFY' },
     { href: '/admin/datasets', label: 'Public Datasets', icon: <Database className="w-5 h-5" /> },
     { href: '/admin/ai-config', label: 'AI Configuration', icon: <Bot className="w-5 h-5" />, badge: 'CONFIG' },
     { href: '/admin/categories', label: 'Categories', icon: <Grid className="w-5 h-5" /> },
