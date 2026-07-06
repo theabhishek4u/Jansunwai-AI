@@ -81,8 +81,8 @@ export const getWritingAssist = async (req: Request, res: Response) => {
 
       Tasks:
       1. Analyze the user's input. Identify missing critical details for development planning (e.g. population size, nearest alternative, land availability, impact).
-      2. Formulate exactly 2 to 3 clarifying questions in the user's selected language to help them improve their proposal.
-      3. Rewrite the user's suggestion to be highly professional, structured, and formal (maintaining the original language or translating to English if they request, but keep it in user's language by default).
+      2. Formulate exactly 2 to 3 clarifying questions STRICTLY in ${language || 'English'} to help them improve their proposal.
+      3. Rewrite the user's suggestion to be highly professional, structured, and formal. You MUST write this improved text STRICTLY in ${language || 'English'}, regardless of the language they originally typed in.
       4. Assign a completeness score from 0 to 100 based on the depth of information provided.
 
       Return ONLY a JSON object with this schema:
@@ -139,17 +139,20 @@ export const processVoiceSuggestion = async (req: Request, res: Response) => {
     const base64Audio = audioBuffer.toString('base64');
     const mimeType = req.file.mimetype || 'audio/webm';
 
+    const language = req.body.language || 'English';
+
     const prompt = `
       You are an AI Speech-to-Text and structuring system for "Jansunwai AI".
-      Below is an audio recording of a citizen explaining a development suggestion in Hindi, English, Bhojpuri, Urdu, or Hinglish.
+      Below is an audio recording of a citizen explaining a development suggestion.
+      The user explicitly selected their preferred language as: "${language}".
       
       Task:
-      1. Transcribe the audio verbatim.
+      1. Transcribe the audio verbatim in the language they spoke.
       2. Translate/summarize the request into a structured JSON proposal.
       3. Identify:
-         - A formal 'title' (in English)
+         - A formal 'title' (in English for standardized MP tracking)
          - An appropriate 'category' from this list: Road, Bridge, School, College, Hospital, PHC, Water Supply, Drainage, Street Lights, Electricity, Library, Park, Sports Ground, Skill Center, Women's Safety, Public Transport, Internet, Waste Management, Environment, Agriculture, Others.
-         - A detailed 'description' (in English or Hindi, depending on which fits best, but write a complete proposal).
+         - A detailed 'description'. Since the citizen selected ${language}, you MUST write this description strictly in ${language}. Ensure it sounds highly professional and structured.
          - Estimated 'urgency': 'low', 'medium', 'high', or 'critical'.
 
       Return ONLY a JSON object with this schema:

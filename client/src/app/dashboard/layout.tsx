@@ -8,14 +8,12 @@ import {
   Vote, 
   LayoutDashboard, 
   PlusCircle, 
-  ListTodo, 
   UserCircle, 
   LogOut, 
   Bell, 
   Menu, 
   X, 
-  Sparkles,
-  Trophy
+  Sparkles
 } from 'lucide-react';
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -64,7 +62,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const sidebarLinks = [
     { href: '/dashboard', label: 'Overview', icon: <LayoutDashboard className="w-5 h-5" /> },
     { href: '/dashboard/submit', label: 'Submit Suggestion', icon: <PlusCircle className="w-5 h-5" /> },
-    { href: '/dashboard/suggestions', label: 'Track Suggestions', icon: <ListTodo className="w-5 h-5" /> },
     { href: '/dashboard/profile', label: 'My Profile', icon: <UserCircle className="w-5 h-5" /> }
   ];
 
@@ -83,19 +80,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           </div>
         </div>
 
-        {/* User Card */}
-        <div className="bg-slate-950/50 border border-slate-950 p-4 rounded-2xl mb-8 flex items-center space-x-3">
-          <div className="w-10 h-10 rounded-full bg-indigo-600 flex items-center justify-center font-bold text-white uppercase text-sm shrink-0 border border-indigo-400">
-            {user.full_name[0]}
-          </div>
-          <div className="min-w-0">
-            <p className="text-sm font-bold text-white truncate">{user.full_name}</p>
-            <div className="flex items-center space-x-1.5 mt-0.5">
-              <Trophy className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-              <span className="text-[11px] text-slate-400 font-semibold">{user.contribution_score} Points</span>
-            </div>
-          </div>
-        </div>
 
         {/* Links */}
         <nav className="space-y-1.5 flex-1">
@@ -147,7 +131,6 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
           {/* Right items */}
           <div className="flex items-center space-x-4 ml-auto">
-
 
             {/* Notification Bell */}
             <div className="relative">

@@ -229,6 +229,8 @@ export const createSuggestion = async (req: Request, res: Response) => {
  */
 export const getSuggestions = async (req: Request, res: Response) => {
   const { citizen_id, category, district } = req.query;
+  console.log("=== GET /api/suggestions ===");
+  console.log("Query:", req.query);
 
   try {
     const list = await db.getSuggestions({

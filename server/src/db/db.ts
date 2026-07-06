@@ -7,7 +7,16 @@ dotenv.config();
 const supabaseUrl = process.env.SUPABASE_URL || '';
 const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY || '';
 
-export const isSupabaseConfigured = !!(supabaseUrl && supabaseKey);
+let isServiceRole = false;
+try {
+  const payload = JSON.parse(Buffer.from(supabaseKey.split('.')[1], 'base64').toString());
+  isServiceRole = payload.role === 'service_role';
+} catch (e) {
+  // Ignore
+}
+
+// We require a true service role key for the backend to bypass RLS.
+export const isSupabaseConfigured = !!(supabaseUrl && supabaseKey && isServiceRole);
 
 export const supabase = isSupabaseConfigured
   ? createClient(supabaseUrl, supabaseKey, {

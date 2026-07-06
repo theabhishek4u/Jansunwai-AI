@@ -101,8 +101,8 @@ export default function SuggestionDetails() {
     return (
       <div className="text-center py-20 space-y-4">
         <p className="text-slate-400 text-sm font-bold">Suggestion not found.</p>
-        <button onClick={() => router.push('/dashboard/suggestions')} className="text-indigo-400 text-xs font-bold hover:underline">
-          Go back to tracking list
+        <button onClick={() => router.push('/dashboard')} className="text-indigo-400 text-xs font-bold hover:underline">
+          Go back to Overview
         </button>
       </div>
     );
@@ -118,11 +118,11 @@ export default function SuggestionDetails() {
       {/* Back Header */}
       <div className="flex items-center justify-between">
         <button
-          onClick={() => router.push('/dashboard/suggestions')}
+          onClick={() => router.push('/dashboard')}
           className="inline-flex items-center text-xs font-semibold text-slate-400 hover:text-white transition-colors space-x-1"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>Back to Suggestions</span>
+          <span>Back to Overview</span>
         </button>
       </div>
 

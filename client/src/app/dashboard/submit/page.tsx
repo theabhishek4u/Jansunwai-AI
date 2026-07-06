@@ -61,6 +61,7 @@ export default function SubmitSuggestion() {
   const [lng, setLng] = useState<number | null>(null);
   const [pincode, setPincode] = useState('');
   const [showMapModal, setShowMapModal] = useState(false);
+  const [language, setLanguage] = useState(user?.language_preference || 'Hindi');
 
   // Reverse geocoding states
   const [geoLoading, setGeoLoading] = useState(false);
@@ -79,10 +80,8 @@ export default function SubmitSuggestion() {
   // Audio Recorder States
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
-  const [audioUrl, setAudioUrl] = useState<string | null>(null);
-  const [isTranscribing, setIsTranscribing] = useState(false);
-  const mediaRecorderRef = useRef<MediaRecorder | null>(null);
-  const audioChunksRef = useRef<Blob[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const speechRecognitionRef = useRef<any>(null);
   const recordingTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // AI Assistant States
@@ -292,76 +291,90 @@ export default function SubmitSuggestion() {
   // Image Selection Handler (removed in favor of multi-media handleFileChange)
 
   // Audio Recording Handlers
-  const startRecording = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      mediaRecorderRef.current = new MediaRecorder(stream);
-      audioChunksRef.current = [];
-      mediaRecorderRef.current.ondataavailable = (event) => {
-        audioChunksRef.current.push(event.data);
-      };
+  const startRecording = () => {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      alert("Speech recognition is not supported in this browser. Please use Chrome or Edge.");
+      return;
+    }
 
-      mediaRecorderRef.current.onstop = async () => {
-        const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
-        const url = URL.createObjectURL(audioBlob);
-        setAudioUrl(url);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    
+    // Map our language names to BCP-47 tags
+    const langMap: Record<string, string> = {
+      'English': 'en-IN',
+      'Hindi': 'hi-IN',
+      'Bengali': 'bn-IN',
+      'Marathi': 'mr-IN',
+      'Telugu': 'te-IN',
+      'Tamil': 'ta-IN',
+      'Gujarati': 'gu-IN',
+      'Urdu': 'ur-IN',
+      'Odia': 'or-IN',
+      'Punjabi': 'pa-IN'
+    };
 
-        // Upload to voice transcription API
-        await transcribeAudio(audioBlob);
-      };
+    recognition.lang = langMap[language] || 'hi-IN';
+    recognition.continuous = true;
+    recognition.interimResults = true;
 
-      mediaRecorderRef.current.start();
+    let currentTranscript = description;
+
+    recognition.onstart = () => {
       setIsRecording(true);
       setRecordingTime(0);
+      if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
       recordingTimerRef.current = setInterval(() => {
         setRecordingTime(prev => prev + 1);
       }, 1000);
-    } catch (err) {
-      alert("Microphone permission denied or not supported on this device. Simulating voice transcription...");
-      // Simulate Voice Transcription fallback
-      setIsTranscribing(true);
-      setTimeout(() => {
-        setTitle("Repair of local village water well");
-        setDescription("Our village well has collapsed water filtration walls. Clean water is highly contaminated.");
-        setUrgency("high");
-        setIsTranscribing(false);
-      }, 2000);
-    }
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    recognition.onresult = (event: any) => {
+      let finalTranscript = '';
+      for (let i = event.resultIndex; i < event.results.length; ++i) {
+        if (event.results[i].isFinal) {
+          finalTranscript += event.results[i][0].transcript;
+        }
+      }
+      
+      // We only append final transcript to avoid text jumping wildly
+      if (finalTranscript) {
+        const newText = currentTranscript ? currentTranscript + ' ' + finalTranscript : finalTranscript;
+        currentTranscript = newText;
+        setDescription(newText);
+        // Automatically suggest a title if it's empty
+        if (!title && currentTranscript.length > 10) {
+          setTitle("Voice Complaint / Suggestion");
+        }
+      }
+    };
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    recognition.onerror = (event: any) => {
+      console.error("Speech recognition error", event.error);
+      if (event.error !== 'no-speech') {
+        alert("Microphone error. Please check permissions.");
+      }
+      stopRecording();
+    };
+
+    recognition.onend = () => {
+      stopRecording();
+    };
+
+    speechRecognitionRef.current = recognition;
+    recognition.start();
   };
 
   const stopRecording = () => {
-    if (mediaRecorderRef.current && isRecording) {
-      mediaRecorderRef.current.stop();
-      // Stop stream tracks
-      mediaRecorderRef.current.stream.getTracks().forEach(track => track.stop());
+    if (speechRecognitionRef.current && isRecording) {
+      speechRecognitionRef.current.stop();
       setIsRecording(false);
       if (recordingTimerRef.current) {
         clearInterval(recordingTimerRef.current);
       }
-    }
-  };
-
-  const transcribeAudio = async (blob: Blob) => {
-    setIsTranscribing(true);
-    try {
-      const formData = new FormData();
-      formData.append('audio', blob, 'suggestion_audio.webm');
-
-      const response = await fetch('http://localhost:5000/api/ai/voice', {
-        method: 'POST',
-        body: formData
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setTitle(data.title || '');
-        setDescription(data.description || '');
-        setUrgency(data.urgency || 'medium');
-      }
-    } catch (err) {
-      console.error('Audio transcription failed, using simulator:', err);
-    } finally {
-      setIsTranscribing(false);
     }
   };
 
@@ -376,7 +389,7 @@ export default function SubmitSuggestion() {
         body: JSON.stringify({
           title,
           description,
-          language: user?.language_preference || 'en'
+          language
         })
       });
 
@@ -428,6 +441,7 @@ export default function SubmitSuggestion() {
       formData.append('citizen_id', user?.id || '');
       formData.append('title', title);
       formData.append('description', description);
+      formData.append('language', language);
       formData.append('state', state);
       formData.append('district', district);
       formData.append('village', village);
@@ -506,6 +520,33 @@ export default function SubmitSuggestion() {
         {/* Suggestion Form - Left 2 Columns */}
         <div className="lg:col-span-2 bg-slate-900/60 backdrop-blur-md border border-slate-800/80 rounded-3xl p-6 sm:p-8 space-y-6 shadow-xl relative overflow-hidden">
           
+          {/* Language Preference */}
+          <div className="flex items-center justify-between bg-slate-800/30 p-4 rounded-2xl border border-slate-800/50">
+            <div className="flex items-center space-x-3">
+              <Globe className="w-5 h-5 text-indigo-400" />
+              <div>
+                <h3 className="text-sm font-semibold text-white">Complaint Language</h3>
+                <p className="text-xs text-slate-400">Select your preferred language for speaking or typing.</p>
+              </div>
+            </div>
+            <select
+              value={language}
+              onChange={(e) => setLanguage(e.target.value)}
+              className="bg-slate-900 border border-slate-700 text-sm text-white rounded-xl px-4 py-2 focus:ring-2 focus:ring-indigo-500 focus:outline-none appearance-none cursor-pointer"
+            >
+              <option value="English">English</option>
+              <option value="Hindi">Hindi (हिंदी)</option>
+              <option value="Bengali">Bengali (বাংলা)</option>
+              <option value="Marathi">Marathi (मराठी)</option>
+              <option value="Telugu">Telugu (తెలుగు)</option>
+              <option value="Tamil">Tamil (தமிழ்)</option>
+              <option value="Gujarati">Gujarati (ગુજરાતી)</option>
+              <option value="Urdu">Urdu (اردو)</option>
+              <option value="Odia">Odia (ଓଡ଼ିଆ)</option>
+              <option value="Punjabi">Punjabi (ਪੰਜਾਬੀ)</option>
+            </select>
+          </div>
+          
           {/* Voice Input Assist */}
           <div className="bg-linear-to-r from-slate-950 via-indigo-950/20 to-slate-950 border border-slate-800 p-6 rounded-2xl flex flex-col sm:flex-row items-center justify-between gap-6 shadow-[0_4px_30px_rgba(99,102,241,0.03)] hover:border-slate-700/85 transition-all duration-300">
             <div className="space-y-2 text-center sm:text-left">
@@ -556,12 +597,6 @@ export default function SubmitSuggestion() {
             </div>
           </div>
 
-          {isTranscribing && (
-            <div className="flex items-center justify-center space-x-3 p-4 bg-slate-950 rounded-xl border border-slate-800 text-indigo-400 text-xs shadow-inner">
-              <div className="w-4 h-4 border-2 border-indigo-400 border-t-transparent animate-spin rounded-full" />
-              <span>Transcribing and structuring audio using Gemini...</span>
-            </div>
-          )}
 
           {/* Form */}
           <form onSubmit={handleSubmitForm} className="space-y-6">
