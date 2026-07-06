@@ -7,7 +7,8 @@ import { motion } from 'framer-motion';
 import {
   ArrowLeft, MapPin, Users, AlertTriangle,
   Calendar, CheckCircle2, XCircle, Clock,
-  ThumbsUp, Sparkles, Building2, IndianRupee
+  ThumbsUp, Sparkles, Building2, IndianRupee,
+  Wrench, ClipboardList
 } from 'lucide-react';
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
@@ -59,33 +60,96 @@ export default function MpSuggestionDetailPage() {
   const [suggestion, setSuggestion] = useState<SuggestionDetail | null>(null);
   const [timeline, setTimeline] = useState<TimelineEvent[]>([]);
   const [loading, setLoading] = useState(true);
-  const [actionTaken, setActionTaken] = useState('');
+  const [timelineNotes, setTimelineNotes] = useState('');
+  const [selectedStatus, setSelectedStatus] = useState('');
+  const [assignedDepartment, setAssignedDepartment] = useState('PWD (Roads)');
+  const [taskInstructions, setTaskInstructions] = useState('');
+  const [activeTab, setActiveTab] = useState<'status' | 'assign'>('status');
+  const [submitting, setSubmitting] = useState(false);
+
+  const fetchSuggestionData = async () => {
+    try {
+      const [sRes, tRes] = await Promise.all([
+        fetch(`${API}/api/suggestions/${id}`),
+        fetch(`${API}/api/suggestions/${id}/timeline`)
+      ]);
+      if (sRes.ok && tRes.ok) {
+        const sData = await sRes.json();
+        const tData = await tRes.json();
+        setSuggestion(sData);
+        setTimeline(tData);
+        if (!selectedStatus) {
+          setSelectedStatus(sData.status);
+        }
+      }
+    } catch (e) {
+      console.error('Failed to load suggestion details for MP:', e);
+    }
+  };
 
   useEffect(() => {
-    Promise.all([
-      fetch(`${API}/api/suggestions/${id}`).then(r => r.json()),
-      fetch(`${API}/api/suggestions/${id}/timeline`).then(r => r.json()),
-    ]).then(([s, t]) => {
-      setSuggestion(s);
-      setTimeline(t);
-    }).catch(console.error).finally(() => setLoading(false));
+    setLoading(true);
+    fetchSuggestionData().finally(() => setLoading(false));
   }, [id]);
 
-  const handleAction = async (action: string) => {
-    setActionTaken(action);
-    try {
-      const statusMap: Record<string, string> = {
-        accept: 'accepted',
-        reject: 'rejected',
-        plan: 'planned',
+  const handleUpdateStatus = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedStatus) return;
+    setSubmitting(true);
+    
+    let notes = timelineNotes.trim();
+    if (!notes) {
+      const defaultNotes: Record<string, string> = {
+        under_review: 'MP planning committee has opened the file for budget review.',
+        accepted: 'MP has accepted the suggestion for departmental planning.',
+        planned: 'Funds sanctioned under Rural Development Block Grant.',
+        completed: 'Contractor completed physical site build. Local inspection approved.',
+        rejected: 'Proposal rejected as it does not meet feasibility guidelines.'
       };
-      await fetch(`${API}/api/suggestions/${id}/timeline`, {
+      notes = defaultNotes[selectedStatus] || `Suggestion transitioned to state: ${selectedStatus}`;
+    }
+
+    try {
+      const response = await fetch(`${API}/api/suggestions/${id}/timeline`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: statusMap[action], notes: `MP action: ${action}` })
+        body: JSON.stringify({ status: selectedStatus, notes })
       });
-    } catch (e) {
-      console.error(e);
+      if (response.ok) {
+        setTimelineNotes('');
+        await fetchSuggestionData();
+      }
+    } catch (err) {
+      console.error('Failed to update timeline status:', err);
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleAssignTask = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!assignedDepartment || !taskInstructions.trim()) return;
+    setSubmitting(true);
+
+    const notes = `Task Assigned to ${assignedDepartment}. Action required: ${taskInstructions.trim()}`;
+    
+    try {
+      const response = await fetch(`${API}/api/suggestions/${id}/timeline`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          status: suggestion?.status || 'under_review', 
+          notes 
+        })
+      });
+      if (response.ok) {
+        setTaskInstructions('');
+        await fetchSuggestionData();
+      }
+    } catch (err) {
+      console.error('Failed to assign task:', err);
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -128,25 +192,9 @@ export default function MpSuggestionDetailPage() {
             </div>
           </div>
 
-          {/* Action Buttons */}
-          {!actionTaken && suggestion.status !== 'completed' && suggestion.status !== 'rejected' && (
-            <div className="flex items-center space-x-2 shrink-0">
-              <button onClick={() => handleAction('accept')} className="flex items-center space-x-1.5 px-4 py-2.5 rounded-xl bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-500 transition-colors">
-                <CheckCircle2 className="w-4 h-4" /><span>Accept</span>
-              </button>
-              <button onClick={() => handleAction('plan')} className="flex items-center space-x-1.5 px-4 py-2.5 rounded-xl bg-violet-600 text-white text-xs font-semibold hover:bg-violet-500 transition-colors">
-                <Building2 className="w-4 h-4" /><span>Plan</span>
-              </button>
-              <button onClick={() => handleAction('reject')} className="flex items-center space-x-1.5 px-4 py-2.5 rounded-xl bg-slate-700 text-red-400 text-xs font-semibold hover:bg-red-600/20 transition-colors border border-slate-600">
-                <XCircle className="w-4 h-4" /><span>Reject</span>
-              </button>
-            </div>
-          )}
-          {actionTaken && (
-            <div className="px-4 py-2.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20">
-              <p className="text-xs font-semibold text-emerald-400">Action: {actionTaken.toUpperCase()} ✓</p>
-            </div>
-          )}
+          <div className="flex items-center space-x-2 shrink-0 bg-slate-900/60 border border-slate-800/80 px-4 py-2 rounded-xl text-slate-400 text-[11px] font-medium">
+            <span>Manage status & tasks using the control panel below</span>
+          </div>
         </div>
       </motion.div>
 
@@ -157,42 +205,155 @@ export default function MpSuggestionDetailPage() {
           <p className="text-sm text-slate-300 leading-relaxed">{suggestion.description}</p>
         </motion.div>
 
-        {/* AI Intelligence Card */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-[#111827] rounded-2xl p-6 border border-slate-800/50">
-          <h2 className="text-sm font-bold text-white mb-4 flex items-center space-x-2">
-            <Sparkles className="w-4 h-4 text-violet-400" />
-            <span>AI Intelligence</span>
-          </h2>
-          <div className="space-y-4">
-            <div className="flex justify-between items-center">
-              <span className="text-[11px] text-slate-400">Completeness Score</span>
-              <span className="text-sm font-bold text-white">{suggestion.ai_score_completeness || 'N/A'}%</span>
+        {/* Right side widgets: AI Intelligence & MP Command Console */}
+        <div className="space-y-6">
+          {/* AI Intelligence Card */}
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-[#111827] rounded-2xl p-6 border border-slate-800/50">
+            <h2 className="text-sm font-bold text-white mb-4 flex items-center space-x-2">
+              <Sparkles className="w-4 h-4 text-violet-400" />
+              <span>AI Intelligence</span>
+            </h2>
+            <div className="space-y-4">
+              <div className="flex justify-between items-center">
+                <span className="text-[11px] text-slate-400">Completeness Score</span>
+                <span className="text-sm font-bold text-white">{suggestion.ai_score_completeness || 'N/A'}%</span>
+              </div>
+              <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
+                <div className="h-full rounded-full bg-linear-to-r from-violet-500 to-fuchsia-500" style={{ width: `${suggestion.ai_score_completeness || 0}%` }} />
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-[11px] text-slate-400">AI Confidence</span>
+                <span className="text-sm font-bold text-white">{suggestion.ai_score_confidence || 'N/A'}%</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-[11px] text-slate-400">Impact Level</span>
+                <span className={`text-xs font-bold ${suggestion.ai_score_impact === 'Critical' ? 'text-red-400' : suggestion.ai_score_impact === 'High' ? 'text-orange-400' : 'text-yellow-400'}`}>{suggestion.ai_score_impact}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-[11px] text-slate-400">Location Verified</span>
+                <span className={`text-xs font-bold ${suggestion.ai_score_location_verified ? 'text-emerald-400' : 'text-red-400'}`}>{suggestion.ai_score_location_verified ? '✓ Yes' : '✗ No'}</span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-[11px] text-slate-400">Photo Verified</span>
+                <span className={`text-xs font-bold ${suggestion.ai_score_photo_verified ? 'text-emerald-400' : 'text-red-400'}`}>{suggestion.ai_score_photo_verified ? '✓ Yes' : '✗ No'}</span>
+              </div>
+              <div className="flex justify-between items-center pt-2 border-t border-slate-800">
+                <span className="text-[11px] text-slate-400 flex items-center space-x-1"><IndianRupee className="w-3 h-3" /><span>Est. Cost</span></span>
+                <span className="text-sm font-bold text-amber-400">₹{suggestion.estimated_cost_lakhs || 0} Lakhs</span>
+              </div>
             </div>
-            <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
-              <div className="h-full rounded-full bg-linear-to-r from-violet-500 to-fuchsia-500" style={{ width: `${suggestion.ai_score_completeness || 0}%` }} />
+          </motion.div>
+
+          {/* MP Command Console */}
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }} 
+            animate={{ opacity: 1, y: 0 }} 
+            transition={{ delay: 0.25 }}
+            className="bg-[#111827] rounded-2xl p-6 border border-slate-800/50 shadow-2xl relative overflow-hidden"
+          >
+            {/* Elegant accent border */}
+            <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-600" />
+            
+            <h2 className="text-sm font-bold text-white mb-4 flex items-center space-x-2">
+              <Wrench className="w-4 h-4 text-amber-400" />
+              <span>MP Command Console</span>
+            </h2>
+            
+            {/* Tabs */}
+            <div className="flex bg-slate-900/60 rounded-xl p-1 mb-5 border border-slate-800/60">
+              <button
+                type="button"
+                onClick={() => setActiveTab('status')}
+                className={`flex-1 py-2 px-3 rounded-lg text-[11px] font-bold transition-all ${activeTab === 'status' ? 'bg-amber-600 text-white shadow-md shadow-amber-600/10' : 'text-slate-400 hover:text-slate-200'}`}
+              >
+                Update Status
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveTab('assign')}
+                className={`flex-1 py-2 px-3 rounded-lg text-[11px] font-bold transition-all ${activeTab === 'assign' ? 'bg-amber-600 text-white shadow-md shadow-amber-600/10' : 'text-slate-400 hover:text-slate-200'}`}
+              >
+                Assign Task
+              </button>
             </div>
-            <div className="flex justify-between items-center">
-              <span className="text-[11px] text-slate-400">AI Confidence</span>
-              <span className="text-sm font-bold text-white">{suggestion.ai_score_confidence || 'N/A'}%</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-[11px] text-slate-400">Impact Level</span>
-              <span className={`text-xs font-bold ${suggestion.ai_score_impact === 'Critical' ? 'text-red-400' : suggestion.ai_score_impact === 'High' ? 'text-orange-400' : 'text-yellow-400'}`}>{suggestion.ai_score_impact}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-[11px] text-slate-400">Location Verified</span>
-              <span className={`text-xs font-bold ${suggestion.ai_score_location_verified ? 'text-emerald-400' : 'text-red-400'}`}>{suggestion.ai_score_location_verified ? '✓ Yes' : '✗ No'}</span>
-            </div>
-            <div className="flex justify-between items-center">
-              <span className="text-[11px] text-slate-400">Photo Verified</span>
-              <span className={`text-xs font-bold ${suggestion.ai_score_photo_verified ? 'text-emerald-400' : 'text-red-400'}`}>{suggestion.ai_score_photo_verified ? '✓ Yes' : '✗ No'}</span>
-            </div>
-            <div className="flex justify-between items-center pt-2 border-t border-slate-800">
-              <span className="text-[11px] text-slate-400 flex items-center space-x-1"><IndianRupee className="w-3 h-3" /><span>Est. Cost</span></span>
-              <span className="text-sm font-bold text-amber-400">₹{suggestion.estimated_cost_lakhs || 0} Lakhs</span>
-            </div>
-          </div>
-        </motion.div>
+
+            {activeTab === 'status' ? (
+              <form onSubmit={handleUpdateStatus} className="space-y-4">
+                <div>
+                  <label className="text-[10px] uppercase font-bold text-slate-500 tracking-wider block mb-1.5">Select Suggestion Status</label>
+                  <select
+                    value={selectedStatus}
+                    onChange={e => setSelectedStatus(e.target.value)}
+                    className="w-full px-3 py-2.5 rounded-xl bg-slate-900 border border-slate-850 text-xs text-white focus:outline-none focus:ring-1 focus:ring-amber-500"
+                  >
+                    <option value="under_review">Under MP Review</option>
+                    <option value="accepted">Accept Proposal</option>
+                    <option value="planned">Planned / Budgeted</option>
+                    <option value="completed">Project Completed</option>
+                    <option value="rejected">Reject Suggestion</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="text-[10px] uppercase font-bold text-slate-500 tracking-wider block mb-1.5">Timeline Notes / Comments (Optional)</label>
+                  <textarea
+                    value={timelineNotes}
+                    onChange={e => setTimelineNotes(e.target.value)}
+                    placeholder="Leave blank to use default MP timeline update comment..."
+                    rows={3}
+                    className="w-full px-3 py-2.5 rounded-xl bg-slate-900 border border-slate-850 text-xs text-white placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-amber-500 resize-none"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className="w-full py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold transition-all shadow-lg shadow-amber-600/15 disabled:opacity-40"
+                >
+                  {submitting ? 'Updating Status...' : 'Submit Status Transition'}
+                </button>
+              </form>
+            ) : (
+              <form onSubmit={handleAssignTask} className="space-y-4">
+                <div>
+                  <label className="text-[10px] uppercase font-bold text-slate-500 tracking-wider block mb-1.5">Select Department / Officer</label>
+                  <select
+                    value={assignedDepartment}
+                    onChange={e => setAssignedDepartment(e.target.value)}
+                    className="w-full px-3 py-2.5 rounded-xl bg-slate-900 border border-slate-850 text-xs text-white focus:outline-none focus:ring-1 focus:ring-amber-500"
+                  >
+                    <option value="PWD (Roads)">Public Works Department (PWD)</option>
+                    <option value="District Water Board">District Water & Sanitation Board</option>
+                    <option value="Health Department">Chief Medical Officer (CMO)</option>
+                    <option value="Electricity Board">UP Power Corporation Ltd (UPPCL)</option>
+                    <option value="Education Department">Basic Shiksha Adhikari (BSA)</option>
+                    <option value="Municipal Corporation">Varanasi Nagar Nigam</option>
+                  </select>
+                </div>
+                
+                <div>
+                  <label className="text-[10px] uppercase font-bold text-slate-500 tracking-wider block mb-1.5">Task Instructions / Directives</label>
+                  <textarea
+                    value={taskInstructions}
+                    onChange={e => setTaskInstructions(e.target.value)}
+                    placeholder="e.g. Conduct physical site inspection and submit cost estimation DPR by next week."
+                    rows={3}
+                    required
+                    className="w-full px-3 py-2.5 rounded-xl bg-slate-900 border border-slate-850 text-xs text-white placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-amber-500 resize-none"
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={submitting || !taskInstructions.trim()}
+                  className="w-full py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold transition-all shadow-lg shadow-amber-600/15 disabled:opacity-40"
+                >
+                  {submitting ? 'Assigning Task...' : 'Assign Task & Log Event'}
+                </button>
+              </form>
+            )}
+          </motion.div>
+        </div>
       </div>
 
       {/* Timeline */}

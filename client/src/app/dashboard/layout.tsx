@@ -12,7 +12,6 @@ import {
   UserCircle, 
   LogOut, 
   Bell, 
-  Award, 
   Menu, 
   X, 
   Sparkles,
@@ -143,18 +142,12 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <Menu className="w-6 h-6" />
           </button>
 
-          {/* Page context / Welcome */}
-          <div className="hidden sm:block text-xs font-semibold text-slate-500 uppercase tracking-wider">
-            Active Constituency: <span className="text-slate-300 font-bold">{user.parliamentary_constituency}, {user.state}</span>
-          </div>
+          {/* Page context / Welcome removed */}
+          <div className="hidden sm:block" />
 
           {/* Right items */}
           <div className="flex items-center space-x-4 ml-auto">
-            {/* Gamification tag */}
-            <div className="flex items-center space-x-1.5 px-3 py-1.5 bg-slate-900 border border-slate-850 rounded-xl text-xs font-semibold">
-              <Award className="w-4 h-4 text-orange-500" />
-              <span className="text-slate-300">Level 1</span>
-            </div>
+
 
             {/* Notification Bell */}
             <div className="relative">

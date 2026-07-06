@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/AuthContext';
 import { 
@@ -16,7 +17,10 @@ import {
   ArrowRight,
   TrendingUp,
   XCircle,
-  Info
+  Info,
+  Loader2,
+  Search,
+  Globe
 } from 'lucide-react';
 
 const CATEGORIES = [
@@ -26,6 +30,11 @@ const CATEGORIES = [
   "Public Transport", "Internet", "Waste Management", "Environment", 
   "Agriculture", "Others"
 ];
+
+const MapPicker = dynamic(() => import('@/components/MapPicker'), { 
+  ssr: false,
+  loading: () => <div className="h-[400px] bg-slate-900 animate-pulse rounded-xl border border-slate-800 flex items-center justify-center text-slate-500">Loading Map...</div>
+});
 
 export default function SubmitSuggestion() {
   const router = useRouter();
@@ -43,6 +52,13 @@ export default function SubmitSuggestion() {
   const [beneficiaries, setBeneficiaries] = useState('');
   const [lat, setLat] = useState<number | null>(null);
   const [lng, setLng] = useState<number | null>(null);
+  const [pincode, setPincode] = useState('');
+  const [showMapModal, setShowMapModal] = useState(false);
+
+  // Reverse geocoding states
+  const [geoLoading, setGeoLoading] = useState(false);
+  const [geoError, setGeoError] = useState<string | null>(null);
+  const [geoSuccess, setGeoSuccess] = useState<string | null>(null);
 
   // Media attachments
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -101,24 +117,136 @@ export default function SubmitSuggestion() {
     suggestionId?: string;
   } | null>(null);
 
-  // Geolocation Handler
+  // Reverse Geocode from lat/lng using OpenStreetMap Nominatim
+  const reverseGeocodeFromCoords = useCallback(async (latitude: number, longitude: number) => {
+    setGeoLoading(true);
+    setGeoError(null);
+    setGeoSuccess(null);
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1&zoom=18&accept-language=en`,
+        { headers: { 'User-Agent': 'JansunwaiAI/1.0' } }
+      );
+      if (!response.ok) throw new Error('Geocoding service unavailable');
+      const data = await response.json();
+      if (data.error) throw new Error(data.error);
+
+      const addr = data.address || {};
+      // Extract fields with smart fallbacks
+      const resolvedState = addr.state || addr.region || '';
+      const resolvedDistrict = addr.county || addr.state_district || addr.city_district || addr.city || '';
+      const resolvedBlock = addr.suburb || addr.town || addr.municipality || '';
+      const resolvedVillage = addr.village || addr.hamlet || addr.neighbourhood || addr.residential || addr.suburb || '';
+      const resolvedPincode = addr.postcode || '';
+
+      if (resolvedState) setState(resolvedState);
+      if (resolvedDistrict) setDistrict(resolvedDistrict);
+      if (resolvedBlock) setBlock(resolvedBlock);
+      if (resolvedVillage) setVillage(resolvedVillage);
+      if (resolvedPincode) setPincode(resolvedPincode);
+
+      setGeoSuccess(`Location resolved: ${resolvedVillage || resolvedBlock || resolvedDistrict}, ${resolvedDistrict}, ${resolvedState}`);
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : 'Failed to resolve location';
+      setGeoError(`Reverse geocoding failed: ${errMsg}. You can manually fill in the fields.`);
+    } finally {
+      setGeoLoading(false);
+    }
+  }, []);
+
+  // Geocode from Pincode using Nominatim search
+  const geocodeFromPincode = useCallback(async (code: string) => {
+    if (code.length !== 6 || !/^\d{6}$/.test(code)) return;
+    setGeoLoading(true);
+    setGeoError(null);
+    setGeoSuccess(null);
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&postalcode=${code}&country=India&addressdetails=1&limit=1&accept-language=en`,
+        { headers: { 'User-Agent': 'JansunwaiAI/1.0' } }
+      );
+      if (!response.ok) throw new Error('Geocoding service unavailable');
+      const data = await response.json();
+      if (!data || data.length === 0) throw new Error('No location found for this pincode');
+
+      const result = data[0];
+      const addr = result.address || {};
+
+      // Set coordinates
+      const newLat = parseFloat(result.lat);
+      const newLng = parseFloat(result.lon);
+      if (!isNaN(newLat) && !isNaN(newLng)) {
+        setLat(newLat);
+        setLng(newLng);
+      }
+
+      // Extract location fields
+      const resolvedState = addr.state || addr.region || '';
+      const resolvedDistrict = addr.county || addr.state_district || addr.city_district || addr.city || '';
+      const resolvedBlock = addr.suburb || addr.town || addr.municipality || '';
+      const resolvedVillage = addr.village || addr.hamlet || addr.neighbourhood || addr.residential || '';
+
+      if (resolvedState) setState(resolvedState);
+      if (resolvedDistrict) setDistrict(resolvedDistrict);
+      if (resolvedBlock) setBlock(resolvedBlock);
+      if (resolvedVillage) setVillage(resolvedVillage);
+
+      setGeoSuccess(`Location resolved from pincode ${code}: ${resolvedDistrict || resolvedBlock}, ${resolvedState}`);
+    } catch (err) {
+      const errMsg = err instanceof Error ? err.message : 'Pincode lookup failed';
+      setGeoError(`Pincode lookup failed: ${errMsg}. Please enter location details manually.`);
+    } finally {
+      setGeoLoading(false);
+    }
+  }, []);
+
+  // Geolocation Handler — fetches GPS + triggers reverse geocoding
+  const handleManualLocationSelect = async (newLat: number, newLng: number) => {
+    setLat(newLat);
+    setLng(newLng);
+    setShowMapModal(false);
+    await reverseGeocodeFromCoords(newLat, newLng);
+  };
+
   const handleGetLocation = () => {
+    setGeoLoading(true);
+    setGeoError(null);
+    setGeoSuccess(null);
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setLat(position.coords.latitude);
-          setLng(position.coords.longitude);
-          // Set simulated coordinates if not already present
+        async (position) => {
+          const newLat = position.coords.latitude;
+          const newLng = position.coords.longitude;
+          setLat(newLat);
+          setLng(newLng);
+          await reverseGeocodeFromCoords(newLat, newLng);
         },
-        (err) => {
+        async () => {
           console.warn("Geolocation permission denied, simulating Varanasi coordinates.");
           setLat(25.3176);
           setLng(82.9739);
+          await reverseGeocodeFromCoords(25.3176, 82.9739);
         }
       );
     } else {
       setLat(25.3176);
       setLng(82.9739);
+      reverseGeocodeFromCoords(25.3176, 82.9739);
+    }
+  };
+
+  // Handle pincode input with debounced auto-lookup
+  const pincodeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const handlePincodeChange = (value: string) => {
+    // Only allow digits, max 6
+    const cleaned = value.replace(/\D/g, '').slice(0, 6);
+    setPincode(cleaned);
+    // Auto-trigger lookup when 6 digits entered
+    if (cleaned.length === 6) {
+      if (pincodeTimeoutRef.current) clearTimeout(pincodeTimeoutRef.current);
+      pincodeTimeoutRef.current = setTimeout(() => {
+        geocodeFromPincode(cleaned);
+      }, 400);
     }
   };
 
@@ -566,18 +694,97 @@ export default function SubmitSuggestion() {
             {/* Location Section */}
             <div className="border-t border-slate-900/60 pt-6 space-y-4">
               <div className="flex items-center justify-between">
-                <span className="block text-xs font-bold text-slate-400 uppercase tracking-wider">Location Metadata</span>
-                <button
-                  type="button"
-                  onClick={handleGetLocation}
-                  className="flex items-center space-x-1.5 px-3 py-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 text-indigo-400 rounded-xl text-xs font-bold transition-all shadow-sm shadow-indigo-500/5 hover:-translate-y-0.5 cursor-pointer"
-                >
-                  <MapPin className="w-3.5 h-3.5 animate-pulse" />
-                  <span>Fetch Geolocation</span>
-                </button>
+                <span className="block text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center space-x-2">
+                  <Globe className="w-4 h-4 text-indigo-400" />
+                  <span>Location Metadata</span>
+                </span>
+                <div className="flex items-center space-x-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowMapModal(true)}
+                    className="flex items-center space-x-1.5 px-3 py-1.5 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 rounded-xl text-xs font-bold transition-all cursor-pointer shadow-sm"
+                  >
+                    <MapIcon className="w-3.5 h-3.5" />
+                    <span>Choose on Map</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={handleGetLocation}
+                    disabled={geoLoading}
+                    className="flex items-center space-x-1.5 px-3 py-1.5 bg-indigo-500/10 hover:bg-indigo-500/20 border border-indigo-500/20 text-indigo-400 rounded-xl text-xs font-bold transition-all shadow-sm shadow-indigo-500/5 hover:-translate-y-0.5 cursor-pointer disabled:opacity-50"
+                  >
+                    {geoLoading ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <MapPin className="w-3.5 h-3.5" />
+                    )}
+                    <span>{geoLoading ? 'Resolving...' : 'Auto-Detect Location'}</span>
+                  </button>
+                </div>
               </div>
 
-              {lat && lng && (
+              {/* Pincode Input with auto-lookup */}
+              <div className="relative">
+                <label className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-2">Pincode (auto-fill location)</label>
+                <div className="relative">
+                  <div className="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                    <Search className="w-4 h-4" />
+                  </div>
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={6}
+                    value={pincode}
+                    onChange={(e) => handlePincodeChange(e.target.value)}
+                    placeholder="Enter 6-digit pincode to auto-fill location"
+                    className="w-full bg-slate-950 border border-slate-800 rounded-xl py-3.5 pl-10 pr-24 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all duration-300"
+                  />
+                  {pincode.length === 6 && (
+                    <button
+                      type="button"
+                      onClick={() => geocodeFromPincode(pincode)}
+                      disabled={geoLoading}
+                      className="absolute inset-y-0 right-0 pr-1.5 flex items-center"
+                    >
+                      <span className="flex items-center space-x-1 px-3 py-1.5 bg-indigo-500/15 hover:bg-indigo-500/25 border border-indigo-500/30 text-indigo-400 rounded-lg text-[10px] font-bold transition-all cursor-pointer">
+                        {geoLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Search className="w-3 h-3" />}
+                        <span>Lookup</span>
+                      </span>
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {/* Geocoding loading indicator */}
+              {geoLoading && (
+                <div className="flex items-center space-x-3 p-3.5 bg-indigo-500/5 border border-indigo-500/15 rounded-xl text-indigo-400 text-[11px] animate-fadeIn">
+                  <Loader2 className="w-4 h-4 animate-spin shrink-0" />
+                  <span className="font-medium">Resolving location from {pincode.length === 6 ? `pincode ${pincode}` : 'GPS coordinates'}... Auto-filling fields.</span>
+                </div>
+              )}
+
+              {/* Geocoding success */}
+              {geoSuccess && !geoLoading && (
+                <div className="flex items-center space-x-2 p-3.5 bg-emerald-500/5 border border-emerald-500/20 rounded-xl text-emerald-400 text-[11px] animate-fadeIn">
+                  <div className="w-5 h-5 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0">
+                    <CheckCircle className="w-3 h-3 text-emerald-400" />
+                  </div>
+                  <span className="font-medium">{geoSuccess}</span>
+                </div>
+              )}
+
+              {/* Geocoding error */}
+              {geoError && !geoLoading && (
+                <div className="flex items-center space-x-2 p-3.5 bg-red-500/5 border border-red-500/20 rounded-xl text-red-400 text-[11px] animate-fadeIn">
+                  <div className="w-5 h-5 rounded-full bg-red-500/10 flex items-center justify-center shrink-0">
+                    <XCircle className="w-3 h-3 text-red-400" />
+                  </div>
+                  <span className="font-medium">{geoError}</span>
+                </div>
+              )}
+
+              {/* GPS Coordinates display */}
+              {lat && lng && !geoLoading && (
                 <div className="bg-emerald-500/5 border border-emerald-500/20 p-3.5 rounded-xl text-emerald-400 text-[11px] flex items-center justify-between shadow-sm animate-fadeIn">
                   <div className="flex items-center space-x-2">
                     <div className="w-5 h-5 rounded-full bg-emerald-500/10 flex items-center justify-center">
@@ -601,7 +808,8 @@ export default function SubmitSuggestion() {
                       required
                       value={state}
                       onChange={(e) => setState(e.target.value)}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl py-3.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all duration-300"
+                      placeholder="Auto-filled from pincode/GPS"
+                      className={`w-full bg-slate-950 border rounded-xl py-3.5 pl-10 pr-4 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all duration-300 ${geoSuccess && state ? 'border-emerald-500/30' : 'border-slate-800'}`}
                     />
                   </div>
                 </div>
@@ -616,7 +824,8 @@ export default function SubmitSuggestion() {
                       required
                       value={district}
                       onChange={(e) => setDistrict(e.target.value)}
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl py-3.5 pl-10 pr-4 text-sm text-slate-100 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all duration-300"
+                      placeholder="Auto-filled from pincode/GPS"
+                      className={`w-full bg-slate-950 border rounded-xl py-3.5 pl-10 pr-4 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all duration-300 ${geoSuccess && district ? 'border-emerald-500/30' : 'border-slate-800'}`}
                     />
                   </div>
                 </div>
@@ -633,8 +842,8 @@ export default function SubmitSuggestion() {
                       type="text"
                       value={block}
                       onChange={(e) => setBlock(e.target.value)}
-                      placeholder="e.g. Kashi Vidyapeeth"
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl py-3.5 pl-10 pr-4 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all duration-300"
+                      placeholder="Auto-filled or enter manually"
+                      className={`w-full bg-slate-950 border rounded-xl py-3.5 pl-10 pr-4 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all duration-300 ${geoSuccess && block ? 'border-emerald-500/30' : 'border-slate-800'}`}
                     />
                   </div>
                 </div>
@@ -648,8 +857,8 @@ export default function SubmitSuggestion() {
                       type="text"
                       value={village}
                       onChange={(e) => setVillage(e.target.value)}
-                      placeholder="e.g. Sigra"
-                      className="w-full bg-slate-950 border border-slate-800 rounded-xl py-3.5 pl-10 pr-4 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all duration-300"
+                      placeholder="Auto-filled or enter manually"
+                      className={`w-full bg-slate-950 border rounded-xl py-3.5 pl-10 pr-4 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/10 transition-all duration-300 ${geoSuccess && village ? 'border-emerald-500/30' : 'border-slate-800'}`}
                     />
                   </div>
                 </div>
@@ -886,6 +1095,23 @@ export default function SubmitSuggestion() {
                 </button>
               </>
             )}
+          </div>
+        </div>
+      )}
+      {/* Map Modal */}
+      {showMapModal && (
+        <div className="fixed inset-0 bg-slate-950/80 backdrop-blur-md flex items-center justify-center p-4 z-50 animate-fadeIn">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl max-w-3xl w-full p-6 space-y-4 shadow-2xl relative">
+            <div className="flex justify-between items-center mb-2">
+              <h3 className="text-lg font-bold text-white flex items-center space-x-2">
+                <MapIcon className="w-5 h-5 text-indigo-400" />
+                <span>Select Location on Map</span>
+              </h3>
+              <button type="button" onClick={() => setShowMapModal(false)} className="text-slate-400 hover:text-white transition-colors cursor-pointer p-1">
+                <XCircle className="w-6 h-6" />
+              </button>
+            </div>
+            <MapPicker initialLat={lat || 25.3176} initialLng={lng || 82.9739} onLocationSelect={handleManualLocationSelect} />
           </div>
         </div>
       )}

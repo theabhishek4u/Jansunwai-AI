@@ -14,8 +14,7 @@ import {
   ArrowLeft,
   Calendar,
   Layers,
-  FileImage,
-  Award
+  FileImage
 } from 'lucide-react';
 
 interface TimelineEvent {
@@ -63,7 +62,6 @@ export default function SuggestionDetails() {
   const { refreshProfile } = useAuth();
   const [sugg, setSugg] = useState<SuggestionDetail | null>(null);
   const [loading, setLoading] = useState(true);
-  const [simulating, setSimulating] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -82,31 +80,6 @@ export default function SuggestionDetails() {
       console.error('Failed to load suggestion details:', err);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleSimulateStatus = async (status: string) => {
-    setSimulating(true);
-    let notes = '';
-    if (status === 'under_review') notes = 'MP planning committee has opened the file for budget review.';
-    if (status === 'planned') notes = 'Funds sanctioned under Rural Development Block Grant.';
-    if (status === 'completed') notes = 'Contractor completed physical site build. Local inspection approved.';
-
-    try {
-      const response = await fetch(`http://localhost:5000/api/suggestions/${id}/timeline`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status, notes })
-      });
-
-      if (response.ok) {
-        await fetchSuggestionDetails();
-        await refreshProfile(); // Refresh citizen badges
-      }
-    } catch (err) {
-      console.error('Failed to update mock status:', err);
-    } finally {
-      setSimulating(false);
     }
   };
 
@@ -308,43 +281,6 @@ export default function SuggestionDetails() {
                   </div>
                 );
               })}
-            </div>
-          </div>
-
-          {/* MP Simulator Console */}
-          <div className="bg-slate-900/40 border border-slate-900 rounded-3xl p-6 space-y-4">
-            <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider flex items-center space-x-2">
-              <Award className="w-4 h-4 text-orange-500" />
-              <span>MP Action Simulator</span>
-            </h3>
-            <p className="text-[11px] text-slate-500 leading-normal">
-              Simulate actions by the MP and Planning Committee to transition suggestion statuses, update timelines, and verify gamification score adjustments.
-            </p>
-            <div className="space-y-2 pt-2">
-              <button
-                type="button"
-                disabled={simulating || sugg.status === 'under_review'}
-                onClick={() => handleSimulateStatus('under_review')}
-                className="w-full bg-slate-950 hover:bg-slate-850 border border-slate-850 hover:border-slate-750 text-[11px] text-slate-300 py-2.5 px-4 rounded-xl transition-all disabled:opacity-40"
-              >
-                Mark Under Review
-              </button>
-              <button
-                type="button"
-                disabled={simulating || sugg.status === 'planned'}
-                onClick={() => handleSimulateStatus('planned')}
-                className="w-full bg-slate-950 hover:bg-slate-850 border border-slate-850 hover:border-slate-750 text-[11px] text-slate-300 py-2.5 px-4 rounded-xl transition-all disabled:opacity-40"
-              >
-                Approve Project (Planned)
-              </button>
-              <button
-                type="button"
-                disabled={simulating || sugg.status === 'completed'}
-                onClick={() => handleSimulateStatus('completed')}
-                className="w-full bg-linear-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-[11px] text-white py-2.5 px-4 rounded-xl transition-all disabled:opacity-40 font-bold"
-              >
-                Mark Project Completed
-              </button>
             </div>
           </div>
         </div>

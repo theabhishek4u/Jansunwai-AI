@@ -405,20 +405,7 @@ ALTER TABLE public.support_votes ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.comments ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.reports ENABLE ROW LEVEL SECURITY;
 
--- 1. Metadata Read policies (Public Select)
-CREATE POLICY "Allow public read states" ON public.states FOR SELECT USING (true);
-CREATE POLICY "Allow public read districts" ON public.districts FOR SELECT USING (true);
-CREATE POLICY "Allow public read blocks" ON public.blocks FOR SELECT USING (true);
-CREATE POLICY "Allow public read villages" ON public.villages FOR SELECT USING (true);
-CREATE POLICY "Allow public read constituencies" ON public.constituencies FOR SELECT USING (true);
-CREATE POLICY "Allow public read categories" ON public.suggestion_categories FOR SELECT USING (true);
-CREATE POLICY "Allow public read badges" ON public.badges FOR SELECT USING (true);
 
--- 2. Users Table Policies
-CREATE POLICY "Allow users to read their own record" ON public.users
-  FOR SELECT USING (auth.uid() = id);
-CREATE POLICY "Allow admins to manage users" ON public.users
-  FOR ALL USING (public.get_user_role(auth.uid()) = 'admin');
 
 -- 1. Metadata Read policies (Public Select)
 CREATE POLICY "Allow public read states" ON public.states FOR ALL USING (true) WITH CHECK (true);
