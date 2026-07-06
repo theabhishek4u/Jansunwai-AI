@@ -15,8 +15,13 @@ try {
   // Ignore
 }
 
-// We require a true service role key for the backend to bypass RLS.
-export const isSupabaseConfigured = !!(supabaseUrl && supabaseKey && isServiceRole);
+// We ideally require a true service role key for the backend to bypass RLS, 
+// but we will allow connection with the anon key so data can at least be stored.
+export const isSupabaseConfigured = !!(supabaseUrl && supabaseKey);
+
+if (isSupabaseConfigured && !isServiceRole) {
+  console.warn('WARNING: Connected to Supabase with an ANON KEY instead of a SERVICE ROLE KEY. Operations may fail if RLS is enabled and restricts anon access.');
+}
 
 export const supabase = isSupabaseConfigured
   ? createClient(supabaseUrl, supabaseKey, {

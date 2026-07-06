@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useState, useRef, useCallback } from 'react';
 import dynamic from 'next/dynamic';
@@ -526,14 +526,7 @@ export default function SubmitSuggestion() {
   const circumference = 2 * Math.PI * radius; // ~282.74
   const strokeDashoffset = aiScore !== null ? circumference - (aiScore / 100) * circumference : circumference;
 
-  // Step progress helpers
-  const formSteps = [
-    { label: 'Voice / Text', icon: Mic, done: !!description },
-    { label: 'Details', icon: FileText, done: !!title && !!description },
-    { label: 'Evidence', icon: Eye, done: attachments.length > 0 },
-    { label: 'Location', icon: MapPin, done: !!state && !!district },
-  ];
-  const completedSteps = formSteps.filter(s => s.done).length;
+
 
   // Dynamic glow color based on AI score
   const scoreGlowColor = aiScore !== null
@@ -568,37 +561,12 @@ export default function SubmitSuggestion() {
             </div>
           </div>
 
-          {/* Mini step progress pills */}
-          <div className="flex items-center gap-2 bg-slate-950/60 border border-slate-800/60 rounded-2xl p-2 px-3">
-            {formSteps.map((step, i) => (
-              <div key={i} className="flex items-center gap-1.5">
-                <div className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all duration-500 ${
-                  step.done 
-                    ? 'bg-emerald-500/15 border border-emerald-500/30 text-emerald-400' 
-                    : 'bg-slate-900 border border-slate-800 text-slate-500'
-                }`}>
-                  {step.done ? <CheckCircle className="w-3.5 h-3.5" /> : <step.icon className="w-3.5 h-3.5" />}
-                </div>
-                <span className={`text-[10px] font-bold uppercase tracking-wider hidden sm:inline ${step.done ? 'text-emerald-400' : 'text-slate-500'}`}>
-                  {step.label}
-                </span>
-                {i < formSteps.length - 1 && (
-                  <div className={`w-4 h-[2px] rounded-full mx-0.5 transition-all duration-500 ${step.done ? 'bg-emerald-500/40' : 'bg-slate-800'}`} />
-                )}
-              </div>
-            ))}
-            <div className="ml-2 pl-2 border-l border-slate-800">
-              <span className="text-[10px] font-black text-indigo-400">{completedSteps}/{formSteps.length}</span>
-            </div>
-          </div>
+
         </div>
       </div>
 
-      {/* ═══════════ MAIN GRID ═══════════ */}
-      <div className="grid grid-cols-1 xl:grid-cols-12 gap-6">
-
-        {/* ═══════════ LEFT: FORM COLUMN (8 cols) ═══════════ */}
-        <div className="xl:col-span-8 space-y-6">
+      {/* ═══════════ MAIN FORM AREA ═══════════ */}
+      <div className="max-w-4xl mx-auto space-y-6">
 
           {/* ── SECTION 1: VOICE + LANGUAGE ── */}
           <div className="relative rounded-[24px] border border-slate-800/60 overflow-hidden" style={{ background: 'linear-gradient(180deg, rgba(30,27,75,0.15) 0%, rgba(15,23,42,0.6) 100%)' }}>
@@ -788,47 +756,27 @@ export default function SubmitSuggestion() {
                 </div>
               </div>
 
-              {/* Beneficiaries & Urgency — side by side */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div className="space-y-2.5">
-                  <label className="flex items-center gap-2 text-xs font-bold text-slate-300 uppercase tracking-wider">
-                    <Target className="w-3.5 h-3.5 text-indigo-400" />
-                    People Benefited
-                  </label>
-                  <div className="relative group">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-500 group-focus-within:text-indigo-400 transition-colors">
-                      <TrendingUp className="w-4 h-4" />
-                    </div>
-                    <input
-                      type="number"
-                      value={beneficiaries}
-                      onChange={(e) => setBeneficiaries(e.target.value)}
-                      placeholder="e.g. 500"
-                      className="w-full bg-slate-950/70 border border-slate-800/80 rounded-2xl py-4 pl-11 pr-4 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-indigo-500/60 focus:ring-2 focus:ring-indigo-500/10 transition-all duration-300"
-                    />
+              {/* Urgency */}
+              <div className="space-y-2.5">
+                <label className="flex items-center gap-2 text-xs font-bold text-slate-300 uppercase tracking-wider">
+                  <Zap className="w-3.5 h-3.5 text-amber-400" />
+                  Urgency Level
+                </label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-500 group-focus-within:text-amber-400 transition-colors">
+                    <AlertTriangle className="w-4 h-4" />
                   </div>
-                </div>
-                <div className="space-y-2.5">
-                  <label className="flex items-center gap-2 text-xs font-bold text-slate-300 uppercase tracking-wider">
-                    <Zap className="w-3.5 h-3.5 text-amber-400" />
-                    Urgency Level
-                  </label>
-                  <div className="relative group">
-                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-500 group-focus-within:text-amber-400 transition-colors">
-                      <AlertTriangle className="w-4 h-4" />
-                    </div>
-                    <select
-                      value={urgency}
-                      onChange={(e) => setUrgency(e.target.value)}
-                      className="w-full bg-slate-950/70 border border-slate-800/80 rounded-2xl py-4 pl-11 pr-10 text-sm text-slate-100 focus:outline-none focus:border-indigo-500/60 focus:ring-2 focus:ring-indigo-500/10 transition-all duration-300 appearance-none cursor-pointer"
-                    >
-                      <option value="low">🟢 Low — Routine Planning</option>
-                      <option value="medium">🟡 Medium — Important Improvement</option>
-                      <option value="high">🟠 High — High Priority</option>
-                      <option value="critical">🔴 Critical — Urgent Public Hazard</option>
-                    </select>
-                    <ChevronDown className="w-4 h-4 text-slate-500 absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" />
-                  </div>
+                  <select
+                    value={urgency}
+                    onChange={(e) => setUrgency(e.target.value)}
+                    className="w-full bg-slate-950/70 border border-slate-800/80 rounded-2xl py-4 pl-11 pr-10 text-sm text-slate-100 focus:outline-none focus:border-indigo-500/60 focus:ring-2 focus:ring-indigo-500/10 transition-all duration-300 appearance-none cursor-pointer"
+                  >
+                    <option value="low">🟢 Low — Routine Planning</option>
+                    <option value="medium">🟡 Medium — Important Improvement</option>
+                    <option value="high">🟠 High — High Priority</option>
+                    <option value="critical">🔴 Critical — Urgent Public Hazard</option>
+                  </select>
+                  <ChevronDown className="w-4 h-4 text-slate-500 absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" />
                 </div>
               </div>
 
@@ -1048,253 +996,104 @@ export default function SubmitSuggestion() {
           </div>
         </div>
 
-        {/* ═══════════ RIGHT: AI SIDEBAR (4 cols) ═══════════ */}
-        <div className="xl:col-span-4 space-y-6">
-
-          {/* ── AI ANALYSIS SCORE CARD ── */}
-          <div className="sticky top-6 space-y-6">
-            <div className="relative rounded-[24px] border border-slate-800/60 overflow-hidden" style={{ background: `radial-gradient(circle at 50% 0%, ${scoreGlowColor}, transparent 70%), linear-gradient(180deg, rgba(15,23,42,0.9) 0%, rgba(15,23,42,0.95) 100%)` }}>
-              <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-indigo-500/30 to-transparent" />
-              
-              <div className="p-6 space-y-5">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                    <BarChart3 className="w-5 h-5 text-indigo-400" />
-                    <span>AI Analysis</span>
-                  </h3>
-                  <span className="text-[9px] font-bold text-indigo-400 bg-indigo-500/10 border border-indigo-500/20 px-2 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1">
-                    <Sparkles className="w-2.5 h-2.5" /> Live
-                  </span>
-                </div>
-
-                {/* Circular gauge */}
-                <div className="flex flex-col items-center justify-center py-4 text-center space-y-4">
-                  <div className="relative w-36 h-36 flex items-center justify-center">
-                    {/* Outer glow ring */}
-                    {aiScore !== null && (
-                      <div className="absolute inset-0 rounded-full" style={{ boxShadow: `0 0 40px ${scoreGlowColor}, 0 0 80px ${scoreGlowColor}` }} />
-                    )}
-                    <svg className="w-full h-full transform -rotate-90" viewBox="0 0 128 128">
-                      <circle cx="64" cy="64" r={radius} className="stroke-slate-800/60" strokeWidth="6" fill="transparent" />
-                      {aiScore !== null && (
-                        <circle
-                          cx="64" cy="64" r={radius}
-                          className={`${scoreStrokeColor} transition-all duration-1000 ease-out`}
-                          strokeWidth="6"
-                          fill="transparent"
-                          strokeDasharray={circumference}
-                          strokeDashoffset={strokeDashoffset}
-                          strokeLinecap="round"
-                        />
-                      )}
-                    </svg>
-                    <div className="absolute flex flex-col items-center justify-center">
-                      <span className="text-4xl font-black text-white tracking-tight">
-                        {aiScore !== null ? `${aiScore}%` : '--'}
-                      </span>
-                      {aiScore !== null && (
-                        <span className={`text-[8px] font-extrabold uppercase px-2.5 py-0.5 rounded-full mt-2 tracking-wider ${
-                          aiScore >= 80 ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20' 
-                          : aiScore >= 50 ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' 
-                          : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
-                        }`}>
-                          {aiScore >= 80 ? '✓ MP Ready' : aiScore >= 50 ? '↗ Improving' : '! Needs Info'}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-
-                  <div className="space-y-1.5">
-                    <span className="block text-xs font-bold uppercase tracking-wider text-slate-400">Completeness Index</span>
-                    <p className="text-[11px] text-slate-500 px-4 leading-relaxed">Aim for &gt;80% to trigger instant priority sorting for the MP.</p>
-                  </div>
-
-                  {/* Progress breakdown pills */}
-                  {aiScore !== null && (
-                    <div className="flex flex-wrap justify-center gap-1.5 pt-1">
-                      {[
-                        { label: 'Title', done: !!title },
-                        { label: 'Description', done: description.length > 20 },
-                        { label: 'Beneficiaries', done: !!beneficiaries },
-                        { label: 'Location', done: !!state && !!district },
-                        { label: 'Evidence', done: attachments.length > 0 },
-                      ].map(({ label, done }) => (
-                        <span key={label} className={`text-[9px] font-bold px-2 py-0.5 rounded-full border ${done ? 'bg-emerald-500/8 text-emerald-400 border-emerald-500/20' : 'bg-slate-900 text-slate-500 border-slate-800'}`}>
-                          {done ? '✓' : '○'} {label}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-
-            {/* ── AI CLARIFYING QUESTIONS ── */}
-            <div className="relative rounded-[24px] border border-slate-800/60 overflow-hidden bg-slate-900/40">
-              <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-violet-500/20 to-transparent" />
-              
-              <div className="p-6 space-y-4">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                    <Lightbulb className="w-5 h-5 text-amber-400" />
-                    <span>AI Clarifying Questions</span>
-                  </h3>
-                  {aiQuestions.length > 0 && (
-                    <span className="text-[9px] font-bold text-amber-400 bg-amber-500/10 border border-amber-500/20 px-2 py-0.5 rounded-full">{aiQuestions.length} pending</span>
-                  )}
-                </div>
-
-                {aiQuestions.length === 0 ? (
-                  <div className="p-5 bg-slate-950/60 rounded-2xl border border-slate-800/60 text-slate-400 text-xs flex flex-col items-center text-center space-y-3">
-                    <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-600/10 to-violet-600/10 border border-indigo-500/15 flex items-center justify-center text-indigo-400 shadow-inner">
-                      <Wand2 className="w-5 h-5" />
-                    </div>
-                    <p className="leading-relaxed text-slate-500">
-                      Write a description and click <strong className="text-indigo-400">AI Writing Assistant</strong> to unlock tailored questions that boost your score.
-                    </p>
-                  </div>
-                ) : (
-                  <div className="space-y-2.5">
-                    <p className="text-[10px] uppercase tracking-wider text-slate-500 font-bold flex items-center gap-1.5">
-                      <Target className="w-3 h-3 text-indigo-400" />
-                      Answer to boost your score:
-                    </p>
-                    {aiQuestions.map((q, idx) => (
-                      <button
-                        key={idx}
-                        type="button"
-                        onClick={() => {
-                          setActiveQuestionIndex(idx);
-                          setQuestionAnswer('');
-                        }}
-                        className={`w-full text-left p-3.5 border text-xs rounded-xl transition-all duration-300 ${
-                          activeQuestionIndex === idx 
-                            ? 'border-indigo-500/50 bg-indigo-950/30 text-white font-semibold shadow-[0_0_20px_rgba(99,102,241,0.08)]' 
-                            : 'border-slate-800/60 bg-slate-950/40 text-slate-400 hover:border-slate-700 hover:bg-slate-900/50 hover:text-slate-300'
-                        }`}
-                      >
-                        <div className="flex items-start gap-2.5">
-                          <span className={`flex items-center justify-center w-5 h-5 rounded-lg text-[10px] font-bold shrink-0 transition-colors ${
-                            activeQuestionIndex === idx ? 'bg-indigo-600 text-white' : 'bg-slate-900 border border-slate-800 text-slate-500'
-                          }`}>
-                            {idx + 1}
-                          </span>
-                          <span className="flex-1 leading-relaxed">{q}</span>
-                        </div>
-                      </button>
-                    ))}
-                  </div>
-                )}
-
-                {/* Clarification answer input */}
-                {activeQuestionIndex !== null && (
-                  <div className="bg-slate-950/80 border border-indigo-500/25 p-4 rounded-2xl space-y-3 shadow-lg shadow-indigo-950/20 animate-fadeIn">
-                    <div className="flex items-center justify-between">
-                      <span className="block text-[10px] font-bold uppercase tracking-wider text-indigo-400 flex items-center gap-1.5">
-                        <MessageSquare className="w-3 h-3" /> Your Answer
-                      </span>
-                      <span className="text-[10px] text-slate-500">Q{activeQuestionIndex + 1}</span>
-                    </div>
-                    <p className="text-xs text-slate-400 italic bg-slate-900/50 p-3 rounded-xl border border-slate-900 leading-relaxed">
-                      &ldquo;{aiQuestions[activeQuestionIndex]}&rdquo;
-                    </p>
-                    <input
-                      type="text"
-                      value={questionAnswer}
-                      onChange={(e) => setQuestionAnswer(e.target.value)}
-                      placeholder="Type your answer here..."
-                      className="w-full bg-slate-900 border border-slate-800/80 rounded-xl py-3 px-4 text-xs text-slate-100 placeholder-slate-600 focus:outline-none focus:border-indigo-500/50 focus:ring-2 focus:ring-indigo-500/10 transition-all duration-300"
-                    />
-                    <div className="flex items-center gap-2 justify-end pt-1">
-                      <button
-                        type="button"
-                        onClick={() => setActiveQuestionIndex(null)}
-                        className="text-xs font-semibold text-slate-400 hover:text-white px-3 py-1.5 transition-colors cursor-pointer"
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        type="button"
-                        onClick={handleAnswerQuestion}
-                        className="bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white text-xs px-4 py-2.5 rounded-xl font-bold transition-all shadow-md shadow-indigo-600/15 cursor-pointer flex items-center gap-1.5"
-                      >
-                        <Zap className="w-3 h-3" />
-                        Apply & Improve
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
 
       {/* ═══════════ SUCCESS MODAL ═══════════ */}
       {submitResult && (
-        <div className="fixed inset-0 bg-slate-950/85 backdrop-blur-xl flex items-center justify-center p-4 z-50 animate-fadeIn">
-          <div className="bg-slate-900/95 backdrop-blur-md border border-slate-800/80 rounded-[28px] max-w-md w-full p-8 text-center space-y-6 shadow-2xl relative overflow-hidden">
-            <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-emerald-500 via-indigo-500 to-violet-500 pointer-events-none" />
-            <div className="absolute inset-0 bg-gradient-to-b from-emerald-500/3 to-transparent pointer-events-none" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+          {/* Animated Backdrop */}
+          <div className="absolute inset-0 bg-slate-950/70 backdrop-blur-xl animate-fadeIn" />
+          
+          {/* Modal Container */}
+          <div className="relative w-full max-w-md animate-fadeIn transition-all">
+            {/* Ambient Background Glow */}
+            <div className="absolute -inset-1 bg-gradient-to-r from-emerald-500 via-indigo-500 to-violet-500 rounded-[32px] blur-xl opacity-30" />
             
-            {submitResult.success ? (
-              <>
-                <div className="relative w-20 h-20 rounded-full bg-emerald-500/10 flex items-center justify-center mx-auto text-emerald-400 border border-emerald-500/20">
-                  <CheckCircle className="w-12 h-12" />
-                  <div className="absolute inset-0 rounded-full animate-ping bg-emerald-500/10" />
-                </div>
-                <div className="space-y-2 relative z-10">
-                  <h3 className="text-xl font-black text-white">Proposal Registered! 🎉</h3>
-                  <p className="text-xs text-slate-400 leading-relaxed">
-                    Your suggestion has been logged on the constituency map. AI verification completed.
-                  </p>
-                </div>
+            <div className="relative bg-[#0b0f19] border border-white/[0.08] rounded-[32px] p-8 sm:p-10 text-center shadow-2xl overflow-hidden">
+              {/* Top Accent Line */}
+              <div className="absolute top-0 inset-x-0 h-[3px] bg-gradient-to-r from-emerald-400 via-indigo-400 to-violet-400" />
+              
+              {/* Subtle glass texture */}
+              <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.03)_0%,rgba(255,255,255,0)_100%)] pointer-events-none" />
 
-                <div className="bg-slate-950/80 p-4 rounded-2xl border border-slate-800/80 space-y-2.5 shadow-inner relative z-10">
-                  <div className="flex justify-between text-xs items-center">
-                    <span className="text-slate-500 font-semibold">Contribution Points:</span>
-                    <span className="font-bold text-orange-400 bg-orange-500/10 border border-orange-500/20 px-2.5 py-0.5 rounded-full flex items-center gap-1">
-                      <Zap className="w-3 h-3" /> +{submitResult.pointsAwarded} XP
-                    </span>
-                  </div>
-                  {submitResult.isDuplicate && (
-                    <div className="border-t border-slate-800 pt-2.5 flex flex-col space-y-1.5 text-left text-xs bg-indigo-950/20 p-3 rounded-xl border border-indigo-900/30">
-                      <span className="font-bold text-indigo-400 flex items-center gap-1.5">
-                        <AlertTriangle className="w-3.5 h-3.5 text-amber-500 shrink-0" />
-                        <span>Duplicate Match Detected!</span>
-                      </span>
-                      <p className="text-[11px] text-slate-400 leading-relaxed">
-                        This development request has already been supported by 742 citizens. Your request is linked to ensure group impact.
-                      </p>
+              {submitResult.success ? (
+                <div className="relative z-10 flex flex-col items-center">
+                  {/* Floating Icon */}
+                  <div className="relative mb-6 group">
+                    <div className="absolute inset-0 bg-emerald-500/20 blur-2xl rounded-full animate-pulse" />
+                    <div className="relative w-24 h-24 rounded-[2.5rem] bg-gradient-to-br from-emerald-400/20 to-emerald-900/40 border border-emerald-500/30 flex items-center justify-center shadow-[0_0_40px_rgba(16,185,129,0.2)] transform hover:-translate-y-2 transition-transform duration-500">
+                      <div className="absolute inset-0 rounded-[2.5rem] bg-gradient-to-tr from-emerald-400/10 to-transparent opacity-50" />
+                      <CheckCircle className="w-12 h-12 text-emerald-400 drop-shadow-[0_0_15px_rgba(52,211,153,0.8)]" />
                     </div>
-                  )}
-                </div>
+                  </div>
 
-                <button
-                  onClick={() => router.push(`/dashboard/suggestions/${submitResult.suggestionId}`)}
-                  className="relative z-10 w-full bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold py-4 rounded-2xl text-xs transition-all flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-indigo-600/20"
-                >
-                  <span>Track Suggestion Timeline</span>
-                  <ArrowRight className="w-4 h-4" />
-                </button>
-              </>
-            ) : (
-              <>
-                <div className="w-20 h-20 rounded-full bg-red-500/10 flex items-center justify-center mx-auto text-red-400 border border-red-500/20">
-                  <XCircle className="w-12 h-12" />
+                  {/* Typography */}
+                  <div className="space-y-3 mb-8">
+                    <h3 className="text-2xl sm:text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-100 to-slate-400 tracking-tight drop-shadow-sm">
+                      Proposal Registered!
+                    </h3>
+                    <p className="text-[13px] text-slate-400 leading-relaxed max-w-[280px] mx-auto">
+                      Your suggestion has been logged on the constituency map. <span className="text-emerald-400 font-medium">AI verification complete.</span>
+                    </p>
+                  </div>
+
+                  {/* Points Box */}
+                  <div className="w-full bg-[#13182b]/80 p-5 rounded-2xl border border-indigo-500/20 shadow-inner mb-8 group-hover:border-indigo-500/40 transition-colors">
+                    <div className="flex justify-between items-center">
+                      <span className="text-[11px] text-slate-400 font-bold uppercase tracking-wider">Contribution Points</span>
+                      <div className="relative">
+                        <div className="absolute inset-0 bg-orange-500/20 blur-md rounded-full opacity-50" />
+                        <span className="relative flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-orange-500/10 to-amber-500/10 border border-orange-500/30 text-orange-400 font-black text-[13px] shadow-sm">
+                          <Zap className="w-3.5 h-3.5 text-amber-400 fill-amber-400/30" />
+                          +{submitResult.pointsAwarded || 50} XP
+                        </span>
+                      </div>
+                    </div>
+                    {submitResult.isDuplicate && (
+                      <div className="mt-4 pt-4 border-t border-slate-800/60 flex flex-col space-y-2 text-left">
+                        <span className="font-bold text-indigo-400 flex items-center gap-2 text-xs">
+                          <AlertTriangle className="w-4 h-4 text-amber-400" />
+                          Duplicate Match Detected
+                        </span>
+                        <p className="text-[11px] text-slate-400 leading-relaxed">
+                          This development request has already been supported by others. Your request is linked to ensure group impact.
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* CTA Button */}
+                  <button
+                    onClick={() => router.push(`/dashboard/suggestions/${submitResult.suggestionId || 'recent'}`)}
+                    className="group relative w-full overflow-hidden rounded-2xl p-[1.5px] focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-500 animate-[spin_4s_linear_infinite] opacity-70" />
+                    <div className="relative flex items-center justify-center gap-2.5 bg-[#0b0f19] group-hover:bg-gradient-to-r group-hover:from-indigo-600/10 group-hover:to-purple-600/10 px-6 py-4 rounded-[14.5px] transition-colors">
+                      <span className="font-bold text-sm text-transparent bg-clip-text bg-gradient-to-r from-indigo-300 to-purple-300">Track Suggestion Timeline</span>
+                      <ArrowRight className="w-4 h-4 text-purple-400 group-hover:translate-x-1 transition-transform" />
+                    </div>
+                  </button>
                 </div>
-                <div className="space-y-2">
-                  <h3 className="text-xl font-black text-white">Submission Failed</h3>
-                  <p className="text-xs text-slate-400 leading-relaxed">{submitResult.message}</p>
+              ) : (
+                <div className="relative z-10 flex flex-col items-center">
+                  {/* Failure State */}
+                  <div className="relative mb-6">
+                    <div className="absolute inset-0 bg-rose-500/20 blur-2xl rounded-full animate-pulse" />
+                    <div className="relative w-24 h-24 rounded-[2.5rem] bg-gradient-to-br from-rose-400/20 to-rose-900/40 border border-rose-500/30 flex items-center justify-center">
+                      <XCircle className="w-12 h-12 text-rose-400" />
+                    </div>
+                  </div>
+                  <h3 className="text-2xl font-black text-white mb-2">Submission Failed</h3>
+                  <p className="text-[13px] text-slate-400 leading-relaxed mb-8">{submitResult.message}</p>
+                  
+                  <button
+                    onClick={() => setSubmitResult(null)}
+                    className="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-4 rounded-2xl text-sm transition-colors border border-slate-700 shadow-lg"
+                  >
+                    Try Again
+                  </button>
                 </div>
-                <button
-                  onClick={() => setSubmitResult(null)}
-                  className="w-full bg-slate-950 hover:bg-slate-900 border border-slate-800 text-white font-bold py-4 rounded-2xl text-xs cursor-pointer transition-colors"
-                >
-                  Try Again
-                </button>
-              </>
-            )}
+              )}
+            </div>
           </div>
         </div>
       )}
