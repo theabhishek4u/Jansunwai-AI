@@ -18,6 +18,7 @@ interface SuggestionItem {
   category: string;
   village: string;
   block: string;
+  district: string;
   urgency: string;
   status: string;
   priorityScore: number;
@@ -186,14 +187,14 @@ export default function MpComplaintsPage() {
                   <div className="flex flex-wrap items-center gap-2 mt-1.5">
                     <span className="flex items-center space-x-1 text-[10px] text-slate-500">
                       <MapPin className="w-3 h-3" />
-                      <span>{s.village}</span>
+                      <span>{s.village}, {s.district}</span>
                     </span>
                     <span className="text-[10px] text-slate-600">•</span>
                     <span className="text-[10px] text-slate-500">{s.category}</span>
                     <span className="text-[10px] text-slate-600">•</span>
-                    <span className="flex items-center space-x-1 text-[10px] text-slate-500">
+                    <span className="flex items-center space-x-1 text-[10px] text-indigo-400 font-bold bg-indigo-500/10 px-2 py-0.5 rounded-full border border-indigo-500/20">
                       <Users className="w-3 h-3" />
-                      <span>{s.supporters.toLocaleString()} supporters</span>
+                      <span>{s.supporters.toLocaleString()} Duplicate Complaints</span>
                     </span>
                     <span className="text-[10px] text-slate-600">•</span>
                     <span className="text-[10px] text-slate-500">₹{s.estimatedCostLakhs}L</span>

@@ -10,7 +10,8 @@ import {
   CheckCircle, 
   PlusCircle, 
   MessageSquare, 
-  Sparkles
+  Sparkles,
+  Trash2
 } from 'lucide-react';
 
 interface Suggestion {
@@ -58,6 +59,30 @@ export default function DashboardHome() {
   const averageAiScore = suggestions.length > 0 
     ? Math.round(suggestions.reduce((acc, curr) => acc + (curr.ai_score_completeness || 0), 0) / suggestions.length)
     : 0;
+
+  const handleDelete = async (e: React.MouseEvent, id: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!confirm('Are you sure you want to delete this complaint? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`http://localhost:5000/api/suggestions/${id}`, {
+        method: 'DELETE',
+      });
+      
+      if (response.ok) {
+        setSuggestions(suggestions.filter(s => s.id !== id));
+      } else {
+        alert('Failed to delete complaint. Please try again later.');
+      }
+    } catch (err) {
+      console.error('Error deleting complaint:', err);
+      alert('An error occurred while deleting the complaint.');
+    }
+  };
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -203,6 +228,15 @@ export default function DashboardHome() {
                       <span className={`inline-block border text-[10px] font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider ${getStatusColor(sugg.status)}`}>
                         {sugg.status.replace('_', ' ')}
                       </span>
+                    </div>
+                    <div className="border-l border-slate-800 pl-3 ml-1 flex items-center">
+                      <button
+                        onClick={(e) => handleDelete(e, sugg.id)}
+                        className="p-2 text-slate-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
+                        title="Delete Complaint"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </div>
                   </div>
                 </div>

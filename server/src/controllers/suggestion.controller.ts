@@ -247,6 +247,22 @@ export const getSuggestions = async (req: Request, res: Response) => {
 };
 
 /**
+ * Delete Suggestion by ID
+ */
+export const deleteSuggestion = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  try {
+    const success = await db.deleteSuggestion(id);
+    if (!success) {
+      return res.status(404).json({ error: 'Suggestion not found' });
+    }
+    return res.json({ message: 'Suggestion deleted successfully' });
+  } catch (error: any) {
+    return res.status(500).json({ error: 'Failed to delete suggestion', details: error.message });
+  }
+};
+
+/**
  * Get Suggestion details by ID, including timeline events and attachments.
  */
 export const getSuggestionDetails = async (req: Request, res: Response) => {

@@ -4,7 +4,8 @@ import {
   getWritingAssist,
   processVoiceSuggestion,
   analyzeSuggestion,
-  checkDuplicate
+  checkDuplicate,
+  analyzeUploadedImage
 } from '../controllers/ai.controller';
 import { asyncHandler } from '../middlewares/asyncHandler';
 
@@ -22,6 +23,7 @@ const upload = multer({
 router.post('/writing-assist', asyncHandler(getWritingAssist));
 router.post('/voice', upload.single('audio'), asyncHandler(processVoiceSuggestion));
 router.post('/analyze-suggestion', upload.single('image'), asyncHandler(analyzeSuggestion));
+router.post('/analyze-image', upload.single('image'), asyncHandler(analyzeUploadedImage));
 router.post('/duplicate-check', asyncHandler(checkDuplicate));
 
 export default router;

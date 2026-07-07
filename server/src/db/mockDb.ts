@@ -531,6 +531,19 @@ export const mockDb = {
     }
     return null;
   },
+  deleteSuggestion: async (id: string) => {
+    const initialLength = suggestions.length;
+    // We cannot use standard assignment to `suggestions` if it's let, but it is declared as `let suggestions = []` so we can.
+    // However, the best way to modify the array without reassigning if it was const is using splice, but since it's `let` we can just filter.
+    // Wait, let's look at how suggestions is declared. `let suggestions: Suggestion[] = [...]`.
+    // So we can reassign it or use splice. I'll use findIndex and splice to be safe.
+    const idx = suggestions.findIndex(s => s.id === id);
+    if (idx > -1) {
+      suggestions.splice(idx, 1);
+      return true;
+    }
+    return false;
+  },
   addMediaAttachment: async (att: Omit<MediaAttachment, 'id' | 'created_at'>) => {
     const newAtt: MediaAttachment = { ...att, id: `media-${uuidv4()}`, created_at: new Date().toISOString() };
     mediaAttachments.push(newAtt);

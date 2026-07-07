@@ -46,6 +46,7 @@ interface PriorityItem {
   title: string;
   category: string;
   village: string;
+  district: string;
   priorityScore: number;
   populationAffected: number;
   supporters: number;
@@ -313,11 +314,16 @@ export default function MpDashboard() {
                       <div className="flex-1 min-w-0">
                         <p className="text-xs font-bold text-slate-200 truncate group-hover:text-amber-400 transition-colors">{p.title}</p>
                         <div className="flex items-center space-x-3 mt-1">
-                          <span className="text-[9px] text-slate-500 font-medium">{p.village}</span>
+                          <span className="text-[9px] text-slate-500 font-medium">{p.village}, {p.district}</span>
                           <span className="text-[9px] text-slate-700">•</span>
                           <span className="text-[9px] text-slate-500 font-medium">{p.category}</span>
                           <span className="text-[9px] text-slate-700">•</span>
                           <span className="text-[9px] text-amber-500/60 font-semibold">{p.populationAffected.toLocaleString()} affected</span>
+                          <span className="text-[9px] text-slate-700">•</span>
+                          <span className="text-[9px] text-indigo-400/80 font-bold flex items-center gap-1">
+                            <Users className="w-2.5 h-2.5" />
+                            {p.supporters} Complaints
+                          </span>
                         </div>
                       </div>
                       <div className="flex items-center space-x-3 shrink-0">

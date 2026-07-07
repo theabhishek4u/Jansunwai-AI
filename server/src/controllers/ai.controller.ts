@@ -287,8 +287,73 @@ export const analyzeSuggestion = async (req: Request, res: Response) => {
     const result = JSON.parse(response.text || '{}');
     return res.json(result);
   } catch (error: any) {
-    console.error('Error in analyze suggestion API:', error);
-    return res.status(500).json({ error: 'AI Analysis failed', details: error.message });
+    console.error('Error analyzing suggestion:', error);
+    return res.status(500).json({ error: 'Suggestion analysis failed', details: error.message });
+  }
+};
+
+/**
+ * 3.5 AI Image Analysis on Upload
+ * Analyzes just the image and returns a structured finding immediately.
+ */
+export const analyzeUploadedImage = async (req: Request, res: Response) => {
+  const imageFile = req.file;
+
+  if (!imageFile) {
+    return res.status(400).json({ error: 'Image file is required' });
+  }
+
+  if (!ai) {
+    // Mock response if Gemini is not configured
+    return res.json({
+      detected: "Road Damage",
+      confidence: "95%",
+      estimatedValue: "Road Width: 5m",
+      severity: "High"
+    });
+  }
+
+  try {
+    const base64Image = imageFile.buffer.toString('base64');
+    const mimeType = imageFile.mimetype || 'image/jpeg';
+    const contents = [{
+      inlineData: {
+        mimeType,
+        data: base64Image
+      }
+    }];
+
+    const prompt = `
+      You are an AI Image Analyzer for the "Jansunwai AI" platform. 
+      Look at this uploaded photo of a civic issue (e.g., road damage, water logging, garbage, school building condition, hospital condition).
+      
+      Identify the core issue.
+      Return ONLY a JSON object with this EXACT schema:
+      {
+        "detected": "A short 2-3 word phrase of what is detected (e.g., Road Damage, Water Logging, Garbage Dump)",
+        "confidence": "A percentage (e.g., 97%)",
+        "estimatedValue": "A short estimation (e.g., Road Width: 5m, Area: 10 sq meters)",
+        "severity": "Low, Medium, High, or Critical"
+      }
+      Do NOT include any markdown formatting, only valid JSON.
+    `;
+
+    const response = await ai.models.generateContent({
+      model: 'gemini-2.5-flash',
+      contents: [
+        ...contents,
+        { text: prompt }
+      ],
+      config: {
+        responseMimeType: 'application/json'
+      }
+    });
+
+    const result = JSON.parse(response.text || '{}');
+    return res.json(result);
+  } catch (error: any) {
+    console.error('Error analyzing uploaded image:', error);
+    return res.status(500).json({ error: 'Image analysis failed', details: error.message });
   }
 };
 

@@ -145,6 +145,22 @@ export const db = {
     return mockDb.createSuggestion(suggestion);
   },
 
+  deleteSuggestion: async (id: string): Promise<boolean> => {
+    if (supabase) {
+      const { error } = await supabase
+        .from('suggestions')
+        .delete()
+        .eq('id', id);
+      
+      if (error) {
+        console.error('Supabase suggestion deletion error, using mockDb fallback:', error.message);
+        return mockDb.deleteSuggestion(id);
+      }
+      return true;
+    }
+    return mockDb.deleteSuggestion(id);
+  },
+
   addMediaAttachment: async (attachment: Omit<MediaAttachment, 'id' | 'created_at'>): Promise<MediaAttachment> => {
     if (supabase) {
       const { data, error } = await supabase

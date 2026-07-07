@@ -89,6 +89,7 @@ export const getPriorityEngine = async (_req: Request, res: Response) => {
         category: s.category,
         village: s.village || 'Unknown',
         block: s.block || 'Unknown',
+        district: s.district || 'Unknown',
         urgency: s.urgency,
         status: s.status,
         priorityScore: Math.min(100, priorityScore),

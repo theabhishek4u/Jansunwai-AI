@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/AuthContext';
@@ -103,13 +103,47 @@ export default function SubmitSuggestion() {
 
   // Drag & drop state and handlers
   const [isDragging, setIsDragging] = useState(false);
+  
+  // Image Analysis State
+  const [isAnalyzingImage, setIsAnalyzingImage] = useState(false);
+  const [imageAnalysis, setImageAnalysis] = useState<{
+    detected: string;
+    confidence: string;
+    estimatedValue: string;
+    severity: string;
+  } | null>(null);
+
+  const analyzeImage = async (file: File) => {
+    setIsAnalyzingImage(true);
+    setImageAnalysis(null);
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+      const res = await fetch('http://localhost:5000/api/ai/analyze-image', {
+        method: 'POST',
+        body: formData,
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setImageAnalysis(data);
+      }
+    } catch (err) {
+      console.error('Failed to analyze image:', err);
+    } finally {
+      setIsAnalyzingImage(false);
+    }
+  };
 
   const processFiles = (files: FileList | File[]) => {
     const newAttachments: Attachment[] = [];
+    let firstImage: File | null = null;
     
     Array.from(files).forEach((file) => {
       let type: 'image' | 'video' | 'audio' | 'document' = 'document';
-      if (file.type.startsWith('image/')) type = 'image';
+      if (file.type.startsWith('image/')) {
+        type = 'image';
+        if (!firstImage) firstImage = file;
+      }
       else if (file.type.startsWith('video/')) type = 'video';
       else if (file.type.startsWith('audio/')) type = 'audio';
       else if (file.type === 'application/pdf' || file.name.endsWith('.pdf')) type = 'document';
@@ -124,6 +158,10 @@ export default function SubmitSuggestion() {
     });
     
     setAttachments((prev) => [...prev, ...newAttachments]);
+
+    if (firstImage) {
+      analyzeImage(firstImage);
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -163,6 +201,8 @@ export default function SubmitSuggestion() {
     duplicateOfId?: string;
     suggestionId?: string;
   } | null>(null);
+
+  const [showPreview, setShowPreview] = useState(false);
 
   // Reverse Geocode from lat/lng using OpenStreetMap Nominatim
   const reverseGeocodeFromCoords = useCallback(async (latitude: number, longitude: number) => {
@@ -297,8 +337,6 @@ export default function SubmitSuggestion() {
     }
   };
 
-  // Image Selection Handler (removed in favor of multi-media handleFileChange)
-
   // Audio Recording Handlers
   const startRecording = () => {
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
@@ -340,25 +378,29 @@ export default function SubmitSuggestion() {
       }, 1000);
     };
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     recognition.onresult = (event: any) => {
+      let interimTranscript = '';
       let finalTranscript = '';
+      
       for (let i = event.resultIndex; i < event.results.length; ++i) {
         if (event.results[i].isFinal) {
           finalTranscript += event.results[i][0].transcript;
+        } else {
+          interimTranscript += event.results[i][0].transcript;
         }
       }
       
-      // We only append final transcript to avoid text jumping wildly
       if (finalTranscript) {
-        const newText = currentTranscript ? currentTranscript + ' ' + finalTranscript : finalTranscript;
-        currentTranscript = newText;
-        transcriptRef.current = newText;
-        setDescription(newText);
+        currentTranscript = currentTranscript ? currentTranscript + ' ' + finalTranscript : finalTranscript;
+        transcriptRef.current = currentTranscript;
+        setDescription(currentTranscript);
         // Automatically suggest a title if it's empty
         if (!title && currentTranscript.length > 10) {
           setTitle("Voice Complaint");
         }
+      } else if (interimTranscript) {
+        // Show interim results live while speaking
+        setDescription((currentTranscript ? currentTranscript + ' ' : '') + interimTranscript);
       }
     };
 
@@ -387,13 +429,8 @@ export default function SubmitSuggestion() {
         clearInterval(recordingTimerRef.current);
       }
 
-      // Auto trigger AI Writing Assist after transcription finishes!
-      const spokenText = transcriptRef.current;
-      if (spokenText && spokenText.trim().length > 5) {
-        setTimeout(() => {
-          handleAiAssist(spokenText);
-        }, 800);
-      }
+      // Ensure description is synced with final recognized text
+      setDescription(transcriptRef.current);
     }
   };
 
@@ -450,14 +487,19 @@ export default function SubmitSuggestion() {
     }
   };
 
-  // Submit Complaint Form
-  const handleSubmitForm = async (e: React.FormEvent) => {
+  // Submit Initial (opens preview)
+  const handleInitialSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!description || !title) {
       alert("Please fill in Title and Description.");
       return;
     }
+    setShowPreview(true);
+  };
 
+  // Final Submit Complaint Form
+  const handleSubmitForm = async () => {
+    setShowPreview(false);
     setIsSubmitting(true);
     try {
       const formData = new FormData();
@@ -523,162 +565,93 @@ export default function SubmitSuggestion() {
   const circumference = 2 * Math.PI * radius; // ~282.74
   const strokeDashoffset = aiScore !== null ? circumference - (aiScore / 100) * circumference : circumference;
 
-
-
   // Dynamic glow color based on AI score
   const scoreGlowColor = aiScore !== null
     ? aiScore >= 80 ? 'rgba(16,185,129,0.15)' : aiScore >= 50 ? 'rgba(245,158,11,0.15)' : 'rgba(239,68,68,0.12)'
     : 'rgba(99,102,241,0.08)';
-  const scoreStrokeColor = aiScore !== null
-    ? aiScore >= 80 ? 'stroke-emerald-400' : aiScore >= 50 ? 'stroke-amber-400' : 'stroke-rose-400'
-    : 'stroke-indigo-500';
+
+  // Dynamic live score calculation (Client-side fallback)
+  const completeness = {
+    Title: title.trim().length > 3,
+    Location: state.trim().length > 0 && district.trim().length > 0,
+    Image: attachments.length > 0,
+    Description: description.trim().length > 10,
+    'Estimated Beneficiaries': beneficiaries.trim().length > 0,
+  };
+
+  const calculateScore = () => {
+    let score = 10; // base score for urgency/category which are default
+    if (completeness.Title) score += 15;
+    if (completeness.Description) score += 25;
+    if (completeness.Location) score += 20;
+    if (completeness.Image) score += 15;
+    if (completeness['Estimated Beneficiaries']) score += 15;
+    return score;
+  };
+
+  const [isScoring, setIsScoring] = useState(false);
+
+  // Real AI Score evaluation via API
+  React.useEffect(() => {
+    if (!description || description.trim().length < 10) {
+      return;
+    }
+    setIsScoring(true);
+    const timer = setTimeout(async () => {
+      try {
+        const formData = new FormData();
+        formData.append('title', title);
+        formData.append('description', description);
+        formData.append('state', state);
+        formData.append('district', district);
+        formData.append('village', village);
+        
+        const firstImage = attachments.find(a => a.type === 'image');
+        if (firstImage) {
+          formData.append('image', firstImage.file);
+        }
+
+        const response = await fetch('http://localhost:5000/api/ai/analyze-suggestion', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (response.ok) {
+          const data = await response.json();
+          if (data.completenessScore) {
+            setAiScore(data.completenessScore);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to fetch real AI score', err);
+      } finally {
+        setIsScoring(false);
+      }
+    }, 1500); // 1.5s debounce
+
+    return () => clearTimeout(timer);
+  }, [title, description, state, district, village, attachments]);
+
+  const liveScore = aiScore !== null ? aiScore : calculateScore();
 
   return (
     <div className="space-y-6 max-w-7xl mx-auto animate-fadeIn">
-
       {/* ═══════════ HERO HEADER ═══════════ */}
       <div className="relative p-6 sm:p-8 rounded-[28px] overflow-hidden border border-slate-800/60" style={{ background: 'linear-gradient(135deg, rgba(15,23,42,0.95) 0%, rgba(30,27,75,0.4) 50%, rgba(15,23,42,0.95) 100%)' }}>
-        {/* Animated mesh gradient blobs */}
-        <div className="absolute -top-20 -right-20 w-72 h-72 bg-indigo-600/8 blur-[100px] rounded-full pointer-events-none animate-pulse" />
-        <div className="absolute -bottom-16 -left-16 w-56 h-56 bg-violet-600/6 blur-[80px] rounded-full pointer-events-none" />
-        <div className="absolute top-0 left-0 w-full h-px bg-linear-to-r from-transparent via-indigo-500/40 to-transparent" />
-
         <div className="relative flex flex-col lg:flex-row lg:items-center justify-between gap-6">
           <div className="space-y-3">
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-2xl bg-linear-to-br from-indigo-600 via-violet-600 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-600/25">
-                <Send className="w-6 h-6 text-white" />
-              </div>
-              <div>
-                <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-                  Submit Development Complaint
-                </h1>
-                <p className="text-xs text-slate-400 mt-0.5">AI-powered proposal builder with voice input, auto-formatting & priority scoring</p>
-              </div>
-            </div>
+            <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
+              Submit Development Complaint
+            </h1>
+            <p className="text-xs text-slate-400">AI-powered proposal builder with voice input & priority scoring</p>
           </div>
-
-
         </div>
       </div>
 
       {/* ═══════════ MAIN FORM AREA ═══════════ */}
-      <div className="max-w-4xl mx-auto space-y-6">
-
-          {/* ── SECTION 1: VOICE + LANGUAGE ── */}
-          <div className="relative rounded-[24px] border border-slate-800/60 overflow-hidden" style={{ background: 'linear-gradient(180deg, rgba(30,27,75,0.15) 0%, rgba(15,23,42,0.6) 100%)' }}>
-            <div className="absolute top-0 left-0 w-full h-px bg-linear-to-r from-transparent via-violet-500/30 to-transparent" />
-            <div className="p-6 sm:p-7 space-y-5">
-
-              {/* Language selector row */}
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-linear-to-br from-violet-600/20 to-indigo-600/20 border border-violet-500/20 flex items-center justify-center">
-                    <Globe className="w-4.5 h-4.5 text-violet-400" />
-                  </div>
-                  <div>
-                    <h3 className="text-sm font-bold text-white">भाषा चुनें / Select Language</h3>
-                    <p className="text-[11px] text-slate-500">AI will process your input in this language</p>
-                  </div>
-                </div>
-                <div className="relative">
-                  <select
-                    value={language}
-                    onChange={(e) => setLanguage(e.target.value)}
-                    className="bg-slate-950/80 border border-slate-700/60 text-sm text-white rounded-xl px-4 py-2.5 pr-10 focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500/50 focus:outline-none appearance-none cursor-pointer font-semibold transition-all hover:border-slate-600"
-                  >
-                    <option value="English">English</option>
-                    <option value="Hindi">Hindi (हिंदी)</option>
-                    <option value="Bengali">Bengali (বাংলা)</option>
-                    <option value="Marathi">Marathi (मराठी)</option>
-                    <option value="Telugu">Telugu (తెలుగు)</option>
-                    <option value="Tamil">Tamil (தமிழ்)</option>
-                    <option value="Gujarati">Gujarati (ગુજરાતી)</option>
-                    <option value="Urdu">Urdu (اردو)</option>
-                    <option value="Odia">Odia (ଓଡ଼ିଆ)</option>
-                    <option value="Punjabi">Punjabi (ਪੰਜਾਬੀ)</option>
-                  </select>
-                  <ChevronDown className="w-4 h-4 text-slate-400 absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none" />
-                </div>
-              </div>
-
-              {/* Voice recorder card */}
-              <div className="relative rounded-2xl overflow-hidden" style={{ background: 'linear-gradient(135deg, rgba(49,46,129,0.12) 0%, rgba(15,23,42,0.8) 100%)' }}>
-                <div className="absolute inset-0 border border-indigo-500/10 rounded-2xl pointer-events-none" />
-                {isRecording && <div className="absolute inset-0 border-2 border-red-500/30 rounded-2xl pointer-events-none animate-pulse" />}
-                
-                <div className="relative p-5 sm:p-6 flex flex-col sm:flex-row items-center justify-between gap-5">
-                  <div className="space-y-3 text-center sm:text-left flex-1">
-                    <div className="flex items-center justify-center sm:justify-start gap-2.5">
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shadow-lg transition-all duration-300 ${
-                        isRecording 
-                          ? 'bg-red-600 shadow-red-600/30 animate-pulse' 
-                          : 'bg-linear-to-br from-indigo-600 to-violet-600 shadow-indigo-600/20'
-                      }`}>
-                        <Mic className="w-5 h-5 text-white" />
-                      </div>
-                      <div>
-                        <h3 className="text-sm font-bold text-white">
-                          {isRecording ? `🔴 Recording... ${recordingTime}s` : 'Speak Your Complaint'}
-                        </h3>
-                        <p className="text-[11px] text-slate-500">AI auto-structures title, description & metadata</p>
-                      </div>
-                    </div>
-
-                    {/* Supported languages */}
-                    <div className="flex flex-wrap items-center justify-center sm:justify-start gap-1.5">
-                      {['Hindi', 'Hinglish', 'Bhojpuri', 'English', 'Urdu'].map(lang => (
-                        <span key={lang} className="text-[9px] font-semibold text-slate-400 bg-slate-900/80 border border-slate-800/80 px-2.5 py-0.5 rounded-full">{lang}</span>
-                      ))}
-                    </div>
-
-                    {/* Live waveform when recording */}
-                    {isRecording && (
-                      <div className="flex items-end justify-center sm:justify-start gap-[3px] h-8 pt-1">
-                        {Array.from({ length: 20 }).map((_, i) => (
-                          <span
-                            key={i}
-                            className="w-[3px] bg-red-500 rounded-full animate-bounce"
-                            style={{
-                              animationDelay: `${i * 0.05}s`,
-                              height: `${8 + Math.random() * 20}px`,
-                              animationDuration: `${0.4 + Math.random() * 0.3}s`
-                            }}
-                          />
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Record / Stop button */}
-                  <div className="shrink-0">
-                    {isRecording ? (
-                      <button
-                        type="button"
-                        onClick={stopRecording}
-                        className="group relative bg-red-600 hover:bg-red-500 text-white font-bold text-xs px-7 py-4 rounded-2xl flex items-center gap-2.5 shadow-xl shadow-red-600/25 active:scale-95 transition-all cursor-pointer"
-                      >
-                        <span className="w-3 h-3 rounded-sm bg-white" />
-                        <span>Stop Recording</span>
-                      </button>
-                    ) : (
-                      <button
-                        type="button"
-                        onClick={startRecording}
-                        className="group relative bg-linear-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold text-xs px-7 py-4 rounded-2xl flex items-center gap-2.5 shadow-xl shadow-indigo-600/25 hover:-translate-y-0.5 active:scale-95 transition-all cursor-pointer"
-                      >
-                        <Mic className="w-4.5 h-4.5" />
-                        <span>Record Complaint</span>
-                        <div className="absolute -inset-px bg-linear-to-r from-indigo-500/20 to-violet-500/20 rounded-2xl blur-sm -z-10 group-hover:blur-md transition-all" />
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* ── SECTION 2: FORM FIELDS ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6 items-start">
+        {/* Left Column: Form */}
+        <div className="space-y-6">
           <div className="relative rounded-[24px] border border-slate-800/60 overflow-hidden bg-slate-900/40 backdrop-blur-sm">
             <div className="absolute top-0 left-0 w-full h-px bg-linear-to-r from-transparent via-indigo-500/20 to-transparent" />
             
@@ -730,26 +703,52 @@ export default function SubmitSuggestion() {
                     placeholder="Describe the developmental need in detail. AI will rewrite it into a formal application letter addressed to your MP..."
                     className="w-full bg-slate-950/70 border border-slate-800/80 rounded-2xl py-4 px-4 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-indigo-500/60 focus:ring-2 focus:ring-indigo-500/10 focus:shadow-[0_0_20px_rgba(99,102,241,0.06)] transition-all duration-300 font-sans resize-none"
                   />
-                  {description.length > 10 && (
+                  <div className="absolute bottom-4 right-4 flex items-center gap-2">
                     <button
                       type="button"
-                      onClick={() => handleAiAssist()}
-                      disabled={aiLoading}
-                      className="absolute bottom-4 right-4 bg-linear-to-r from-indigo-600 via-violet-600 to-purple-600 hover:from-indigo-500 hover:via-violet-500 hover:to-purple-500 text-white text-[11px] px-4 py-2.5 rounded-xl flex items-center gap-2 shadow-lg shadow-indigo-600/20 hover:shadow-xl hover:shadow-indigo-600/30 hover:-translate-y-0.5 transition-all font-bold cursor-pointer disabled:opacity-50 disabled:hover:translate-y-0"
+                      onClick={isRecording ? stopRecording : startRecording}
+                      className={`relative flex items-center justify-center p-3 rounded-xl shadow-lg transition-all duration-300 cursor-pointer overflow-hidden group ${
+                        isRecording 
+                          ? 'bg-red-600 hover:bg-red-500 shadow-red-600/30' 
+                          : 'bg-indigo-600 hover:bg-indigo-500 shadow-indigo-600/20 hover:-translate-y-0.5'
+                      }`}
+                      title={isRecording ? "Stop Recording" : "Voice Typing"}
                     >
-                      {aiLoading ? (
-                        <>
-                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                          <span>Analyzing...</span>
-                        </>
-                      ) : (
-                        <>
-                          <Wand2 className="w-3.5 h-3.5" />
-                          <span>AI Writing Assistant</span>
-                        </>
+                      {isRecording && (
+                        <div className="absolute inset-0 bg-red-400/30 animate-ping rounded-xl" />
                       )}
+                      <div className="relative z-10 flex items-center gap-2">
+                        {isRecording ? (
+                          <>
+                            <span className="w-4 h-4 rounded-sm bg-white animate-pulse" />
+                            <span className="text-white text-xs font-bold w-6 text-center">{recordingTime}s</span>
+                          </>
+                        ) : (
+                          <Mic className="w-4.5 h-4.5 text-white group-hover:scale-110 transition-transform" />
+                        )}
+                      </div>
                     </button>
-                  )}
+                    {description.length > 10 && (
+                      <button
+                        type="button"
+                        onClick={() => handleAiAssist()}
+                        disabled={aiLoading}
+                        className="bg-linear-to-r from-indigo-600 via-violet-600 to-purple-600 hover:from-indigo-500 hover:via-violet-500 hover:to-purple-500 text-white text-[11px] px-4 py-2.5 rounded-xl flex items-center gap-2 shadow-lg shadow-indigo-600/20 hover:shadow-xl hover:shadow-indigo-600/30 hover:-translate-y-0.5 transition-all font-bold cursor-pointer disabled:opacity-50 disabled:hover:translate-y-0"
+                      >
+                        {aiLoading ? (
+                          <>
+                            <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            <span>Analyzing...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Wand2 className="w-3.5 h-3.5" />
+                            <span>AI Writing Assistant</span>
+                          </>
+                        )}
+                      </button>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -819,23 +818,74 @@ export default function SubmitSuggestion() {
                 >
                   <p className="text-[11px] text-slate-500 font-medium text-center mb-4">Drag & drop files or select a category below</p>
                   
-                  <div className="grid grid-cols-4 gap-3">
-                    {[
-                      { accept: 'image/*', capture: 'environment' as const, icon: Camera, label: 'Photo', color: 'blue', bg: 'bg-blue-500/8', border: 'hover:border-blue-500/40', text: 'text-blue-400' },
-                      { accept: 'video/*', capture: 'environment' as const, icon: Video, label: 'Video', color: 'pink', bg: 'bg-pink-500/8', border: 'hover:border-pink-500/40', text: 'text-pink-400' },
-                      { accept: 'audio/*', capture: undefined, icon: FileAudio, label: 'Audio', color: 'amber', bg: 'bg-amber-500/8', border: 'hover:border-amber-500/40', text: 'text-amber-400' },
-                      { accept: '.pdf,.doc,.docx', capture: undefined, icon: Paperclip, label: 'Document', color: 'emerald', bg: 'bg-emerald-500/8', border: 'hover:border-emerald-500/40', text: 'text-emerald-400' },
-                    ].map(({ accept, capture, icon: Icon, label, bg, border, text }) => (
-                      <label key={label} className={`flex flex-col items-center justify-center py-4 ${bg} border border-slate-800/60 ${border} rounded-xl cursor-pointer transition-all group hover:scale-[1.03] active:scale-95`}>
-                        <div className={`w-9 h-9 rounded-xl ${bg} flex items-center justify-center ${text} mb-2 group-hover:scale-110 transition-transform shadow-inner`}>
-                          <Icon className="w-4.5 h-4.5" />
-                        </div>
-                        <span className="text-[11px] font-bold text-slate-300">{label}</span>
-                        <input type="file" accept={accept} capture={capture} multiple className="hidden" onChange={handleFileChange} />
-                      </label>
-                    ))}
-                  </div>
+                  <label className="flex flex-col items-center justify-center py-8 bg-indigo-500/5 border border-indigo-500/20 hover:border-indigo-500/40 rounded-xl cursor-pointer transition-all group hover:bg-indigo-500/10 active:scale-[0.98]">
+                    <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 mb-3 group-hover:scale-110 transition-transform shadow-inner">
+                      <Paperclip className="w-6 h-6" />
+                    </div>
+                    <span className="text-sm font-bold text-indigo-300 mb-1">Click to Upload Files</span>
+                    <span className="text-[10px] text-slate-500">Supports Images, Videos, Audio, and PDFs</span>
+                    <input 
+                      type="file" 
+                      accept="image/*,video/*,audio/*,.pdf,.doc,.docx" 
+                      multiple 
+                      className="hidden" 
+                      onChange={handleFileChange} 
+                    />
+                  </label>
                 </div>
+                
+                {/* AI Image Analysis Results */}
+                {(isAnalyzingImage || imageAnalysis) ? (
+                  <div className="mt-3 p-4 rounded-xl border border-indigo-500/30 bg-indigo-950/20 relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-1 h-full bg-linear-to-b from-indigo-500 to-purple-500" />
+                    
+                    <div className="flex items-center justify-between mb-3 ml-1">
+                      <div className="flex items-center gap-2">
+                        <Sparkles className={`w-4 h-4 text-indigo-400 ${isAnalyzingImage ? 'animate-spin' : ''}`} />
+                        <span className="text-xs font-bold text-slate-200">AI Image Analysis ⭐⭐⭐⭐⭐</span>
+                      </div>
+                      {isAnalyzingImage && <span className="text-[10px] text-indigo-400 animate-pulse font-medium tracking-wide">Analyzing with Gemini Vision...</span>}
+                    </div>
+
+                    {!isAnalyzingImage && imageAnalysis && (
+                      <div className="ml-1 grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <div className="bg-slate-900/60 border border-slate-800 rounded-lg p-2.5">
+                          <span className="block text-[9px] uppercase tracking-wider text-slate-500 font-bold mb-1">Detected</span>
+                          <span className="text-xs font-bold text-white flex items-center gap-1.5"><CheckCircle className="w-3.5 h-3.5 text-emerald-400" /> {imageAnalysis.detected}</span>
+                        </div>
+                        <div className="bg-slate-900/60 border border-slate-800 rounded-lg p-2.5">
+                          <span className="block text-[9px] uppercase tracking-wider text-slate-500 font-bold mb-1">Confidence</span>
+                          <span className="text-xs font-bold text-indigo-300">{imageAnalysis.confidence}</span>
+                        </div>
+                        <div className="bg-slate-900/60 border border-slate-800 rounded-lg p-2.5">
+                          <span className="block text-[9px] uppercase tracking-wider text-slate-500 font-bold mb-1">Estimated</span>
+                          <span className="text-xs font-medium text-slate-300 line-clamp-1">{imageAnalysis.estimatedValue}</span>
+                        </div>
+                        <div className="bg-slate-900/60 border border-slate-800 rounded-lg p-2.5">
+                          <span className="block text-[9px] uppercase tracking-wider text-slate-500 font-bold mb-1">Severity</span>
+                          <span className={`text-xs font-bold ${imageAnalysis.severity?.toLowerCase() === 'critical' ? 'text-rose-500' : imageAnalysis.severity?.toLowerCase() === 'high' ? 'text-amber-500' : 'text-emerald-500'}`}>{imageAnalysis.severity}</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="mt-3 p-3.5 rounded-xl border border-indigo-500/20 bg-slate-900/40 relative overflow-hidden">
+                    <div className="absolute top-0 left-0 w-1 h-full bg-linear-to-b from-indigo-500 to-purple-500" />
+                    <div className="flex items-center gap-2 mb-2 ml-1">
+                      <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+                      <span className="text-[11px] font-bold text-slate-300">AI will analyze uploaded media</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2 ml-1">
+                      {['Road Damage', 'Water Logging', 'Garbage', 'School Building', 'Hospital'].map((item) => (
+                        <span key={item} className="flex items-center gap-1 text-[10px] text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded-md border border-emerald-500/20">
+                          <CheckCircle className="w-3 h-3" />
+                          {item}
+                        </span>
+                      ))}
+                    </div>
+                    <div className="mt-2 ml-1 text-[9px] text-slate-500 font-medium tracking-wide uppercase">Detected automatically</div>
+                  </div>
+                )}
 
                 {/* Attachment previews */}
                 {attachments.length > 0 && (
@@ -1013,6 +1063,144 @@ export default function SubmitSuggestion() {
           </div>
         </div>
 
+        {/* Right Column: AI Completeness Score */}
+        <div className="sticky top-6 space-y-6">
+          <div className="relative rounded-[24px] border border-slate-800/60 overflow-hidden bg-slate-900/40 backdrop-blur-sm p-6 shadow-xl">
+            <div className="absolute top-0 left-0 w-full h-px bg-linear-to-r from-transparent via-emerald-500/30 to-transparent" />
+            
+            <h3 className="text-sm font-bold text-white mb-6 flex items-center justify-between">
+              <span className="flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-emerald-400" />
+                Proposal Quality
+              </span>
+              {isScoring && (
+                <span className="flex items-center gap-1.5 text-[10px] text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                  AI Evaluating
+                </span>
+              )}
+            </h3>
+            
+            <div className="flex items-center justify-center mb-8">
+              <div className="relative w-28 h-28 flex items-center justify-center">
+                <div className="absolute inset-0 bg-emerald-500/10 blur-xl rounded-full" />
+                <svg className="w-full h-full transform -rotate-90 relative z-10" viewBox="0 0 100 100">
+                  <circle cx="50" cy="50" r="45" fill="none" className="stroke-slate-800" strokeWidth="8" />
+                  <circle 
+                    cx="50" cy="50" r="45" fill="none" 
+                    className={`${liveScore >= 80 ? 'stroke-emerald-400' : liveScore >= 50 ? 'stroke-amber-400' : 'stroke-rose-400'} transition-all duration-1000 ease-out`} 
+                    strokeWidth="8"
+                    strokeDasharray={2 * Math.PI * 45}
+                    strokeDashoffset={2 * Math.PI * 45 - (liveScore / 100) * (2 * Math.PI * 45)}
+                    strokeLinecap="round"
+                  />
+                </svg>
+                <div className="absolute inset-0 flex items-center justify-center flex-col z-20">
+                  <span className="text-3xl font-black text-white">{liveScore}<span className="text-sm text-slate-400">%</span></span>
+                </div>
+              </div>
+            </div>
+
+            <div className="space-y-5">
+              <div className="space-y-2.5">
+                {Object.entries(completeness).map(([key, isComplete]) => 
+                  isComplete ? (
+                    <div key={key} className="flex items-center gap-2.5 text-sm font-medium text-emerald-400 bg-emerald-500/5 px-3 py-1.5 rounded-lg border border-emerald-500/10 transition-all duration-500">
+                      <CheckCircle className="w-4 h-4" />
+                      {key}
+                    </div>
+                  ) : null
+                )}
+              </div>
+              
+              {Object.values(completeness).includes(false) && (
+                <>
+                  <div className="h-px w-full bg-slate-800/60" />
+                  <div>
+                    <span className="text-[11px] font-bold text-rose-400 uppercase tracking-wider block mb-3">Missing</span>
+                    <div className="space-y-2.5">
+                      {Object.entries(completeness).map(([key, isComplete]) => 
+                        !isComplete ? (
+                          <div key={key} className="flex items-center gap-2.5 text-sm font-medium text-slate-400 bg-slate-900/50 px-3 py-1.5 rounded-lg border border-slate-800/50 transition-all duration-500">
+                            <XCircle className="w-4 h-4 text-rose-500/50" />
+                            {key}
+                          </div>
+                        ) : null
+                      )}
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+            
+            <div className="mt-8 p-3.5 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-xs text-indigo-300 font-medium leading-relaxed">
+              <div className="flex gap-2.5">
+                <Info className="w-4 h-4 shrink-0 mt-0.5" />
+                <p>AI live updates the score as you fill in details. Aim for &gt;80% for high priority.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ═══════════ PREVIEW MODAL ═══════════ */}
+      {showPreview && !submitResult && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+          <div className="absolute inset-0 bg-slate-950/80 backdrop-blur-xl" />
+          <div className="relative w-full max-w-2xl bg-[#0b0f19] border border-slate-800 rounded-3xl p-6 sm:p-8 shadow-2xl max-h-[90vh] overflow-y-auto custom-scrollbar">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                <FileText className="w-5 h-5 text-indigo-400" />
+                Preview Your Proposal
+              </h3>
+              <button type="button" onClick={() => !isSubmitting && setShowPreview(false)} disabled={isSubmitting} className="text-slate-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition-colors disabled:opacity-50">
+                <XCircle className="w-6 h-6" />
+              </button>
+            </div>
+            
+            <div className="space-y-6">
+              <div className="space-y-4">
+                <div>
+                  <label className="text-[10px] uppercase text-slate-500 font-bold tracking-wider">Title</label>
+                  <p className="text-sm text-slate-200 font-medium bg-slate-900/50 p-3 rounded-xl border border-slate-800/50">{title}</p>
+                </div>
+                <div>
+                  <label className="text-[10px] uppercase text-slate-500 font-bold tracking-wider">Description</label>
+                  <p className="text-sm text-slate-300 bg-slate-900/50 p-3 rounded-xl border border-slate-800/50 whitespace-pre-wrap leading-relaxed">{description}</p>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-[10px] uppercase text-slate-500 font-bold tracking-wider">Location</label>
+                    <p className="text-xs text-slate-300 bg-slate-900/50 p-2.5 rounded-xl border border-slate-800/50">{village ? village + ', ' : ''}{district ? district + ', ' : ''}{state}</p>
+                  </div>
+                  <div>
+                    <label className="text-[10px] uppercase text-slate-500 font-bold tracking-wider">Urgency</label>
+                    <p className="text-xs text-slate-300 bg-slate-900/50 p-2.5 rounded-xl border border-slate-800/50 capitalize">{urgency}</p>
+                  </div>
+                  <div>
+                    <label className="text-[10px] uppercase text-slate-500 font-bold tracking-wider">People Affected</label>
+                    <p className="text-xs text-slate-300 bg-slate-900/50 p-2.5 rounded-xl border border-slate-800/50">{beneficiaries}</p>
+                  </div>
+                  <div>
+                    <label className="text-[10px] uppercase text-slate-500 font-bold tracking-wider">Attachments</label>
+                    <p className="text-xs text-slate-300 bg-slate-900/50 p-2.5 rounded-xl border border-slate-800/50">{attachments.length} files attached</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-4 pt-4 border-t border-slate-800/60">
+                <button type="button" onClick={() => setShowPreview(false)} disabled={isSubmitting} className="flex-1 py-3.5 rounded-xl text-sm font-bold text-slate-300 bg-slate-800 hover:bg-slate-700 transition-colors disabled:opacity-50">
+                  Edit Details
+                </button>
+                <button type="button" onClick={handleSubmitForm} disabled={isSubmitting} className="flex-1 py-3.5 rounded-xl text-sm font-bold text-white bg-linear-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2 disabled:opacity-50">
+                  {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+                  {isSubmitting ? 'Submitting...' : 'Confirm & Submit'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ═══════════ SUCCESS MODAL ═══════════ */}
       {submitResult && (
@@ -1067,17 +1255,26 @@ export default function SubmitSuggestion() {
                     </div>
                   )}
 
-                  {/* CTA Button */}
-                  <button
-                    onClick={() => router.push(`/dashboard/suggestions/${submitResult.suggestionId || 'recent'}`)}
-                    className="group relative w-full overflow-hidden rounded-2xl p-[1.5px] focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
-                  >
-                    <div className="absolute inset-0 bg-linear-to-r from-indigo-500 via-purple-500 to-indigo-500 animate-[spin_4s_linear_infinite] opacity-70" />
-                    <div className="relative flex items-center justify-center gap-2.5 bg-[#0b0f19] group-hover:bg-linear-to-r group-hover:from-indigo-600/10 group-hover:to-purple-600/10 px-6 py-4 rounded-[14.5px] transition-colors">
-                      <span className="font-bold text-sm text-transparent bg-clip-text bg-linear-to-r from-indigo-300 to-purple-300">Track Complaint Timeline</span>
-                      <ArrowRight className="w-4 h-4 text-purple-400 group-hover:translate-x-1 transition-transform" />
-                    </div>
-                  </button>
+                  {/* CTA Buttons */}
+                  <div className="flex flex-col gap-3 w-full">
+                    <button
+                      onClick={() => router.push(`/dashboard/suggestions/${submitResult.suggestionId || 'recent'}`)}
+                      className="group relative w-full overflow-hidden rounded-2xl p-[1.5px] focus:outline-none focus:ring-2 focus:ring-indigo-500/50"
+                    >
+                      <div className="absolute inset-0 bg-linear-to-r from-indigo-500 via-purple-500 to-indigo-500 animate-[spin_4s_linear_infinite] opacity-70" />
+                      <div className="relative flex items-center justify-center gap-2.5 bg-[#0b0f19] group-hover:bg-linear-to-r group-hover:from-indigo-600/10 group-hover:to-purple-600/10 px-6 py-4 rounded-[14.5px] transition-colors">
+                        <span className="font-bold text-sm text-transparent bg-clip-text bg-linear-to-r from-indigo-300 to-purple-300">Track Complaint Timeline</span>
+                        <ArrowRight className="w-4 h-4 text-purple-400 group-hover:translate-x-1 transition-transform" />
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={() => router.push('/dashboard')}
+                      className="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-4 rounded-2xl text-sm transition-colors border border-slate-700 shadow-lg"
+                    >
+                      Go to Dashboard
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <div className="relative z-10 flex flex-col items-center">

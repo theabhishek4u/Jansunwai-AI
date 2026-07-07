@@ -4,6 +4,7 @@ import {
   createSuggestion,
   getSuggestions,
   getSuggestionDetails,
+  deleteSuggestion,
   addTimelineStatus,
   syncProfile,
   getProfileDetails
@@ -23,6 +24,7 @@ const upload = multer({
 router.post('/suggestions', upload.any(), asyncHandler(createSuggestion));
 router.get('/suggestions', asyncHandler(getSuggestions));
 router.get('/suggestions/:id', asyncHandler(getSuggestionDetails));
+router.delete('/suggestions/:id', asyncHandler(deleteSuggestion));
 router.post('/suggestions/:id/timeline', asyncHandler(addTimelineStatus));
 
 // Profile Routing

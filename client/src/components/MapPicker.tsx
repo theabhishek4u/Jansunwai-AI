@@ -41,7 +41,7 @@ const LocateControl = ({ setPosition }: { setPosition: (pos: L.LatLng) => void }
     e.stopPropagation();
     e.preventDefault();
     setLocating(true);
-    map.locate({ setView: true, maxZoom: 16 });
+    map.locate({ setView: true, maxZoom: 18, enableHighAccuracy: true });
   };
 
   useMapEvents({
