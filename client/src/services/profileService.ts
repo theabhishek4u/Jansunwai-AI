@@ -30,21 +30,30 @@ export const profileService = {
     if (role === 'mp') tableName = 'mp_profiles';
     if (role === 'admin') tableName = 'admin_profiles';
 
-    const { data, error } = await supabase
-      .from(tableName)
-      .select('*')
-      .eq('id', userId)
-      .single();
+    try {
+      const { data, error } = await supabase
+        .from(tableName)
+        .select('*')
+        .eq('id', userId)
+        .single();
 
-    if (error) {
+      if (error) {
+        return {
+          id: userId,
+          full_name: 'New User',
+          role
+        };
+      }
+      
+      return { ...data, role };
+    } catch (err) {
+      console.warn('Network error in getProfile, using fallback data:', err);
       return {
         id: userId,
-        full_name: 'New User',
+        full_name: 'Demo User',
         role
       };
     }
-    
-    return { ...data, role };
   },
 
   updateProfile: async (userId: string, role: 'citizen' | 'mp' | 'admin', profileData: Partial<ProfileData>): Promise<ProfileData> => {

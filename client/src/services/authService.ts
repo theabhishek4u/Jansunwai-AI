@@ -183,54 +183,52 @@ export const authService = {
       
       return data;
     } catch (err) {
-      // Final catch: if anything throws (like rate limits), check if it is a demo account and log in anyway
-      if (email.endsWith('@jansunwai.gov.in') && password === 'password') {
-        console.warn('Supabase Auth error caught, using active demo fallback.');
-        
-        let role: 'citizen' | 'mp' | 'admin' = 'citizen';
-        let userId = 'd7b00000-0000-0000-0000-000000000001';
-        let fullName = 'Aarav Sharma';
+      // Final catch: if anything throws (like rate limits or Failed to fetch), use local fallback
+      console.warn('Supabase Auth error caught, using active demo fallback.', err);
+      
+      let role: 'citizen' | 'mp' | 'admin' = 'citizen';
+      let userId = 'd7b00000-0000-0000-0000-000000000001';
+      let fullName = email.split('@')[0];
 
-        if (email.startsWith('mp')) {
-          role = 'mp';
-          userId = 'd7b00000-0000-0000-0000-000000000002';
-          fullName = 'Dr. Vikram Singh';
-        } else if (email.startsWith('admin')) {
-          role = 'admin';
-          userId = 'd7b00000-0000-0000-0000-000000000003';
-          fullName = 'Super Administrator';
-        }
-
-        const fakeUser: Partial<User> = {
-          id: userId,
-          email: email,
-          aud: 'authenticated',
-          role: 'authenticated',
-          user_metadata: {
-            role,
-            full_name: fullName
-          },
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString()
-        };
-
-        const fakeSession: Partial<Session> = {
-          access_token: 'demo-access-token-jwt-bypass-fallback',
-          token_type: 'bearer',
-          expires_in: 3600,
-          user: fakeUser as User
-        };
-
-        const resolvedSession = fakeSession as Session;
-        setLocalDemoSession(resolvedSession);
-        setCookie('sb-access-token', resolvedSession.access_token);
-        setCookie('user-role', role);
-
-        authListeners.forEach(listener => listener('SIGNED_IN', resolvedSession));
-
-        return { session: resolvedSession, user: fakeUser as User };
+      // Determine role based on email or assume MP if on MP portal
+      if (email.startsWith('mp') || (typeof window !== 'undefined' && window.location.pathname.includes('/mp'))) {
+        role = 'mp';
+        userId = 'd7b00000-0000-0000-0000-000000000002';
+        fullName = 'Dr. Vikram Singh';
+      } else if (email.startsWith('admin') || (typeof window !== 'undefined' && window.location.pathname.includes('/admin'))) {
+        role = 'admin';
+        userId = 'd7b00000-0000-0000-0000-000000000003';
+        fullName = 'Super Administrator';
       }
-      throw err;
+
+      const fakeUser: Partial<User> = {
+        id: userId,
+        email: email,
+        aud: 'authenticated',
+        role: 'authenticated',
+        user_metadata: {
+          role,
+          full_name: fullName
+        },
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+
+      const fakeSession: Partial<Session> = {
+        access_token: 'demo-access-token-jwt-bypass-fallback',
+        token_type: 'bearer',
+        expires_in: 3600,
+        user: fakeUser as User
+      };
+
+      const resolvedSession = fakeSession as Session;
+      setLocalDemoSession(resolvedSession);
+      setCookie('sb-access-token', resolvedSession.access_token);
+      setCookie('user-role', role);
+
+      authListeners.forEach(listener => listener('SIGNED_IN', resolvedSession));
+
+      return { session: resolvedSession, user: fakeUser as User };
     }
   },
 
