@@ -72,8 +72,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const sidebarLinks = [
     { href: '/dashboard', label: 'Overview', icon: <LayoutDashboard className="w-5 h-5" /> },
-    { href: '/dashboard/submit', label: 'Submit Complaint', icon: <PlusCircle className="w-5 h-5" /> },
-    { href: '/dashboard/profile', label: 'My Profile', icon: <UserCircle className="w-5 h-5" /> }
+    { href: '/dashboard/submit', label: 'Submit Complaint', icon: <PlusCircle className="w-5 h-5" /> }
   ];
 
   return (
@@ -146,24 +145,25 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
             <div className="relative">
               <button 
                 onClick={() => setShowNotifications(!showNotifications)}
-                className="w-10 h-10 rounded-xl bg-slate-900 border border-slate-850 flex items-center justify-center text-slate-400 hover:text-white transition-colors"
+                className="relative p-2 rounded-full text-slate-400 hover:text-indigo-400 hover:bg-indigo-500/10 transition-all duration-300"
+                title="Notifications"
               >
                 <Bell className="w-5 h-5" />
                 {notifications.length > 0 && (
-                  <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+                  <span className="absolute top-1.5 right-2 w-2 h-2 rounded-full bg-rose-500 border-2 border-slate-900 animate-pulse" />
                 )}
               </button>
 
               {showNotifications && (
-                  <div className="absolute right-0 mt-3 w-80 bg-slate-900 border border-slate-800 shadow-2xl rounded-2xl p-4 z-50">
+                  <div className="absolute right-0 mt-3 w-80 bg-slate-900/95 backdrop-blur-xl border border-slate-800 shadow-2xl rounded-2xl p-4 z-50">
                     <div className="flex items-center justify-between border-b border-slate-800 pb-2 mb-3">
-                      <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Notifications</span>
+                      <span className="text-xs font-bold text-slate-300 uppercase tracking-wider">Notifications</span>
                       <button 
                         onClick={() => {
                           setNotifications([]);
                           notifications.forEach(n => fetch(`/api/notifications/${n.id}/read`, { method: 'POST' }).catch(console.error));
                         }} 
-                        className="text-[10px] text-indigo-400 font-semibold hover:underline"
+                        className="text-[10px] text-indigo-400 font-semibold hover:text-indigo-300 transition-colors"
                       >
                         Clear all
                       </button>
@@ -171,13 +171,13 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                     {notifications.length === 0 ? (
                       <p className="text-slate-500 text-xs text-center py-4">No new notifications</p>
                     ) : (
-                      <div className="space-y-3">
+                      <div className="space-y-3 max-h-64 overflow-y-auto custom-scrollbar">
                         {notifications.map((notif, idx) => (
                           <div key={notif.id || idx} className="flex items-start space-x-2 text-xs text-slate-300 border-b border-slate-850 pb-2 last:border-0 last:pb-0">
                             <Sparkles className="w-3.5 h-3.5 text-indigo-400 shrink-0 mt-0.5" />
                             <div className="flex flex-col">
-                              <span className="font-bold text-slate-200">{notif.title}</span>
-                              <p className="text-slate-400 mt-0.5">{notif.message}</p>
+                               <span className="font-bold text-slate-200">{notif.title}</span>
+                               <p className="text-slate-400 mt-0.5">{notif.message}</p>
                             </div>
                           </div>
                         ))}
@@ -186,6 +186,51 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                   </div>
               )}
             </div>
+
+            {/* Profile Completion Indicator */}
+            {user && (
+              <Link 
+                href="/dashboard/profile"
+                className="relative group flex items-center justify-center w-10 h-10 rounded-full"
+                title={`Profile Completion: ${
+                  [user.full_name, user.phone, user.state, user.district, user.parliamentary_constituency, user.village_ward, user.pincode, user.aadhaar_number]
+                    .filter(f => f && String(f).trim() !== '').length
+                }/8 (${Math.round(([user.full_name, user.phone, user.state, user.district, user.parliamentary_constituency, user.village_ward, user.pincode, user.aadhaar_number]
+                    .filter(f => f && String(f).trim() !== '').length / 8) * 100)}%)`}
+              >
+                {/* SVG Circular Progress Background */}
+                <svg className="absolute inset-0 w-full h-full -rotate-90" viewBox="0 0 44 44">
+                  <circle 
+                    cx="22" cy="22" r="20" 
+                    fill="none" stroke="currentColor" strokeWidth="2" 
+                    className="text-slate-800" 
+                  />
+                  {/* SVG Circular Progress Value */}
+                  <circle 
+                    cx="22" cy="22" r="20" 
+                    fill="none" stroke="currentColor" strokeWidth="2" 
+                    strokeLinecap="round"
+                    strokeDasharray={2 * Math.PI * 20}
+                    strokeDashoffset={2 * Math.PI * 20 - (Math.round(([user.full_name, user.phone, user.state, user.district, user.parliamentary_constituency, user.village_ward, user.pincode, user.aadhaar_number]
+                      .filter(f => f && String(f).trim() !== '').length / 8) * 100) / 100) * (2 * Math.PI * 20)}
+                    className={`${
+                      Math.round(([user.full_name, user.phone, user.state, user.district, user.parliamentary_constituency, user.village_ward, user.pincode, user.aadhaar_number]
+                        .filter(f => f && String(f).trim() !== '').length / 8) * 100) === 100 
+                        ? 'text-emerald-500' 
+                        : 'text-amber-500'
+                    } transition-all duration-1000 ease-out`}
+                  />
+                </svg>
+                {/* Inner Icon or Avatar */}
+                <div className="w-8 h-8 rounded-full bg-slate-900 flex items-center justify-center overflow-hidden border-2 border-slate-950 group-hover:bg-slate-800 transition-colors">
+                  {user.avatar_url ? (
+                    <img src={user.avatar_url} alt="Profile" className="w-full h-full object-cover" />
+                  ) : (
+                    <UserCircle className="w-5 h-5 text-slate-400 group-hover:text-white transition-colors" />
+                  )}
+                </div>
+              </Link>
+            )}
           </div>
         </header>
 
