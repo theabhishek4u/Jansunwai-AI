@@ -289,5 +289,42 @@ export const db = {
       return data;
     }
     return mockDb.updateVerificationStatus(userId, status);
+  },
+
+  getAllSuggestions: async () => {
+    if (supabase) {
+      const { data, error } = await supabase
+        .from('suggestions')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (error) {
+        return mockDb.getAllSuggestions();
+      }
+      return data || [];
+    }
+    return mockDb.getAllSuggestions();
+  },
+
+  getStats: async () => {
+    if (supabase) {
+      const { data: allSugg, error: suggError } = await supabase.from('suggestions').select('*');
+      const { data: profiles, error: profError } = await supabase.from('profiles').select('role');
+      
+      if (suggError || profError || !allSugg || !profiles) {
+        return mockDb.getStats();
+      }
+
+      const citizenCount = profiles.filter(p => p.role === 'citizen').length;
+      const totalSuggestions = allSugg.length;
+      const highPriority = allSugg.filter(s => s.urgency === 'critical' || s.urgency === 'high').length;
+      const activeProjects = allSugg.filter(s => s.status === 'planned' || s.status === 'under_review').length;
+      const completed = allSugg.filter(s => s.status === 'completed').length;
+      const pendingReview = allSugg.filter(s => s.status === 'submitted' || s.status === 'under_review').length;
+      const totalBeneficiaries = allSugg.reduce((sum, s) => sum + (s.estimated_beneficiaries || 0), 0);
+      const totalCostLakhs = allSugg.reduce((sum, s) => sum + (s.estimated_cost_lakhs || 0), 0);
+      
+      return { citizenCount, totalSuggestions, highPriority, activeProjects, completed, pendingReview, totalBeneficiaries, totalCostLakhs };
+    }
+    return mockDb.getStats();
   }
 };

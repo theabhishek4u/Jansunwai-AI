@@ -14,7 +14,7 @@ const ai = apiKey ? new GoogleGenAI({ apiKey }) : null;
  */
 export const getDashboardStats = async (_req: Request, res: Response) => {
   try {
-    const stats = await mockDb.getStats();
+    const stats = await db.getStats();
     const budgetAllocated = 1000; // ₹10 Crore in lakhs
     const budgetUsed = 575; // simulated usage
     const constituencyHealthScore = 72;
@@ -70,11 +70,11 @@ export const getConstituencyHealth = async (_req: Request, res: Response) => {
  */
 export const getPriorityEngine = async (_req: Request, res: Response) => {
   try {
-    const allSugg = await mockDb.getAllSuggestions();
+    const allSugg = await db.getAllSuggestions();
 
     const urgencyWeight: Record<string, number> = { critical: 4, high: 3, medium: 2, low: 1 };
     const ranked = await Promise.all(allSugg.map(async s => {
-      const profile = await mockDb.getProfile(s.citizen_id);
+      const profile = await db.getProfile(s.citizen_id);
       const isVerified = profile?.verification_status === 'verified';
       
       const urgencyScore = (urgencyWeight[s.urgency] || 1) * 25;
@@ -116,8 +116,8 @@ export const aiCopilot = async (req: Request, res: Response) => {
   if (!question) return res.status(400).json({ error: 'Question is required' });
 
   try {
-    const allSugg = await mockDb.getAllSuggestions();
-    const stats = await mockDb.getStats();
+    const allSugg = await db.getAllSuggestions();
+    const stats = await db.getStats();
 
     if (!ai) {
       // Simulator: pattern-match common questions
@@ -210,7 +210,7 @@ export const budgetPlanner = async (req: Request, res: Response) => {
   if (!budgetCrore || budgetCrore <= 0) return res.status(400).json({ error: 'Valid budget amount required' });
 
   try {
-    const allSugg = await mockDb.getAllSuggestions();
+    const allSugg = await db.getAllSuggestions();
     const budgetLakhs = budgetCrore * 100;
 
     // Group by category and calculate need
@@ -263,8 +263,8 @@ export const developmentSimulator = async (req: Request, res: Response) => {
   const { projectIdA, projectIdB } = req.body;
 
   try {
-    const projA = await mockDb.getSuggestionById(projectIdA);
-    const projB = await mockDb.getSuggestionById(projectIdB);
+    const projA = await db.getSuggestionById(projectIdA);
+    const projB = await db.getSuggestionById(projectIdB);
 
     if (!projA || !projB) return res.status(404).json({ error: 'One or both projects not found' });
 
@@ -316,7 +316,7 @@ export const getInfrastructureGaps = async (_req: Request, res: Response) => {
  */
 export const getAnalytics = async (_req: Request, res: Response) => {
   try {
-    const allSugg = await mockDb.getAllSuggestions();
+    const allSugg = await db.getAllSuggestions();
 
     // Category distribution
     const categoryDist: Record<string, number> = {};

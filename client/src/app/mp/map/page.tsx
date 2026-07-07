@@ -47,14 +47,13 @@ interface PriorityItem {
   populationAffected: number;
 }
 
-// Simplified India SVG state nodes
 const STATE_MAP_NODES = [
-  { id: 'IN-UP', name: 'Uttar Pradesh', d: 'M 350 140 C 370 120, 420 150, 440 180 C 420 220, 380 230, 360 210 Z', textX: 380, textY: 175, color: '#f59e0b', suggestions: 842 },
-  { id: 'IN-MH', name: 'Maharashtra', d: 'M 220 260 C 260 250, 290 280, 300 320 C 250 350, 200 320, 220 260 Z', textX: 250, textY: 300, color: '#8b5cf6', suggestions: 450 },
-  { id: 'IN-KA', name: 'Karnataka', d: 'M 230 330 C 250 340, 270 380, 260 420 C 220 400, 210 360, 230 330 Z', textX: 240, textY: 380, color: '#06b6d4', suggestions: 430 },
-  { id: 'IN-DL', name: 'Delhi', d: 'M 310 120 C 320 120, 320 130, 310 130 Z', textX: 305, textY: 115, color: '#ef4444', suggestions: 140 },
-  { id: 'IN-BR', name: 'Bihar', d: 'M 450 160 C 480 150, 500 170, 510 190 C 480 210, 450 200, 450 160 Z', textX: 475, textY: 180, color: '#10b981', suggestions: 300 },
-  { id: 'IN-RJ', name: 'Rajasthan', d: 'M 200 130 C 240 120, 270 150, 280 180 C 230 200, 180 170, 200 130 Z', textX: 230, textY: 155, color: '#ec4899', suggestions: 270 }
+  { id: 'IN-UP', name: 'Uttar Pradesh', x: 390, y: 170, color: '#f59e0b', suggestions: 842 },
+  { id: 'IN-MH', name: 'Maharashtra', x: 270, y: 290, color: '#8b5cf6', suggestions: 450 },
+  { id: 'IN-KA', name: 'Karnataka', x: 280, y: 390, color: '#06b6d4', suggestions: 430 },
+  { id: 'IN-DL', name: 'Delhi', x: 320, y: 120, color: '#ef4444', suggestions: 140 },
+  { id: 'IN-BR', name: 'Bihar', x: 480, y: 190, color: '#10b981', suggestions: 300 },
+  { id: 'IN-RJ', name: 'Rajasthan', x: 230, y: 190, color: '#ec4899', suggestions: 270 }
 ];
 
 // Active districts per state
@@ -282,39 +281,59 @@ export default function ConstituencyMapPage() {
                     </defs>
                     <rect x="100" y="80" width="500" height="380" fill="url(#indiaGrid)" rx="16" />
 
-                    {/* State Paths */}
+                    {/* Network Connection Lines */}
+                    <path d="M 320 120 L 230 190 L 270 290 L 280 390" stroke="#1e293b" strokeWidth="1.5" strokeDasharray="4 4" fill="none" />
+                    <path d="M 320 120 L 390 170 L 480 190" stroke="#1e293b" strokeWidth="1.5" strokeDasharray="4 4" fill="none" />
+                    <path d="M 230 190 L 390 170 L 270 290" stroke="#1e293b" strokeWidth="1.5" strokeDasharray="4 4" fill="none" />
+
+                    {/* State Nodes */}
                     {STATE_MAP_NODES.map((state) => {
                       const isHovered = hoveredStateNode?.id === state.id;
+                      const radius = isHovered ? 24 : 18;
                       return (
-                        <path
-                          key={state.id}
-                          d={state.d}
-                          fill={isHovered ? 'rgba(245, 158, 11, 0.25)' : 'rgba(30, 41, 59, 0.3)'}
-                          stroke={isHovered ? '#f59e0b' : '#1e293b'}
-                          strokeWidth="1.5"
-                          className="transition-all duration-300 cursor-pointer"
+                        <g 
+                          key={state.id} 
+                          className="cursor-pointer transition-all duration-300"
                           onMouseEnter={() => setHoveredStateNode(state)}
                           onMouseLeave={() => setHoveredStateNode(null)}
                           onClick={() => { setSelectedState(state.name); setHoveredStateNode(null); }}
-                        />
+                        >
+                          {/* Outer pulse ring */}
+                          <circle cx={state.x} cy={state.y} r={radius + 10} fill="none" stroke={state.color} strokeWidth="1" opacity={isHovered ? 0.6 : 0.05}>
+                            {isHovered && <animate attributeName="r" values={`${radius + 8};${radius + 16};${radius + 8}`} dur="2s" repeatCount="indefinite" />}
+                            {isHovered && <animate attributeName="opacity" values="0.6;0;0.6" dur="2s" repeatCount="indefinite" />}
+                          </circle>
+                          
+                          {/* Node glow effect */}
+                          <circle 
+                            cx={state.x} cy={state.y} r={radius} 
+                            fill={isHovered ? state.color : 'rgba(30, 41, 59, 0.9)'}
+                            stroke={state.color} strokeWidth="2.5"
+                            className="transition-all duration-300"
+                          />
+                          
+                          {/* Node value */}
+                          <text 
+                            x={state.x} y={state.y + 4} 
+                            fill={isHovered ? '#fff' : state.color} 
+                            fontSize="11" fontWeight="900" textAnchor="middle"
+                            className="pointer-events-none transition-all duration-300"
+                          >
+                            {state.suggestions}
+                          </text>
+                          
+                          {/* State Label */}
+                          <text 
+                            x={state.x} y={state.y + radius + 16} 
+                            fill={isHovered ? '#fff' : '#64748b'} 
+                            fontSize="9" fontWeight="900" textAnchor="middle"
+                            className="pointer-events-none uppercase tracking-widest transition-all duration-300 drop-shadow-md"
+                          >
+                            {state.name}
+                          </text>
+                        </g>
                       );
                     })}
-
-                    {/* Labels */}
-                    {STATE_MAP_NODES.map((state) => (
-                      <text 
-                        key={`label-${state.id}`} 
-                        x={state.textX} 
-                        y={state.textY} 
-                        fill="#64748b" 
-                        fontSize="8" 
-                        fontWeight="black" 
-                        textAnchor="middle" 
-                        className="pointer-events-none uppercase tracking-widest"
-                      >
-                        {state.name.substring(0, 3)}
-                      </text>
-                    ))}
                   </motion.svg>
                 ) : (
                   // District Node Grid (District selection for clicked State)
