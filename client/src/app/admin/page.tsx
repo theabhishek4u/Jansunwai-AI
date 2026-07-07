@@ -38,14 +38,23 @@ interface CommandStats {
   stateStats: StatePerformance[];
 }
 
-// Customized India Map SVG outline data (simplified coordinates for main active states)
+// Premium Command Center Topology Relay Map
 const STATE_MAP_NODES = [
-  { id: 'IN-UP', name: 'Uttar Pradesh', d: 'M 350 140 C 370 120, 420 150, 440 180 C 420 220, 380 230, 360 210 Z', textX: 380, textY: 175 },
-  { id: 'IN-MH', name: 'Maharashtra', d: 'M 220 260 C 260 250, 290 280, 300 320 C 250 350, 200 320, 220 260 Z', textX: 250, textY: 300 },
-  { id: 'IN-KA', name: 'Karnataka', d: 'M 230 330 C 250 340, 270 380, 260 420 C 220 400, 210 360, 230 330 Z', textX: 240, textY: 380 },
-  { id: 'IN-DL', name: 'Delhi', d: 'M 310 120 C 320 120, 320 130, 310 130 Z', textX: 305, textY: 115 },
-  { id: 'IN-BR', name: 'Bihar', d: 'M 450 160 C 480 150, 500 170, 510 190 C 480 210, 450 200, 450 160 Z', textX: 475, textY: 180 },
-  { id: 'IN-RJ', name: 'Rajasthan', d: 'M 200 130 C 240 120, 270 150, 280 180 C 230 200, 180 170, 200 130 Z', textX: 230, textY: 155 }
+  { id: 'IN-UP', name: 'Uttar Pradesh', cx: 360, cy: 180, label: 'UP' },
+  { id: 'IN-MH', name: 'Maharashtra', cx: 280, cy: 280, label: 'MH' },
+  { id: 'IN-KA', name: 'Karnataka', cx: 270, cy: 390, label: 'KA' },
+  { id: 'IN-DL', name: 'Delhi', cx: 290, cy: 130, label: 'DEL' },
+  { id: 'IN-BR', name: 'Bihar', cx: 460, cy: 190, label: 'BIH' },
+  { id: 'IN-RJ', name: 'Rajasthan', cx: 190, cy: 185, label: 'RAJ' }
+];
+
+const MAP_RELAYS = [
+  { from: 'IN-DL', to: 'IN-RJ' },
+  { from: 'IN-DL', to: 'IN-UP' },
+  { from: 'IN-UP', to: 'IN-BR' },
+  { from: 'IN-UP', to: 'IN-MH' },
+  { from: 'IN-RJ', to: 'IN-MH' },
+  { from: 'IN-MH', to: 'IN-KA' }
 ];
 
 export default function AdminDashboard() {
@@ -165,6 +174,18 @@ export default function AdminDashboard() {
           {/* India SVG outline wrapper */}
           <div className="flex items-center justify-center flex-1 my-4">
             <svg viewBox="100 80 500 380" className="w-full max-h-[380px]">
+              <style>
+                {`
+                  @keyframes dash {
+                    to {
+                      stroke-dashoffset: -100;
+                    }
+                  }
+                  .animate-dash {
+                    animation: dash 8s linear infinite !important;
+                  }
+                `}
+              </style>
               <defs>
                 <pattern id="gridPattern" width="25" height="25" patternUnits="userSpaceOnUse">
                   <path d="M 25 0 L 0 0 0 25" fill="none" stroke="#162544" strokeWidth="0.5" />
@@ -172,29 +193,91 @@ export default function AdminDashboard() {
               </defs>
               <rect x="100" y="80" width="500" height="380" fill="url(#gridPattern)" />
 
-              {/* State boundaries */}
-              {STATE_MAP_NODES.map((state) => {
-                const isHovered = hoveredState?.state === state.name;
+              {/* Topology Connecting Relay lines */}
+              {MAP_RELAYS.map((relay, idx) => {
+                const nodeFrom = STATE_MAP_NODES.find(n => n.id === relay.from);
+                const nodeTo = STATE_MAP_NODES.find(n => n.id === relay.to);
+                if (!nodeFrom || !nodeTo) return null;
                 return (
-                  <path
-                    key={state.id}
-                    d={state.d}
-                    fill={isHovered ? 'rgba(6, 182, 212, 0.25)' : 'rgba(30, 41, 59, 0.4)'}
-                    stroke={isHovered ? '#22d3ee' : '#1e293b'}
-                    strokeWidth="1.5"
-                    className="transition-all duration-300 cursor-pointer"
-                    onMouseEnter={() => setHoveredState(getHoverStateDetails(state.name))}
-                    onMouseLeave={() => setHoveredState(null)}
-                  />
+                  <g key={idx}>
+                    {/* Glowing outer line */}
+                    <line
+                      x1={nodeFrom.cx}
+                      y1={nodeFrom.cy}
+                      x2={nodeTo.cx}
+                      y2={nodeTo.cy}
+                      stroke="rgba(6, 182, 212, 0.15)"
+                      strokeWidth="3"
+                    />
+                    {/* Pulsing inner dashed line showing data flow */}
+                    <line
+                      x1={nodeFrom.cx}
+                      y1={nodeFrom.cy}
+                      x2={nodeTo.cx}
+                      y2={nodeTo.cy}
+                      stroke="rgba(34, 211, 238, 0.4)"
+                      strokeWidth="1"
+                      strokeDasharray="5 5"
+                      className="animate-dash"
+                      style={{
+                        animation: 'dash 15s linear infinite'
+                      }}
+                    />
+                  </g>
                 );
               })}
 
-              {/* Text labels on map */}
-              {STATE_MAP_NODES.map(s => (
-                <text key={s.id} x={s.textX} y={s.textY} fill="#64748b" fontSize="8" fontWeight="bold" textAnchor="middle" className="pointer-events-none uppercase">
-                  {s.name.substring(0, 3)}
-                </text>
-              ))}
+              {/* State Interactive Nodes */}
+              {STATE_MAP_NODES.map((state) => {
+                const isHovered = hoveredState?.state === state.name;
+                return (
+                  <g
+                    key={state.id}
+                    className="cursor-pointer group/node"
+                    onMouseEnter={() => setHoveredState(getHoverStateDetails(state.name))}
+                    onMouseLeave={() => setHoveredState(null)}
+                  >
+                    {/* Large Hover target area */}
+                    <circle
+                      cx={state.cx}
+                      cy={state.cy}
+                      r="25"
+                      fill="transparent"
+                    />
+                    {/* Outer glowing pulsing ring */}
+                    <circle
+                      cx={state.cx}
+                      cy={state.cy}
+                      r={isHovered ? 16 : 12}
+                      fill="none"
+                      stroke={isHovered ? '#22d3ee' : '#0891b2'}
+                      strokeWidth="1.5"
+                      strokeDasharray="4 2"
+                      className="transition-all duration-300"
+                    />
+                    {/* Inner glowing core circle */}
+                    <circle
+                      cx={state.cx}
+                      cy={state.cy}
+                      r={isHovered ? 8 : 5}
+                      fill={isHovered ? '#22d3ee' : '#0891b2'}
+                      className="transition-all duration-300 shadow-lg shadow-cyan-500/50"
+                    />
+                    {/* Text Label next to or below node */}
+                    <text
+                      x={state.cx}
+                      y={state.cy + 25}
+                      fill={isHovered ? '#e2e8f0' : '#475569'}
+                      fontSize="9"
+                      fontWeight="black"
+                      textAnchor="middle"
+                      className="pointer-events-none uppercase tracking-wider transition-colors duration-200"
+                    >
+                      {state.label}
+                    </text>
+                  </g>
+                );
+              })}
             </svg>
           </div>
 

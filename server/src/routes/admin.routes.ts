@@ -10,7 +10,11 @@ import {
   updateMpStatus,
   broadcastNotification,
   getCitizens,
-  verifyCitizen
+  verifyCitizen,
+  getDepartments,
+  createDepartment,
+  updateDepartment,
+  deleteDepartment
 } from '../controllers/admin.controller';
 import { asyncHandler } from '../middlewares/asyncHandler';
 
@@ -27,5 +31,11 @@ router.post('/mps/status', asyncHandler(updateMpStatus));
 router.post('/notifications/broadcast', asyncHandler(broadcastNotification));
 router.get('/citizens', asyncHandler(getCitizens));
 router.post('/citizens/verify', asyncHandler(verifyCitizen));
+
+// Departments management routes
+router.get('/departments', asyncHandler(getDepartments));
+router.post('/departments', asyncHandler(createDepartment));
+router.put('/departments/:id', asyncHandler(updateDepartment));
+router.delete('/departments/:id', asyncHandler(deleteDepartment));
 
 export default router;

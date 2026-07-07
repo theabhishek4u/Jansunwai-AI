@@ -21,7 +21,8 @@ import {
   Sparkles,
   Users,
   UserCheck,
-  X
+  X,
+  Building2
 } from 'lucide-react';
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
@@ -60,6 +61,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const sidebarLinks: Array<{ href: string; label: string; icon: React.ReactNode; badge?: string; exact?: boolean }> = [
     { href: '/admin', label: 'Overview', icon: <LayoutDashboard className="w-5 h-5" />, exact: true },
     { href: '/admin/complaints', label: 'Complaints', icon: <FileText className="w-5 h-5" /> },
+    { href: '/admin/departments', label: 'Departments', icon: <Building2 className="w-5 h-5" />, badge: 'PORTALS' },
     { href: '/admin/mps', label: 'MP Directory', icon: <UserCheck className="w-5 h-5" /> },
     { href: '/admin/citizens', label: 'Citizen Verification', icon: <Users className="w-5 h-5" />, badge: 'VERIFY' },
     { href: '/admin/datasets', label: 'Public Datasets', icon: <Database className="w-5 h-5" /> },

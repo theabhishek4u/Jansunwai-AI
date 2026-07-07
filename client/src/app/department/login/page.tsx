@@ -4,6 +4,8 @@ import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Shield, Mail, Key, Users, ArrowRight, CheckCircle2, AlertCircle } from 'lucide-react';
 
+const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+
 const DEPARTMENTS = [
   { id: 'pwd', name: 'Public Works Department (PWD)', email: 'pwd@jansunwai.gov.in', officer: 'Rakesh Kumar (Executive Engineer)', category: 'Road' },
   { id: 'water', name: 'District Water & Sanitation Board', email: 'water@jansunwai.gov.in', officer: 'Sanjay Mishra (Superintending Engineer)', category: 'Drainage' },
@@ -14,6 +16,7 @@ const DEPARTMENTS = [
 ];
 
 export default function DepartmentLoginPage() {
+  const [departments, setDepartments] = useState<any[]>(DEPARTMENTS);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [selectedDeptId, setSelectedDeptId] = useState('');
@@ -24,6 +27,19 @@ export default function DepartmentLoginPage() {
   // Clear previous session on load
   useEffect(() => {
     localStorage.removeItem('dept-session');
+    
+    // Fetch dynamic departments list from API
+    fetch(`${API}/api/admin/departments`)
+      .then(res => {
+        if (res.ok) return res.json();
+        throw new Error('API failed');
+      })
+      .then(data => {
+        if (Array.isArray(data) && data.length > 0) {
+          setDepartments(data);
+        }
+      })
+      .catch(err => console.log('Using static default departments fallback:', err));
   }, []);
 
   const handleLoginSubmit = (e: React.FormEvent) => {
@@ -32,11 +48,11 @@ export default function DepartmentLoginPage() {
     setError('');
 
     // Check credentials or demo selection
-    let matchedDept = DEPARTMENTS.find(d => d.email.toLowerCase() === email.toLowerCase());
+    let matchedDept = departments.find(d => d.email.toLowerCase() === email.toLowerCase());
     
     // If they used the quick select dropdown
     if (selectedDeptId) {
-      matchedDept = DEPARTMENTS.find(d => d.id === selectedDeptId);
+      matchedDept = departments.find(d => d.id === selectedDeptId);
     }
 
     if (matchedDept) {
@@ -63,7 +79,7 @@ export default function DepartmentLoginPage() {
 
   const selectQuickDept = (id: string) => {
     setSelectedDeptId(id);
-    const dept = DEPARTMENTS.find(d => d.id === id);
+    const dept = departments.find(d => d.id === id);
     if (dept) {
       setEmail(dept.email);
       setPassword('password123');
@@ -112,7 +128,7 @@ export default function DepartmentLoginPage() {
                 className="w-full px-3.5 py-3 rounded-xl bg-slate-900 border border-slate-800 text-xs text-slate-200 focus:outline-none focus:border-blue-500 transition-colors"
               >
                 <option value="">Select Government Department...</option>
-                {DEPARTMENTS.map(d => (
+                {departments.map(d => (
                   <option key={d.id} value={d.id}>{d.name}</option>
                 ))}
               </select>

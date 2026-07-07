@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { mockDb, Profile, Suggestion, MediaAttachment, TimelineEvent,  } from './mockDb';
+import { mockDb, Profile, Suggestion, MediaAttachment, TimelineEvent, Department } from './mockDb';
 import dotenv from 'dotenv';
 
 dotenv.config();
