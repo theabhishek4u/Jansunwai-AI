@@ -31,7 +31,7 @@ export default function AdminComplaintsList() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('/api/suggestions')
+    fetch('http://localhost:5000/api/suggestions')
       .then(res => res.json())
       .then(data => {
         setComplaints(data);

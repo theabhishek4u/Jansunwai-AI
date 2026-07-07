@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-  Users, CheckCircle2, XCircle, Search, Filter, ShieldAlert,
+  Users, CheckCircle, XCircle, Search, Filter, ShieldAlert,
   MapPin, Phone, Mail, FileCheck, RefreshCw, AlertCircle, Fingerprint
 } from 'lucide-react';
 
@@ -88,7 +88,7 @@ export default function CitizenVerificationPage() {
       case 'verified':
         return (
           <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-full text-xs font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
-            <CheckCircle2 className="w-3.5 h-3.5" />
+            <CheckCircle className="w-3.5 h-3.5" />
             <span>Verified Account</span>
           </span>
         );

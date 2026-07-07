@@ -348,7 +348,7 @@ let suggestions: Suggestion[] = [
     ai_score_photo_verified: true, ai_score_confidence: 96, supporters: 1048, estimated_cost_lakhs: 15,
     created_at: daysAgo(25), updated_at: daysAgo(3)
   }
-];
+] as any;
 
 let proposalSupports: ProposalSupport[] = [];
 

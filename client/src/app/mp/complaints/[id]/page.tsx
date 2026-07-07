@@ -6,7 +6,7 @@ import { useParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {
   ArrowLeft, MapPin, Users, AlertTriangle,
-  Calendar, CheckCircle2, XCircle, Clock,
+  Calendar, CheckCircle, XCircle, Clock,
   ThumbsUp, Sparkles, Building2, IndianRupee,
   Wrench, ClipboardList
 } from 'lucide-react';

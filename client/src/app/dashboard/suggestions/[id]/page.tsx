@@ -44,6 +44,7 @@ interface SuggestionDetail {
   ai_score_confidence?: number;
   duplicate_of_id?: string | null;
   support_count?: number;
+  supporters?: number;
   consensus_score?: number;
   duplicate_group_id?: string | null;
   estimated_cost_lakhs?: number;

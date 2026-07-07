@@ -8,7 +8,7 @@ import {
   MessageSquare, 
   ArrowRight,
   Clock,
-  CheckCircle2,
+  CheckCircle,
   Calendar,
   Layers
 } from 'lucide-react';

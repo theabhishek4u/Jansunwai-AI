@@ -37,7 +37,7 @@ import {
   BarChart3,
   Clock,
   Lightbulb,
-  Hash, Users
+  Hash, Users, Layers
 } from 'lucide-react';
 
 const CATEGORIES = [
@@ -60,6 +60,7 @@ export default function SubmitSuggestion() {
   // General Form States
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [category, setCategory] = useState('Road');
   const [state, setState] = useState(user?.state || '');
   const [district, setDistrict] = useState(user?.district || '');
   const [block, setBlock] = useState('');
@@ -545,6 +546,7 @@ export default function SubmitSuggestion() {
       formData.append('citizen_id', user?.id || '');
       formData.append('title', title);
       formData.append('description', description);
+      formData.append('category', category);
       formData.append('language', language);
       formData.append('state', state);
       formData.append('district', district);
@@ -748,6 +750,31 @@ export default function SubmitSuggestion() {
                     placeholder="AI will generate a formal title, or type your own..."
                     className="w-full bg-slate-950/70 border border-slate-800/80 rounded-2xl py-4 pl-11 pr-4 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-indigo-500/60 focus:ring-2 focus:ring-indigo-500/10 focus:shadow-[0_0_20px_rgba(99,102,241,0.06)] transition-all duration-300"
                   />
+                </div>
+              </div>
+
+              {/* Category dropdown */}
+              <div className="space-y-2.5">
+                <label className="flex items-center gap-2 text-xs font-bold text-slate-300 uppercase tracking-wider">
+                  <Layers className="w-3.5 h-3.5 text-indigo-400" />
+                  Development Category
+                </label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-500 group-focus-within:text-indigo-400 transition-colors">
+                    <Layers className="w-4 h-4" />
+                  </div>
+                  <select
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    className="w-full bg-slate-950/70 border border-slate-800/80 rounded-2xl py-4 pl-11 pr-10 text-sm text-slate-100 focus:outline-none focus:border-indigo-500/60 focus:ring-2 focus:ring-indigo-500/10 transition-all duration-300 appearance-none cursor-pointer"
+                  >
+                    {CATEGORIES.map((cat) => (
+                      <option key={cat} value={cat}>
+                        {cat}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="w-4 h-4 text-slate-500 absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" />
                 </div>
               </div>
 
@@ -1253,13 +1280,12 @@ export default function SubmitSuggestion() {
                   </div>
                 </div>
               </div>
-
               <div className="flex gap-4 pt-4 border-t border-slate-800/60">
-                <button type="button" onClick={() => setShowPreview(false)} disabled={isSubmitting} className="flex-1 py-3.5 rounded-xl text-sm font-bold text-slate-300 bg-slate-800 hover:bg-slate-700 transition-colors disabled:opacity-50">
+                <button type="button" onClick={() => setShowPreview(false)} disabled={isSubmitting} className="grow py-3.5 rounded-xl text-sm font-bold text-slate-300 bg-slate-850 hover:bg-slate-805 transition-colors disabled:opacity-50">
                   Edit Details
                 </button>
-                <button type="button" onClick={handleSubmitForm} disabled={isSubmitting} className="flex-1 py-3.5 rounded-xl text-sm font-bold text-white bg-linear-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2 disabled:opacity-50">
-                  {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+                <button type="button" onClick={handleSubmitForm} disabled={isSubmitting} className="grow py-3.5 rounded-xl text-sm font-bold text-white bg-linear-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2 disabled:opacity-50">
+                  {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
                   {isSubmitting ? 'Submitting...' : 'Confirm & Submit'}
                 </button>
               </div>
