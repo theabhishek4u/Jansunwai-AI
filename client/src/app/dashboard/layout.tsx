@@ -72,7 +72,8 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const sidebarLinks = [
     { href: '/dashboard', label: 'Overview', icon: <LayoutDashboard className="w-5 h-5" /> },
-    { href: '/dashboard/submit', label: 'Submit Complaint', icon: <PlusCircle className="w-5 h-5" /> }
+    { href: '/dashboard/submit', label: 'Submit Complaint', icon: <PlusCircle className="w-5 h-5" /> },
+    { href: '/dashboard/supported', label: 'Supported Proposals', icon: <Sparkles className="w-5 h-5" /> }
   ];
 
   return (

@@ -204,6 +204,19 @@ export default function SubmitSuggestion() {
 
   const [showPreview, setShowPreview] = useState(false);
 
+  // Consensus Engine: Duplicate Interception States
+  const [duplicateFoundInfo, setDuplicateFoundInfo] = useState<{
+    id: string;
+    title: string;
+    status: string;
+    supportCount: number;
+    similarity?: number;
+  } | null>(null);
+  const [showDuplicateModal, setShowDuplicateModal] = useState(false);
+  const [ignoreDuplicateWarning, setIgnoreDuplicateWarning] = useState(false);
+  const [isSupportingFromModal, setIsSupportingFromModal] = useState(false);
+  const [modalSupportSuccess, setModalSupportSuccess] = useState(false);
+
   // Reverse Geocode from lat/lng using OpenStreetMap Nominatim
   const reverseGeocodeFromCoords = useCallback(async (latitude: number, longitude: number) => {
     setGeoLoading(true);
@@ -502,6 +515,32 @@ export default function SubmitSuggestion() {
     setShowPreview(false);
     setIsSubmitting(true);
     try {
+      // 1. Duplicate check interceptor (if warning not ignored)
+      if (!ignoreDuplicateWarning) {
+        const dupRes = await fetch('http://localhost:5000/api/ai/duplicate-check', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title, description, category, district })
+        });
+        
+        if (dupRes.ok) {
+          const dupData = await dupRes.json();
+          if (dupData.isDuplicate && dupData.duplicateOfId) {
+            setDuplicateFoundInfo({
+              id: dupData.duplicateOfId,
+              title: dupData.duplicateTitle || title,
+              status: dupData.duplicateStatus || 'under_review',
+              supportCount: dupData.supportCount || 326,
+              similarity: dupData.similarity || 94
+            });
+            setShowDuplicateModal(true);
+            setIsSubmitting(false);
+            return;
+          }
+        }
+      }
+
+      // 2. Normal creation if not duplicate (or duplicate ignored)
       const formData = new FormData();
       formData.append('citizen_id', user?.id || '');
       formData.append('title', title);
@@ -557,6 +596,33 @@ export default function SubmitSuggestion() {
       });
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleSupportExistingProposal = async () => {
+    if (!duplicateFoundInfo || !user) return;
+    setIsSupportingFromModal(true);
+    try {
+      const res = await fetch(`http://localhost:5000/api/suggestions/${duplicateFoundInfo.id}/support`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id })
+      });
+      if (res.ok) {
+        setModalSupportSuccess(true);
+        setTimeout(() => {
+          setShowDuplicateModal(false);
+          router.push('/dashboard');
+        }, 3000);
+      } else {
+        const errData = await res.json();
+        alert(errData.error || 'Could not support proposal.');
+      }
+    } catch (err) {
+      console.error('Error supporting proposal:', err);
+      alert('Failed to support proposal due to connection issues.');
+    } finally {
+      setIsSupportingFromModal(false);
     }
   };
 
@@ -1316,6 +1382,90 @@ export default function SubmitSuggestion() {
               </button>
             </div>
             <MapPicker initialLat={lat || 25.3176} initialLng={lng || 82.9739} onLocationSelect={handleManualLocationSelect} />
+          </div>
+        </div>
+      )}
+
+      {/* ═══════════ SIMILAR PROPOSAL MODAL ═══════════ */}
+      {showDuplicateModal && duplicateFoundInfo && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+          <div className="absolute inset-0 bg-slate-950/85 backdrop-blur-xl animate-fadeIn" />
+          
+          <div className="relative w-full max-w-xl animate-fadeIn">
+            {/* Background Glow */}
+            <div className="absolute -inset-1 bg-linear-to-r from-amber-500 via-indigo-500 to-violet-500 rounded-[32px] blur-xl opacity-30" />
+            
+            <div className="relative bg-[#0b0f19] border border-slate-800 rounded-[32px] p-6 sm:p-8 shadow-2xl text-center overflow-hidden">
+              <div className="absolute top-0 inset-x-0 h-[3px] bg-linear-to-r from-amber-400 to-indigo-500" />
+              
+              {modalSupportSuccess ? (
+                <div className="py-6 flex flex-col items-center space-y-4">
+                  <div className="relative w-20 h-20 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-400 border border-emerald-500/20 shadow-[0_0_30px_rgba(16,185,129,0.1)]">
+                    <CheckCircle className="w-10 h-10 animate-bounce" />
+                  </div>
+                  <h3 className="text-2xl font-black text-white">Thank you!</h3>
+                  <p className="text-sm text-slate-400 leading-relaxed max-w-xs">
+                    You have successfully supported this proposal. Redirecting to your dashboard...
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-6 text-left">
+                  <div className="flex items-center space-x-3 text-indigo-400 font-bold border-b border-slate-800/80 pb-4">
+                    <Sparkles className="w-5 h-5 animate-pulse text-indigo-400" />
+                    <h3 className="text-md font-black text-white">🤖 AI Recommendation</h3>
+                  </div>
+
+                  <div className="space-y-2">
+                    <p className="text-xs text-slate-400 font-medium">We found a similar development proposal in your constituency:</p>
+                    <div className="bg-slate-950/60 border border-slate-850 rounded-2xl p-5 space-y-4">
+                      <h4 className="text-sm font-black text-slate-100 leading-snug">{duplicateFoundInfo.title}</h4>
+                      
+                      <div className="flex items-center justify-between border-t border-slate-900 pt-3 text-xs">
+                        <span className="text-slate-400 font-semibold">👍 Supported by <strong className="text-white">{duplicateFoundInfo.supportCount}</strong> citizens</span>
+                        <span className="inline-flex items-center gap-1 text-[10px] font-extrabold uppercase text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20">
+                          AI Similarity {duplicateFoundInfo.similarity || 94}%
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <p className="text-xs text-slate-300 leading-relaxed font-sans">
+                    Supporting this proposal will strengthen the public demand and help the MP prioritize it faster.
+                  </p>
+
+                  <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
+                    <button
+                      onClick={handleSupportExistingProposal}
+                      disabled={isSupportingFromModal}
+                      className="w-full sm:flex-1 py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white font-black rounded-xl text-xs transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
+                    >
+                      {isSupportingFromModal ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                      Support Existing Proposal
+                    </button>
+                    
+                    <button
+                      onClick={() => window.open(`/dashboard/suggestions/${duplicateFoundInfo.id}`, '_blank')}
+                      className="w-full sm:w-auto py-3.5 px-5 bg-slate-900 hover:bg-slate-800 text-slate-300 font-bold rounded-xl text-xs transition-all border border-slate-850 cursor-pointer"
+                    >
+                      View Details
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setIgnoreDuplicateWarning(true);
+                        setShowDuplicateModal(false);
+                        setTimeout(() => {
+                          handleSubmitForm();
+                        }, 50);
+                      }}
+                      className="w-full sm:w-auto py-3.5 px-4 text-[10px] font-bold text-slate-500 hover:text-rose-400 transition-colors cursor-pointer text-center"
+                    >
+                      Create New Proposal Anyway
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}

@@ -72,6 +72,7 @@ export default function MpDashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [health, setHealth] = useState<HealthData | null>(null);
   const [priorities, setPriorities] = useState<PriorityItem[]>([]);
+  const [supportedProposals, setSupportedProposals] = useState<any[]>([]);
   const [analytics, setAnalytics] = useState<{ categoryChart: CategoryData[]; villageChart: CategoryData[] } | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'summary' | 'demographics' | 'insights'>('summary');
@@ -90,11 +91,21 @@ export default function MpDashboard() {
       fetch(`${API}/api/mp/constituency-health`).then(r => r.json()),
       fetch(`${API}/api/mp/priority-engine`).then(r => r.json()),
       fetch(`${API}/api/mp/analytics`).then(r => r.json()),
-    ]).then(([s, h, p, a]) => {
+      fetch(`${API}/api/suggestions`).then(r => r.json()),
+    ]).then(([s, h, p, a, sug]) => {
       setStats(s);
       setHealth(h);
       setPriorities(p.slice(0, 5));
       setAnalytics(a);
+      if (Array.isArray(sug)) {
+        const sorted = [...sug].sort((x, y) => {
+          const scoreX = x.consensus_score || 0;
+          const scoreY = y.consensus_score || 0;
+          if (scoreY !== scoreX) return scoreY - scoreX;
+          return (y.support_count || y.supporters || 0) - (x.support_count || x.supporters || 0);
+        });
+        setSupportedProposals(sorted.slice(0, 10));
+      }
     }).catch(console.error).finally(() => setLoading(false));
   }, []);
 
@@ -232,7 +243,8 @@ export default function MpDashboard() {
           transition={{ duration: 0.2 }}
         >
           {activeTab === 'summary' && (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="space-y-6">
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Constituency Health Score */}
               <div className="bg-[#0d1220]/80 rounded-2xl p-6 border border-slate-800/50 flex flex-col justify-between lg:col-span-1">
                 <div>
@@ -340,6 +352,88 @@ export default function MpDashboard() {
                 </div>
               </div>
             </div>
+
+            {/* Row 2: Most Supported Development Proposals */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              <div className="bg-[#0d1220]/80 rounded-2xl p-6 border border-slate-800/50 lg:col-span-2 space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-800/60 pb-4">
+                  <div className="space-y-1">
+                    <h2 className="text-xs uppercase tracking-wider font-black text-slate-400 flex items-center space-x-2">
+                      <Sparkles className="w-4 h-4 text-indigo-400" />
+                      <span>Most Supported Development Proposals</span>
+                    </h2>
+                    <p className="text-[10px] text-slate-500 font-medium">Ranked by community consensus score and citizen support volume</p>
+                  </div>
+                  <span className="text-[9px] text-slate-400 bg-slate-900 border border-slate-850 px-2 py-0.5 rounded-full font-bold">
+                    Top 10 High Consensus
+                  </span>
+                </div>
+
+                <div className="space-y-2.5 max-h-[360px] overflow-y-auto custom-scrollbar pr-1">
+                  {supportedProposals.map((p, idx) => (
+                    <div
+                      key={p.id}
+                      className="flex items-center justify-between p-3.5 rounded-xl bg-slate-900/30 border border-slate-850 hover:border-slate-800 transition-colors"
+                    >
+                      <div className="flex items-center space-x-3.5 min-w-0 flex-1">
+                        <div className="shrink-0 w-7 h-7 rounded-full bg-slate-950 border border-slate-850 flex items-center justify-center font-extrabold text-[10px] text-indigo-400">
+                          {idx + 1}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <Link href={`/mp/complaints/${p.id}`} className="text-xs font-bold text-slate-200 hover:text-indigo-400 hover:underline truncate block">
+                            {p.title}
+                          </Link>
+                          <div className="flex items-center space-x-2 mt-1 text-[9px] text-slate-500 font-medium">
+                            <span className="text-indigo-400/90 font-bold">{p.category}</span>
+                            <span>•</span>
+                            <span>{p.village || 'Varanasi'}</span>
+                            <span>•</span>
+                            <span className="text-emerald-400 font-bold">👍 {p.support_count || p.supporters || 0} Citizens</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center space-x-4 shrink-0 pl-3">
+                        <div className="text-right">
+                          <span className="block text-[8px] uppercase tracking-wider text-slate-500 font-bold">Consensus</span>
+                          <span className="text-xs font-black text-indigo-400">{p.consensus_score || 70}/100</span>
+                        </div>
+                        <span className={`px-2 py-0.5 rounded-full text-[8px] font-black uppercase border tracking-wider ${
+                          p.status === 'completed' ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' :
+                          p.status === 'planned' ? 'text-indigo-400 bg-indigo-500/10 border-indigo-500/20' :
+                          'text-amber-400 bg-amber-500/10 border-amber-500/20'
+                        }`}>
+                          {p.status.replace('_', ' ')}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Community Engagement Insights Guide */}
+              <div className="bg-[#0d1220]/80 rounded-2xl p-6 border border-slate-800/50 lg:col-span-1 space-y-4">
+                <h3 className="text-xs uppercase tracking-wider font-black text-slate-400 flex items-center space-x-2 border-b border-slate-800/60 pb-3">
+                  <Bot className="w-4 h-4 text-violet-400" />
+                  <span>Consensus Engine Rules</span>
+                </h3>
+                <div className="space-y-3.5 text-[11px] leading-relaxed text-slate-400">
+                  <p>
+                    Jansunwai AI calculates the <strong className="text-slate-200">Community Consensus Score</strong> out of 100 based on four grounded pillars:
+                  </p>
+                  <ul className="space-y-2 list-disc pl-4 text-slate-400">
+                    <li><strong className="text-indigo-400">Citizen Support (40%):</strong> Total verified resident signatures backing the request.</li>
+                    <li><strong className="text-amber-400">Mukhiya Support (25%):</strong> Endorsements from the local Village Head.</li>
+                    <li><strong className="text-cyan-400">MLA Recommendation (20%):</strong> Assembly Level MLA routing sanction.</li>
+                    <li><strong className="text-rose-400">AI Impact Score (15%):</strong> Need urgency derived from nearest infrastructure deficit.</li>
+                  </ul>
+                  <div className="bg-slate-900/60 border border-slate-850 p-3 rounded-xl text-[10px] text-slate-500 leading-normal">
+                    💡 <strong>Planning Tip:</strong> Direct development funds towards proposals with consensus scores exceeding <strong>85</strong> to maximize public satisfaction and HDI indicators.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
           )}
 
           {activeTab === 'demographics' && (

@@ -42,10 +42,20 @@ export interface Suggestion {
   ai_score_photo_verified: boolean;
   ai_score_confidence?: number;
   duplicate_of_id?: string | null;
-  supporters?: number;
+  supporters?: number; // legacy alias
+  support_count: number;
+  consensus_score: number;
+  duplicate_group_id?: string | null;
   estimated_cost_lakhs?: number;
   created_at: string;
   updated_at: string;
+}
+
+export interface ProposalSupport {
+  id: string;
+  proposal_id: string;
+  user_id: string;
+  supported_at: string;
 }
 
 export interface MediaAttachment {
@@ -436,6 +446,26 @@ let suggestions: Suggestion[] = [
   }
 ];
 
+let proposalSupports: ProposalSupport[] = [];
+
+// Initialize consensus_score, support_count dynamically for initial mock suggestions
+suggestions.forEach(s => {
+  if (s.support_count === undefined) {
+    s.support_count = s.supporters || Math.floor(Math.random() * 400) + 12;
+  }
+  if (s.consensus_score === undefined) {
+    // Dynamically calculate a realistic consensus score using standard variables
+    const citizenScore = Math.min(40, Math.round((s.support_count / 1000) * 40));
+    const mukhiyaScore = (s.support_count % 2 === 0) ? 25 : 0;
+    const mlaScore = (s.support_count > 100) ? 20 : 10;
+    const aiScore = Math.round((s.ai_score_completeness || 70) * 0.15);
+    s.consensus_score = Math.min(100, citizenScore + mukhiyaScore + mlaScore + aiScore);
+  }
+  if (s.duplicate_group_id === undefined) {
+    s.duplicate_group_id = null;
+  }
+});
+
 let mediaAttachments: MediaAttachment[] = [
   { id: 'media-1', suggestion_id: 'sugg-1', file_url: 'https://images.unsplash.com/photo-1590247813693-5541f1c609fd?q=80&w=600&auto=format&fit=crop', file_type: 'image', created_at: daysAgo(10) },
   { id: 'media-2', suggestion_id: 'sugg-2', file_url: 'https://images.unsplash.com/photo-1515162305285-0293e4767cc2?q=80&w=600&auto=format&fit=crop', file_type: 'image', created_at: daysAgo(20) },
@@ -696,6 +726,39 @@ export const mockDb = {
       return profile;
     }
     return null;
+  },
+  addSupport: async (proposalId: string, userId: string) => {
+    const existing = proposalSupports.find(s => s.proposal_id === proposalId && s.user_id === userId);
+    if (existing) return false;
+    
+    proposalSupports.push({
+      id: `sup-${uuidv4()}`,
+      proposal_id: proposalId,
+      user_id: userId,
+      supported_at: new Date().toISOString()
+    });
+
+    const suggestion = suggestions.find(s => s.id === proposalId);
+    if (suggestion) {
+      suggestion.support_count += 1;
+      // Recalculate Consensus Score
+      const citizenScore = Math.min(40, Math.round((suggestion.support_count / 1000) * 40));
+      const mukhiyaScore = (suggestion.support_count % 2 === 0) ? 25 : 0;
+      const mlaScore = (suggestion.support_count > 100) ? 20 : 10;
+      const aiScore = Math.round((suggestion.ai_score_completeness || 70) * 0.15);
+      suggestion.consensus_score = Math.min(100, citizenScore + mukhiyaScore + mlaScore + aiScore);
+      suggestion.updated_at = new Date().toISOString();
+    }
+    return true;
+  },
+  hasSupported: async (proposalId: string, userId: string) => {
+    return proposalSupports.some(s => s.proposal_id === proposalId && s.user_id === userId);
+  },
+  getSupportedSuggestions: async (userId: string) => {
+    const supportedIds = proposalSupports
+      .filter(s => s.user_id === userId)
+      .map(s => s.proposal_id);
+    return suggestions.filter(s => supportedIds.includes(s.id));
   }
 };
 

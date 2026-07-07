@@ -299,6 +299,9 @@ export const addTimelineStatus = async (req: Request, res: Response) => {
   }
 
   try {
+    // Keep suggestion status in sync in DB
+    await db.updateSuggestionStatus(id, status);
+
     const event = await db.addTimelineEvent({
       suggestion_id: id,
       status,
@@ -381,5 +384,59 @@ export const getProfileDetails = async (req: Request, res: Response) => {
     });
   } catch (error: any) {
     return res.status(500).json({ error: 'Failed to retrieve profile', details: error.message });
+  }
+};
+
+/**
+ * Support a suggestion / proposal
+ */
+export const supportSuggestion = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const { userId } = req.body;
+
+  if (!userId) {
+    return res.status(400).json({ error: 'User ID is required' });
+  }
+
+  try {
+    const success = await db.addSupport(id, userId);
+    if (!success) {
+      return res.status(400).json({ error: 'You have already supported this proposal.' });
+    }
+    
+    // Increase points for engagement
+    await mockDb.incrementScore(userId, 15);
+
+    return res.json({ message: 'Thank you. You have successfully supported this proposal.' });
+  } catch (error: any) {
+    return res.status(500).json({ error: 'Failed to add support', details: error.message });
+  }
+};
+
+/**
+ * Check if citizen has supported suggestion
+ */
+export const checkSupport = async (req: Request, res: Response) => {
+  const { id, userId } = req.params;
+
+  try {
+    const supported = await db.hasSupported(id, userId);
+    return res.json({ supported });
+  } catch (error: any) {
+    return res.status(500).json({ error: 'Failed to check support status', details: error.message });
+  }
+};
+
+/**
+ * Fetch proposals supported by citizen
+ */
+export const getSupportedByCitizen = async (req: Request, res: Response) => {
+  const { userId } = req.params;
+
+  try {
+    const list = await db.getSupportedSuggestions(userId);
+    return res.json(list);
+  } catch (error: any) {
+    return res.status(500).json({ error: 'Failed to fetch supported proposals', details: error.message });
   }
 };
