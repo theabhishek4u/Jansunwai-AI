@@ -149,7 +149,7 @@ export default function DashboardHome() {
   return (
     <div className="space-y-8">
       {/* Welcome Banner */}
-      <div className="bg-gradient-to-br from-[#0e142c] to-[#0a0d1e] border border-[#1e293b]/30 rounded-3xl shadow-lg shadow-black/10 p-6 sm:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden">
+      <div className="bg-linear-to-br from-[#0e142c] to-[#0a0d1e] border border-[#1e293b]/30 rounded-3xl shadow-lg shadow-black/10 p-6 sm:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-500/5 blur-3xl -z-10" />
         <div className="space-y-2">
           <h1 className="text-2xl sm:text-3xl font-black text-white">Jai Hind, {user?.full_name}! 🇮🇳</h1>

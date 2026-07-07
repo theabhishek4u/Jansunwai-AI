@@ -56,7 +56,7 @@ export default function AdminComplaintsList() {
           { label: 'Rejected / Discarded', count: complaints.filter(c => c.status === 'rejected').length, icon: <AlertTriangle className="w-5 h-5 text-rose-450" />, glow: 'border-rose-500/10 shadow-rose-500/5', bg: 'from-rose-600/10' }
         ].map(kpi => (
           <div key={kpi.label} className={`p-5 bg-slate-900/60 backdrop-blur-md border border-slate-800/80 rounded-2xl flex items-center justify-between shadow-xl relative overflow-hidden ${kpi.glow}`}>
-            <div className={`absolute inset-0 bg-gradient-to-br ${kpi.bg} via-transparent to-transparent -z-10`} />
+            <div className={`absolute inset-0 bg-linear-to-br ${kpi.bg} via-transparent to-transparent -z-10`} />
             <div>
               <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block">{kpi.label}</span>
               <span className="text-2xl font-extrabold text-white block mt-1.5 tracking-tight">{kpi.count}</span>

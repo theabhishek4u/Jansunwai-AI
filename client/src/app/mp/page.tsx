@@ -499,7 +499,7 @@ export default function MpDashboard() {
               {analytics?.categoryChart.map((c, i) => (
                 <div key={c.name} className="flex items-center space-x-2">
                   <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
-                  <span className="text-[10px] text-slate-300 truncate flex-grow font-semibold flex items-center gap-1">
+                  <span className="text-[10px] text-slate-300 truncate grow font-semibold flex items-center gap-1">
                     {getCategoryIcon(c.name)}
                     {c.name}
                   </span>

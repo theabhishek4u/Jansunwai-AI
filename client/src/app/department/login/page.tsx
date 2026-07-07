@@ -135,9 +135,9 @@ export default function DepartmentLoginPage() {
             </div>
 
             <div className="relative flex py-2 items-center">
-              <div className="flex-grow border-t border-slate-850"></div>
-              <span className="flex-shrink mx-4 text-[9px] text-slate-550 font-black uppercase tracking-wider">or employee login</span>
-              <div className="flex-grow border-t border-slate-850"></div>
+              <div className="grow border-t border-slate-850"></div>
+              <span className="shrink mx-4 text-[9px] text-slate-550 font-black uppercase tracking-wider">or employee login</span>
+              <div className="grow border-t border-slate-850"></div>
             </div>
 
             {/* Email Address */}

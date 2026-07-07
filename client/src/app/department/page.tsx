@@ -184,7 +184,7 @@ export default function DepartmentDashboard() {
             whileHover={{ y: -4, scale: 1.01 }}
             className={`group p-5 bg-[#0b1329]/65 backdrop-blur-md border rounded-2xl flex items-center justify-between shadow-xl transition-all duration-355 relative overflow-hidden ${kpi.glow}`}
           >
-            <div className={`absolute inset-0 bg-gradient-to-br ${kpi.bg} -z-10`} />
+            <div className={`absolute inset-0 bg-linear-to-br ${kpi.bg} -z-10`} />
             <div>
               <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest block">{kpi.label}</span>
               <span className="text-3xl font-extrabold text-white block mt-1.5 tracking-tight">{kpi.count}</span>

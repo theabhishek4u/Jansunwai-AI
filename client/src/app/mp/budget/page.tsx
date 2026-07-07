@@ -394,7 +394,7 @@ export default function BudgetPlannerPage() {
               <div className="flex space-x-2 pt-1">
                 <button
                   onClick={handleAIAutoSanction}
-                  className="flex-grow py-2.5 rounded-xl bg-violet-600/10 border border-violet-500/20 text-violet-400 hover:text-white hover:bg-violet-600 text-[10px] font-black transition-all flex items-center justify-center space-x-1"
+                  className="grow py-2.5 rounded-xl bg-violet-600/10 border border-violet-500/20 text-violet-400 hover:text-white hover:bg-violet-600 text-[10px] font-black transition-all flex items-center justify-center space-x-1"
                 >
                   <RefreshCw className="w-3.5 h-3.5" />
                   <span>AI Auto-Select</span>
@@ -402,7 +402,7 @@ export default function BudgetPlannerPage() {
                 <button
                   onClick={() => setShowSanctionModal(true)}
                   disabled={remainingBudgetLakhs < 0 || approvedProjectIds.size === 0}
-                  className="flex-grow py-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-450 hover:text-slate-950 hover:bg-amber-500 text-[10px] font-black transition-all disabled:opacity-40 flex items-center justify-center space-x-1"
+                  className="grow py-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-amber-450 hover:text-slate-950 hover:bg-amber-500 text-[10px] font-black transition-all disabled:opacity-40 flex items-center justify-center space-x-1"
                 >
                   <FileText className="w-3.5 h-3.5" />
                   <span>Sanction Order</span>
@@ -592,7 +592,7 @@ export default function BudgetPlannerPage() {
                 {approvedByCategory.map((d, i) => (
                   <div key={d.name} className="flex items-center space-x-2 bg-slate-950/40 p-2 rounded-xl border border-slate-900">
                     <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: COLORS[i % COLORS.length] }} />
-                    <span className="text-[10px] text-slate-300 truncate flex-grow font-semibold flex items-center gap-1">
+                    <span className="text-[10px] text-slate-300 truncate grow font-semibold flex items-center gap-1">
                       {getCategoryIcon(d.name)}
                       {d.name}
                     </span>
