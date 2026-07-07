@@ -239,7 +239,7 @@ export default function DepartmentComplaints() {
         <div className="bg-[#070d1e]/45 border border-slate-850 p-16 rounded-3xl text-center space-y-3">
           <ShieldAlert className="w-12 h-12 text-slate-750 mx-auto" />
           <h3 className="text-sm font-bold text-white uppercase tracking-wider">No Grievances Found</h3>
-          <p className="text-xs text-slate-500">No matching requests exist in this department's category map.</p>
+          <p className="text-xs text-slate-500">No matching requests exist in this department&apos;s category map.</p>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

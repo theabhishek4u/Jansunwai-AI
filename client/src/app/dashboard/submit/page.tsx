@@ -392,6 +392,7 @@ export default function SubmitSuggestion() {
       }, 1000);
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     recognition.onresult = (event: any) => {
       let interimTranscript = '';
       let finalTranscript = '';

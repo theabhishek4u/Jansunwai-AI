@@ -16,7 +16,7 @@ const DEPARTMENTS = [
 ];
 
 export default function DepartmentLoginPage() {
-  const [departments, setDepartments] = useState<any[]>(DEPARTMENTS);
+  const [departments, setDepartments] = useState(DEPARTMENTS);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [selectedDeptId, setSelectedDeptId] = useState('');
