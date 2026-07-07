@@ -90,6 +90,7 @@ export default function MpDashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [health, setHealth] = useState<HealthData | null>(null);
   const [priorities, setPriorities] = useState<PriorityItem[]>([]);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [supportedProposals, setSupportedProposals] = useState<any[]>([]);
   const [analytics, setAnalytics] = useState<{ categoryChart: CategoryData[]; villageChart: CategoryData[] } | null>(null);
   const [loading, setLoading] = useState(true);

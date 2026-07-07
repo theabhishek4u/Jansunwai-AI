@@ -192,7 +192,7 @@ export default function PriorityEnginePage() {
             </div>
           </div>
 
-          <div className="mt-6 pt-4 border-t border-slate-800/60 flex items-center space-x-2 bg-violet-600/5 p-3 rounded-2xl border border-violet-500/10">
+          <div className="mt-6 pt-4 border-t border-violet-500/10 flex items-center space-x-2 bg-violet-600/5 p-3 rounded-2xl">
             <Zap className="w-4 h-4 text-violet-400 shrink-0" />
             <p className="text-[9px] text-slate-400 leading-normal">
               Verified Citizen bonus adds <span className="text-violet-300 font-extrabold">+20 Priority Points</span> to accelerate verified issues.

@@ -102,6 +102,7 @@ export default function TaskDetailConsole() {
         // Extract chat logs from timeline if any
         if (data.timeline) {
           const extractedChats: typeof chats = [];
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           data.timeline.forEach((event: any) => {
             if (event.notes && event.notes.includes('[Chat]')) {
               const cleaned = event.notes.replace('[Chat]', '');

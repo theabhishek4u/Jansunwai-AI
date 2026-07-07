@@ -392,6 +392,7 @@ export default function SubmitSuggestion() {
       }, 1000);
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     recognition.onresult = (event: any) => {
       let interimTranscript = '';
       let finalTranscript = '';
@@ -968,7 +969,7 @@ export default function SubmitSuggestion() {
                         <div className="grid grid-cols-2 gap-2 text-[10px] font-bold">
                           <div className="bg-slate-900/60 border border-slate-800 rounded-lg p-2 flex flex-col justify-between">
                             <span className="text-[7.5px] uppercase tracking-widest text-slate-500 font-bold">Detected issue</span>
-                            <span className="text-white block mt-0.5 flex items-center gap-1 truncate"><CheckCircle className="w-3 h-3 text-emerald-400 shrink-0" /> {imageAnalysis.detected}</span>
+                            <span className="text-white mt-0.5 flex items-center gap-1 truncate"><CheckCircle className="w-3 h-3 text-emerald-400 shrink-0" /> {imageAnalysis.detected}</span>
                           </div>
                           <div className="bg-slate-900/60 border border-slate-800 rounded-lg p-2 flex flex-col justify-between">
                             <span className="text-[7.5px] uppercase tracking-widest text-slate-500 font-bold">Confidence</span>

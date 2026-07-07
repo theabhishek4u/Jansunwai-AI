@@ -16,7 +16,7 @@ const DEPARTMENTS = [
 ];
 
 export default function DepartmentLoginPage() {
-  const [departments, setDepartments] = useState<any[]>(DEPARTMENTS);
+  const [departments, setDepartments] = useState(DEPARTMENTS);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [selectedDeptId, setSelectedDeptId] = useState('');
@@ -118,7 +118,7 @@ export default function DepartmentLoginPage() {
           <form onSubmit={handleLoginSubmit} className="space-y-4">
             {/* Quick Demo Selector */}
             <div>
-              <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider block mb-1.5 flex items-center justify-between">
+              <label className="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-1.5 flex items-center justify-between">
                 <span>Quick Demo Access</span>
                 <span className="text-blue-400 text-[8px] font-black uppercase bg-blue-500/10 px-1.5 py-0.5 rounded">Fast Track</span>
               </label>
