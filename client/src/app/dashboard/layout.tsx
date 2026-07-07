@@ -6,11 +6,13 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/AuthContext';
 import { 
   Vote, 
-  LayoutDashboard, 
-  PlusCircle, 
+  LayoutGrid, 
+  FileEdit, 
   UserCircle, 
   LogOut, 
   Bell,
+  Award,
+  Shield,
   Sparkles
 } from 'lucide-react';
 
@@ -71,9 +73,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }
 
   const sidebarLinks = [
-    { href: '/dashboard', label: 'Overview', icon: <LayoutDashboard className="w-5 h-5" /> },
-    { href: '/dashboard/submit', label: 'Submit Complaint', icon: <PlusCircle className="w-5 h-5" /> },
-    { href: '/dashboard/supported', label: 'Supported Proposals', icon: <Sparkles className="w-5 h-5" /> }
+    { href: '/dashboard', label: 'Overview', icon: <LayoutGrid className="w-5.5 h-5.5 transition-transform group-hover:scale-110" /> },
+    { href: '/dashboard/submit', label: 'Submit Complaint', icon: <FileEdit className="w-5.5 h-5.5 transition-transform group-hover:scale-110" /> },
+    { href: '/dashboard/supported', label: 'Supported Proposals', icon: <Award className="w-5.5 h-5.5 transition-transform group-hover:scale-110" /> }
   ];
 
   return (
@@ -242,7 +244,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </div>
 
       {/* Mobile Bottom Navigation Bar */}
-      <nav className="fixed bottom-0 left-0 right-0 md:hidden bg-slate-900/90 backdrop-blur-xl border-t border-slate-800/60 z-50 flex items-center justify-around h-16 pb-safe">
+      <nav className="fixed bottom-0 left-0 right-0 md:hidden bg-[#0a0d1e]/90 backdrop-blur-xl border-t border-[#1e293b]/25 z-50 flex items-center justify-around h-16 pb-safe shadow-lg shadow-black/20">
         {sidebarLinks.map(link => {
           const isActive = pathname === link.href;
           const label = link.label === 'Submit Complaint' ? 'Submission' : link.label;
@@ -252,11 +254,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               href={link.href}
               className={`flex flex-col items-center justify-center flex-1 h-full py-1 text-center transition-all ${
                 isActive 
-                  ? 'text-indigo-400 font-bold scale-105' 
+                  ? 'text-[#3b82f6] font-bold scale-105' 
                   : 'text-slate-400 hover:text-slate-200'
               }`}
             >
-              <div className={`p-1 rounded-xl transition-all ${isActive ? 'bg-indigo-500/10' : ''}`}>
+              <div className={`p-1 rounded-xl transition-all ${isActive ? 'bg-[#1c223c]/60' : ''}`}>
                 {link.icon}
               </div>
               <span className="text-[9px] tracking-tight mt-0.5">{label}</span>

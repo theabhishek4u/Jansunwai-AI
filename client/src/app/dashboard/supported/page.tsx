@@ -22,6 +22,7 @@ interface Suggestion {
   status: string;
   consensus_score?: number;
   support_count?: number;
+  supporters?: number;
   created_at: string;
 }
 

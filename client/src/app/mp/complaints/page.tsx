@@ -6,7 +6,8 @@ import { motion } from 'framer-motion';
 import {
   ListTodo, Search, Filter, ChevronRight,
   MapPin, Users, AlertTriangle, CheckCircle,
-  Clock, XCircle, ArrowUpDown
+  Clock, XCircle, ArrowUpDown,
+  Zap, Droplet, Heart, BookOpen, Trash2, ShieldAlert, Bus, FileText
 } from 'lucide-react';
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
@@ -39,6 +40,31 @@ const statusConfig: Record<string, { label: string; color: string; icon: React.R
   rejected: { label: 'Rejected', color: 'text-red-400 bg-red-500/10', icon: <XCircle className="w-3 h-3" /> },
 };
 
+const categoryIcons: Record<string, React.ReactNode> = {
+  'electricity': <Zap className="w-4 h-4 text-amber-400" />,
+  'road': <MapPin className="w-4 h-4 text-blue-400" />,
+  'bridge': <MapPin className="w-4 h-4 text-sky-400" />,
+  'water supply': <Droplet className="w-4 h-4 text-cyan-400" />,
+  'drainage': <Droplet className="w-4 h-4 text-teal-400" />,
+  'health': <Heart className="w-4 h-4 text-rose-400" />,
+  'hospital': <Heart className="w-4 h-4 text-rose-400" />,
+  'phc': <Heart className="w-4 h-4 text-rose-400" />,
+  'school': <BookOpen className="w-4 h-4 text-indigo-400" />,
+  'college': <BookOpen className="w-4 h-4 text-indigo-400" />,
+  'education': <BookOpen className="w-4 h-4 text-indigo-400" />,
+  'library': <BookOpen className="w-4 h-4 text-indigo-400" />,
+  'waste management': <Trash2 className="w-4 h-4 text-emerald-400" />,
+  'municipal': <Trash2 className="w-4 h-4 text-emerald-400" />,
+  "women's safety": <ShieldAlert className="w-4 h-4 text-pink-400" />,
+  'public transport': <Bus className="w-4 h-4 text-violet-400" />,
+  'others': <FileText className="w-4 h-4 text-slate-400" />
+};
+
+const getCategoryIcon = (catName: string) => {
+  const norm = catName.toLowerCase().trim();
+  return categoryIcons[norm] || <FileText className="w-4 h-4 text-slate-400" />;
+};
+
 const urgencyBadge: Record<string, string> = {
   critical: 'bg-red-500/10 text-red-400 border-red-500/20',
   high: 'bg-orange-500/10 text-orange-400 border-orange-500/20',
@@ -67,6 +93,33 @@ export default function MpComplaintsPage() {
   const categories = [...new Set(complaints.map(s => s.category))].sort();
   const villages = [...new Set(complaints.map(s => s.village))].sort();
 
+  // Group by category to compute stats dynamically
+  const categoryStats = complaints.reduce((acc, curr) => {
+    const cat = curr.category;
+    if (!acc[cat]) {
+      acc[cat] = { total: 0, active: 0, solved: 0 };
+    }
+    acc[cat].total += 1;
+    if (curr.status === 'completed') {
+      acc[cat].solved += 1;
+    } else if (curr.status !== 'rejected') {
+      acc[cat].active += 1;
+    }
+    return acc;
+  }, {} as Record<string, { total: number; active: number; solved: number }>);
+
+  // Convert to array and filter out categories with 0 active complaints
+  const activeCategoryList = Object.entries(categoryStats)
+    .map(([name, stats]) => ({
+      name,
+      active: stats.active,
+      solved: stats.solved,
+      total: stats.total,
+      rate: Math.round((stats.solved / (stats.total || 1)) * 100)
+    }))
+    .filter(cat => cat.active > 0)
+    .sort((a, b) => b.active - a.active);
+
   const filtered = complaints
     .filter(s => {
       if (searchQuery && !s.title.toLowerCase().includes(searchQuery.toLowerCase())) return false;
@@ -91,13 +144,75 @@ export default function MpComplaintsPage() {
 
   return (
     <div className="space-y-6 max-w-[1400px] mx-auto">
-      <div>
-        <h1 className="text-2xl font-bold text-white">Complaint Management</h1>
-        <p className="text-sm text-slate-400 mt-1">Review, prioritize, and manage citizen development complaints</p>
+      {/* ── CATEGORY STATUS OVERVIEW BOARD ── */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <span className="text-[10px] text-slate-500 uppercase tracking-widest font-black">Active categories index</span>
+          <span className="text-[9px] text-slate-550 font-bold bg-[#0b1329]/40 border border-[#1e293b]/20 px-3 py-1 rounded-full shadow-inner">
+            {activeCategoryList.length} Categories Affected
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          {activeCategoryList.map((cat) => (
+            <button
+              key={cat.name}
+              onClick={() => setFilterCategory(filterCategory === cat.name ? '' : cat.name)}
+              className={`p-5 rounded-2xl flex flex-col justify-between text-left hover:scale-[1.03] active:scale-[0.97] transition-all duration-300 cursor-pointer border relative overflow-hidden group shadow-md ${
+                filterCategory === cat.name 
+                  ? 'bg-[#1c223c] border-[#3b82f6]/50 shadow-lg shadow-blue-500/10' 
+                  : 'bg-[#0f142c] border-[#1e293b]/30 hover:border-[#1e293b]/60'
+              }`}
+            >
+              {/* Category Icon and Label Header */}
+              <div className="flex items-center justify-between gap-2 border-b border-[#1e293b]/20 pb-2.5 mb-3.5">
+                <div className="space-y-0.5">
+                  <span className="block text-[8px] uppercase tracking-widest text-slate-500 font-black">Category</span>
+                  <span className="block text-xs font-black text-slate-200 truncate uppercase leading-tight group-hover:text-white transition-colors" title={cat.name}>
+                    {cat.name}
+                  </span>
+                </div>
+                <div className="w-7 h-7 rounded-lg bg-slate-950 flex items-center justify-center border border-[#1e293b]/30 shadow-inner shrink-0 group-hover:scale-110 transition-transform">
+                  {getCategoryIcon(cat.name)}
+                </div>
+              </div>
+
+              {/* Progress and Active problem counts */}
+              <div className="flex items-center justify-between mb-4">
+                <div>
+                  <span className="text-2xl font-mono font-black text-amber-400 block leading-none">{cat.active}</span>
+                  <span className="text-[8px] text-slate-500 font-extrabold uppercase tracking-wider block mt-1">active tasks</span>
+                </div>
+                
+                {/* Circular indicator rate with exact r=15.915 math */}
+                <div className="relative w-10 h-10 flex items-center justify-center shrink-0">
+                  <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
+                    <circle cx="18" cy="18" r="15.915" fill="none" className="stroke-[#131930]" strokeWidth="3.5" />
+                    <circle 
+                      cx="18" cy="18" r="15.915" fill="none" 
+                      className="stroke-emerald-500 transition-all duration-700" 
+                      strokeWidth="3.5"
+                      strokeDasharray="100"
+                      strokeDashoffset={100 - cat.rate}
+                      strokeLinecap="round"
+                    />
+                  </svg>
+                  <span className="absolute text-[9px] font-black text-emerald-400 drop-shadow-[0_0_4px_rgba(16,185,129,0.4)]">{cat.rate}%</span>
+                </div>
+              </div>
+
+              {/* Solved stats footer */}
+              <div className="border-t border-[#1e293b]/20 pt-2.5 flex justify-between text-[8px] text-slate-500 font-bold uppercase">
+                <span>Completed</span>
+                <span className="text-emerald-400 font-extrabold">{cat.solved} solved</span>
+              </div>
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Filters */}
-      <div className="bg-[#111827] rounded-2xl p-4 border border-slate-800/50">
+      <div className="bg-[#0f142c] rounded-2xl p-4 border border-[#1e293b]/25">
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
@@ -171,7 +286,7 @@ export default function MpComplaintsPage() {
             >
               <Link
                 href={`/mp/complaints/${s.id}`}
-                className="flex items-center gap-4 p-4 rounded-2xl bg-[#111827] border border-slate-800/50 hover:border-slate-700/80 transition-all group"
+                className="flex items-center gap-4 p-4 rounded-2xl bg-[#0a0d1e] border border-[#1e293b]/20 hover:border-[#3b82f6]/30 transition-all group shadow-sm"
               >
                 {/* Rank */}
                 <div className="w-10 h-10 rounded-xl bg-linear-to-br from-amber-500/10 to-amber-500/5 flex items-center justify-center shrink-0 border border-amber-500/10">

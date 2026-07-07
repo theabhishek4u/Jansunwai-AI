@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { mockDb, Profile, Suggestion, MediaAttachment, TimelineEvent, Department } from './mockDb';
+import { mockDb, Profile, Suggestion, MediaAttachment, TimelineEvent, Department, AreaPopulation } from './mockDb';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -483,5 +483,111 @@ export const db = {
       }
     }
     return mockDb.getSupportedSuggestions(userId);
+  },
+
+  getPopulations: async (): Promise<AreaPopulation[]> => {
+    if (supabase) {
+      const { data, error } = await supabase
+        .from('area_populations')
+        .select('*');
+      if (!error && data) {
+        return data as AreaPopulation[];
+      }
+    }
+    return mockDb.getPopulations();
+  },
+
+  addOrUpdatePopulation: async (pop: Omit<AreaPopulation, 'id'> & { id?: string }): Promise<AreaPopulation> => {
+    if (supabase) {
+      const { data, error } = await supabase
+        .from('area_populations')
+        .upsert({
+          id: pop.id || undefined,
+          district: pop.district,
+          area: pop.area,
+          total_population: pop.total_population,
+          male_percentage: pop.male_percentage,
+          female_percentage: pop.female_percentage,
+          age_0_18_percentage: pop.age_0_18_percentage,
+          age_18_60_percentage: pop.age_18_60_percentage,
+          age_60_plus_percentage: pop.age_60_plus_percentage
+        })
+        .select()
+        .single();
+      if (!error && data) {
+        return data as AreaPopulation;
+      }
+      console.error('Supabase population upsert error:', error?.message);
+    }
+    return mockDb.addOrUpdatePopulation(pop);
+  },
+
+  deletePopulation: async (id: string): Promise<boolean> => {
+    if (supabase) {
+      const { error } = await supabase
+        .from('area_populations')
+        .delete()
+        .eq('id', id);
+      if (!error) return true;
+    }
+    return mockDb.deletePopulation(id);
+  },
+
+  getDepartments: async (): Promise<Department[]> => {
+    if (supabase) {
+      const { data, error } = await supabase
+        .from('departments')
+        .select('*')
+        .order('created_at', { ascending: false });
+      if (!error && data) {
+        return data as Department[];
+      }
+    }
+    return mockDb.getDepartments();
+  },
+
+  createDepartment: async (dept: Omit<Department, 'created_at'>): Promise<Department> => {
+    if (supabase) {
+      const { data, error } = await supabase
+        .from('departments')
+        .insert({
+          ...dept,
+          created_at: new Date().toISOString()
+        })
+        .select()
+        .single();
+      if (!error && data) {
+        return data as Department;
+      }
+    }
+    return mockDb.createDepartment(dept);
+  },
+
+  updateDepartment: async (id: string, updates: Partial<Department>): Promise<Department | null> => {
+    if (supabase) {
+      const { data, error } = await supabase
+        .from('departments')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+      if (!error && data) {
+        return data as Department;
+      }
+    }
+    return mockDb.updateDepartment(id, updates);
+  },
+
+  deleteDepartment: async (id: string): Promise<boolean> => {
+    if (supabase) {
+      const { error } = await supabase
+        .from('departments')
+        .delete()
+        .eq('id', id);
+      if (!error) {
+        return true;
+      }
+    }
+    return mockDb.deleteDepartment(id);
   }
 };

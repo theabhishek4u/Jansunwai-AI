@@ -64,6 +64,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: '/admin/departments', label: 'Departments', icon: <Building2 className="w-5 h-5" />, badge: 'PORTALS' },
     { href: '/admin/mps', label: 'MP Directory', icon: <UserCheck className="w-5 h-5" /> },
     { href: '/admin/citizens', label: 'Citizen Verification', icon: <Users className="w-5 h-5" />, badge: 'VERIFY' },
+    { href: '/admin/demographics', label: 'Census Population', icon: <Users className="w-5 h-5" /> },
     { href: '/admin/datasets', label: 'Public Datasets', icon: <Database className="w-5 h-5" /> },
     { href: '/admin/ai-config', label: 'AI Configuration', icon: <Bot className="w-5 h-5" />, badge: 'CONFIG' },
     { href: '/admin/categories', label: 'Categories', icon: <Grid className="w-5 h-5" /> },

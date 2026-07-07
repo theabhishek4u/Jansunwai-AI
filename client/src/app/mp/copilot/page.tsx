@@ -107,7 +107,7 @@ export default function CopilotPage() {
       </div>
 
       {/* Chat Area */}
-      <div className="flex-1 overflow-y-auto rounded-2xl bg-[#111827] border border-slate-800/50 p-4 md:p-6 space-y-6">
+      <div className="flex-1 overflow-y-auto rounded-2xl bg-transparent p-4 md:p-6 space-y-6 custom-scrollbar">
         {messages.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full space-y-8">
             <div className="flex flex-col items-center space-y-4">
@@ -127,7 +127,7 @@ export default function CopilotPage() {
                 <button
                   key={q}
                   onClick={() => sendMessage(q)}
-                  className="flex items-center space-x-2.5 px-4 py-3 rounded-xl bg-slate-800/50 border border-slate-700/50 text-xs text-slate-300 hover:bg-slate-800 hover:border-slate-600 hover:text-white transition-all text-left group"
+                  className="flex items-center space-x-2.5 px-4 py-3 rounded-xl bg-[#0f142c] border border-[#1e293b]/30 text-xs text-slate-300 hover:bg-[#151c38] hover:border-blue-500/20 hover:text-white transition-all text-left group"
                 >
                   <Lightbulb className="w-3.5 h-3.5 text-amber-500/60 group-hover:text-amber-400 shrink-0" />
                   <span>{q}</span>
@@ -244,7 +244,7 @@ export default function CopilotPage() {
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && sendMessage(input)}
               placeholder="Ask about your constituency..."
-              className="w-full px-5 py-3.5 rounded-xl bg-[#111827] border border-slate-700/50 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500/30 focus:border-violet-500/50 transition-all"
+              className="w-full px-5 py-3.5 rounded-xl bg-[#0f142c] border border-[#1e293b]/30 text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500/40 transition-all"
               disabled={isLoading}
             />
             <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center space-x-1">

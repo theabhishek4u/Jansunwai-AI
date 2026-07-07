@@ -14,6 +14,7 @@ import {
   FlaskConical,
   FileText,
   BarChart3,
+  Users2,
   LogOut,
   Bell,
   Menu,
@@ -63,6 +64,7 @@ export default function MpLayout({ children }: { children: React.ReactNode }) {
     { href: '/mp/budget', label: 'Budget Planner', icon: <Wallet className="w-5 h-5" /> },
     { href: '/mp/simulator', label: 'Dev Simulator', icon: <FlaskConical className="w-5 h-5" /> },
     { href: '/mp/analytics', label: 'Analytics', icon: <BarChart3 className="w-5 h-5" /> },
+    { href: '/mp/demographics', label: 'Demographics', icon: <Users2 className="w-5 h-5" /> },
     { href: '/mp/reports', label: 'Reports', icon: <FileText className="w-5 h-5" /> },
   ];
 
@@ -74,7 +76,7 @@ export default function MpLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-[#0a0e1a] flex flex-col md:flex-row" style={{ fontFamily: "'Inter', sans-serif" }}>
       {/* Sidebar - Desktop */}
-      <aside className="hidden md:flex flex-col w-[260px] bg-[#0d1220] border-r border-amber-900/10 shrink-0 sticky top-0 h-screen overflow-y-auto">
+      <aside className="hidden md:flex flex-col w-[260px] bg-[#080b18] border-r border-[#1e293b]/30 shrink-0 sticky top-0 h-screen overflow-y-auto shadow-xl">
         {/* Brand */}
         <div className="px-5 pt-6 pb-5 border-b border-slate-800/50">
           <Link href="/mp" className="flex items-center space-x-3">
@@ -96,10 +98,10 @@ export default function MpLayout({ children }: { children: React.ReactNode }) {
             <Link
               key={link.href}
               href={link.href}
-              className={`group flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-medium transition-all duration-255 border-l-2
+              className={`group flex items-center space-x-3 px-3 py-2.5 rounded-xl text-xs font-medium transition-all duration-200 hover:translate-x-1 border-l-2
                 ${isActive(link)
-                  ? 'bg-linear-to-r from-amber-500/15 to-transparent text-amber-300 border-amber-500 shadow-sm shadow-amber-500/5'
-                  : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/30 border-transparent'
+                  ? 'bg-linear-to-r from-amber-500/10 to-transparent text-amber-200 border-amber-500 shadow-lg shadow-amber-500/5'
+                  : 'text-slate-450 hover:text-slate-200 hover:bg-slate-900/40 border-transparent'
                 }`}
             >
               <span className={isActive(link) ? 'text-amber-400' : 'text-slate-500 group-hover:text-slate-300'}>{link.icon}</span>
@@ -129,7 +131,7 @@ export default function MpLayout({ children }: { children: React.ReactNode }) {
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0">
         {/* Top Header */}
-        <header className="sticky top-0 z-40 bg-[#0d1220]/80 backdrop-blur-xl border-b border-slate-800/50">
+        <header className="sticky top-0 z-40 bg-[#080b18]/80 backdrop-blur-xl border-b border-[#1e293b]/25 shadow-sm">
           <div className="flex items-center justify-between px-4 md:px-8 h-14">
             {/* Mobile toggle */}
             <button

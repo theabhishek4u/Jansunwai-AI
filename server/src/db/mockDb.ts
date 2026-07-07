@@ -505,6 +505,67 @@ export const mockDb = {
     }
     return false;
   },
+  getPopulations: async () => {
+    return [...areaPopulations];
+  },
+  addOrUpdatePopulation: async (pop: Omit<AreaPopulation, 'id'> & { id?: string }) => {
+    const id = pop.id || `pop-${uuidv4()}`;
+    const existingIdx = areaPopulations.findIndex(p => p.id === id || (p.area.toLowerCase() === pop.area.toLowerCase() && p.district.toLowerCase() === pop.district.toLowerCase()));
+    const newPopRecord: AreaPopulation = {
+      id,
+      district: pop.district,
+      area: pop.area,
+      total_population: Number(pop.total_population),
+      male_percentage: Number(pop.male_percentage),
+      female_percentage: Number(pop.female_percentage),
+      age_0_18_percentage: Number(pop.age_0_18_percentage),
+      age_18_60_percentage: Number(pop.age_18_60_percentage),
+      age_60_plus_percentage: Number(pop.age_60_plus_percentage)
+    };
+    if (existingIdx > -1) {
+      areaPopulations[existingIdx] = newPopRecord;
+    } else {
+      areaPopulations.push(newPopRecord);
+    }
+    return newPopRecord;
+  },
+  deletePopulation: async (id: string) => {
+    const idx = areaPopulations.findIndex(p => p.id === id);
+    if (idx > -1) {
+      areaPopulations.splice(idx, 1);
+      return true;
+    }
+    return false;
+  },
+  getDepartments: async () => {
+    return [...mockDepartments];
+  },
+  createDepartment: async (dept: Omit<Department, 'created_at'>) => {
+    const newDept = {
+      ...dept,
+      status: dept.status || 'active',
+      verification_status: dept.verification_status || 'verified',
+      created_at: new Date().toISOString()
+    };
+    mockDepartments.push(newDept);
+    return newDept;
+  },
+  updateDepartment: async (id: string, updates: Partial<Department>) => {
+    const idx = mockDepartments.findIndex(d => d.id === id);
+    if (idx > -1) {
+      mockDepartments[idx] = { ...mockDepartments[idx], ...updates };
+      return mockDepartments[idx];
+    }
+    return null;
+  },
+  deleteDepartment: async (id: string) => {
+    const idx = mockDepartments.findIndex(d => d.id === id);
+    if (idx > -1) {
+      mockDepartments.splice(idx, 1);
+      return true;
+    }
+    return false;
+  },
   addMediaAttachment: async (att: Omit<MediaAttachment, 'id' | 'created_at'>) => {
     const newAtt: MediaAttachment = { ...att, id: `media-${uuidv4()}`, created_at: new Date().toISOString() };
     mediaAttachments.push(newAtt);
@@ -719,6 +780,18 @@ export interface AuditLog {
   ipAddress: string;
 }
 
+export interface AreaPopulation {
+  id: string;
+  district: string;
+  area: string;
+  total_population: number;
+  male_percentage: number;
+  female_percentage: number;
+  age_0_18_percentage: number;
+  age_18_60_percentage: number;
+  age_60_plus_percentage: number;
+}
+
 let promptTemplates: PromptTemplate[] = [
   {
     id: 'p-1',
@@ -770,5 +843,19 @@ let auditLogs: AuditLog[] = [
   { id: 'log-1', adminName: 'Admin Operations', action: 'System online. All constituency listeners active.', timestamp: daysAgo(4), ipAddress: '127.0.0.1' },
   { id: 'log-2', adminName: 'Admin Operations', action: 'Configured Gemini 2.5 Flash as active model.', timestamp: daysAgo(3), ipAddress: '192.168.1.10' },
   { id: 'log-3', adminName: 'Admin Operations', action: 'Synchronized Jal Jeevan Mission dataset.', timestamp: daysAgo(2), ipAddress: '192.168.1.10' }
+];
+
+export let areaPopulations: AreaPopulation[] = [
+  { id: 'pop-1', district: 'Lucknow', area: 'Jankipuram', total_population: 180000, male_percentage: 53, female_percentage: 47, age_0_18_percentage: 24, age_18_60_percentage: 62, age_60_plus_percentage: 14 },
+  { id: 'pop-2', district: 'Lucknow', area: 'Gomti Nagar', total_population: 240000, male_percentage: 51, female_percentage: 49, age_0_18_percentage: 20, age_18_60_percentage: 65, age_60_plus_percentage: 15 },
+  { id: 'pop-3', district: 'Lucknow', area: 'Chowk', total_population: 150000, male_percentage: 54, female_percentage: 46, age_0_18_percentage: 28, age_18_60_percentage: 58, age_60_plus_percentage: 14 },
+  { id: 'pop-4', district: 'Lucknow', area: 'Hazratganj', total_population: 95000, male_percentage: 52, female_percentage: 48, age_0_18_percentage: 18, age_18_60_percentage: 64, age_60_plus_percentage: 18 },
+  { id: 'pop-5', district: 'Lucknow', area: 'Alambagh', total_population: 135000, male_percentage: 52, female_percentage: 48, age_0_18_percentage: 26, age_18_60_percentage: 60, age_60_plus_percentage: 14 },
+  { id: 'pop-6', district: 'Lucknow', area: 'Ashiyana', total_population: 165000, male_percentage: 53, female_percentage: 47, age_0_18_percentage: 23, age_18_60_percentage: 63, age_60_plus_percentage: 14 },
+  { id: 'pop-7', district: 'Lucknow', area: 'Charbagh', total_population: 110000, male_percentage: 55, female_percentage: 45, age_0_18_percentage: 22, age_18_60_percentage: 66, age_60_plus_percentage: 12 },
+  { id: 'pop-8', district: 'Lucknow', area: 'Mahanagar', total_population: 125000, male_percentage: 51, female_percentage: 49, age_0_18_percentage: 21, age_18_60_percentage: 62, age_60_plus_percentage: 17 },
+  { id: 'pop-9', district: 'Lucknow', area: 'Aminabad', total_population: 145000, male_percentage: 54, female_percentage: 46, age_0_18_percentage: 27, age_18_60_percentage: 59, age_60_plus_percentage: 14 },
+  { id: 'pop-10', district: 'Lucknow', area: 'Indira Nagar', total_population: 210000, male_percentage: 52, female_percentage: 48, age_0_18_percentage: 21, age_18_60_percentage: 63, age_60_plus_percentage: 16 },
+  { id: 'pop-11', district: 'Lucknow', area: 'Karpi', total_population: 35000, male_percentage: 52, female_percentage: 48, age_0_18_percentage: 30, age_18_60_percentage: 57, age_60_plus_percentage: 13 }
 ];
 

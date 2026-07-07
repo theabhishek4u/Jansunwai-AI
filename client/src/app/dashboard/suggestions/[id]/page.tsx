@@ -244,10 +244,10 @@ export default function SuggestionDetails() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Left Side: Proposal Details */}
         <div className="lg:col-span-2 space-y-6">
-          <div className="bg-slate-900/40 border border-slate-900 rounded-3xl p-6 sm:p-8 space-y-6">
+          <div className="bg-[#0f142c] border border-[#1e293b]/30 rounded-3xl p-6 sm:p-8 space-y-6 shadow-md">
             
             {/* Header info */}
-            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 border-b border-slate-850/60 pb-5">
+            <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 border-b border-[#1e293b]/20 pb-5">
               <div className="space-y-2">
                 <div className="flex items-center space-x-2">
                   <span className="text-[10px] font-extrabold uppercase tracking-wider text-indigo-400 bg-indigo-950/20 border border-indigo-900/15 px-2.5 py-1 rounded">
@@ -293,7 +293,7 @@ export default function SuggestionDetails() {
             </div>
 
             {/* Beneficiaries & Location Details */}
-            <div className="grid grid-cols-2 gap-4 border-t border-slate-850/60 pt-5 text-xs">
+            <div className="grid grid-cols-2 gap-4 border-t border-[#1e293b]/20 pt-5 text-xs">
               <div className="flex items-start space-x-2.5">
                 <Users className="w-4 h-4 text-indigo-400 shrink-0" />
                 <div>
@@ -330,11 +330,11 @@ export default function SuggestionDetails() {
 
             {/* Media uploads evidence display */}
             {sugg.media.length > 0 && (
-              <div className="border-t border-slate-850/60 pt-5 space-y-2">
+              <div className="border-t border-[#1e293b]/20 pt-5 space-y-2">
                 <span className="block text-[10px] font-bold text-slate-500 uppercase tracking-wider">Submitted Evidence Photos</span>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                   {sugg.media.map((med, index) => (
-                    <div key={index} className="relative group rounded-xl overflow-hidden border border-slate-850">
+                    <div key={index} className="relative group rounded-xl overflow-hidden border border-[#1e293b]/20">
                       <img src={med.file_url} alt="Evidence" className="w-full h-24 object-cover group-hover:scale-105 transition-transform" />
                     </div>
                   ))}
@@ -344,28 +344,28 @@ export default function SuggestionDetails() {
           </div>
 
           {/* AI Auditor scores panel */}
-          <div className="bg-slate-900/40 border border-slate-900 rounded-3xl p-6 sm:p-8 space-y-4">
+          <div className="bg-[#0f142c] border border-[#1e293b]/30 rounded-3xl p-6 sm:p-8 space-y-4 shadow-md">
             <h2 className="text-md font-bold text-white flex items-center space-x-2">
               <Sparkles className="w-5 h-5 text-indigo-400" />
               <span>AI Auditor Report Card</span>
             </h2>
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-center">
-              <div className="bg-slate-950/50 border border-slate-850 p-4 rounded-2xl">
+              <div className="bg-slate-950/50 border border-[#1e293b]/20 p-4 rounded-2xl">
                 <span className="block text-[9px] uppercase tracking-wider text-slate-500 font-bold mb-1">Completeness</span>
                 <span className="text-xl font-black text-white">{sugg.ai_score_completeness || 60}%</span>
               </div>
-              <div className="bg-slate-950/50 border border-slate-850 p-4 rounded-2xl">
+              <div className="bg-slate-950/50 border border-[#1e293b]/20 p-4 rounded-2xl">
                 <span className="block text-[9px] uppercase tracking-wider text-slate-500 font-bold mb-1">Confidence</span>
                 <span className="text-xl font-black text-white">{sugg.ai_score_confidence || 80}%</span>
               </div>
-              <div className="bg-slate-950/50 border border-slate-850 p-4 rounded-2xl">
+              <div className="bg-slate-950/50 border border-[#1e293b]/20 p-4 rounded-2xl">
                 <span className="block text-[9px] uppercase tracking-wider text-slate-500 font-bold mb-1">Photo Verified</span>
                 <span className={`text-xs font-bold uppercase tracking-wider ${sugg.ai_score_photo_verified ? 'text-emerald-400' : 'text-slate-500'}`}>
                   {sugg.ai_score_photo_verified ? 'Verified ✓' : 'No Photo'}
                 </span>
               </div>
-              <div className="bg-slate-950/50 border border-slate-850 p-4 rounded-2xl">
+              <div className="bg-slate-950/50 border border-[#1e293b]/20 p-4 rounded-2xl">
                 <span className="block text-[9px] uppercase tracking-wider text-slate-500 font-bold mb-1">Loc Verified</span>
                 <span className={`text-xs font-bold uppercase tracking-wider ${sugg.ai_score_location_verified ? 'text-emerald-400' : 'text-slate-500'}`}>
                   {sugg.ai_score_location_verified ? 'Verified ✓' : 'Manual'}
@@ -390,7 +390,7 @@ export default function SuggestionDetails() {
         {/* Right Side: Timeline & Consensus Score */}
         <div className="space-y-6">
           {/* Consensus Score Widget */}
-          <div className="bg-slate-900/40 border border-slate-900 rounded-3xl p-6 space-y-4">
+          <div className="bg-[#0f142c] border border-[#1e293b]/30 rounded-3xl p-6 space-y-4 shadow-md">
             <div className="flex items-center justify-between">
               <h2 className="text-md font-bold text-white flex items-center space-x-2">
                 <Layers className="w-5 h-5 text-indigo-400" />
@@ -410,7 +410,7 @@ export default function SuggestionDetails() {
               <div className="relative w-28 h-28 flex items-center justify-center">
                 <div className="absolute inset-0 bg-indigo-500/5 blur-xl rounded-full" />
                 <svg className="w-full h-full transform -rotate-90 relative z-10" viewBox="0 0 100 100">
-                  <circle cx="50" cy="50" r="42" fill="none" className="stroke-slate-800" strokeWidth="6" />
+                  <circle cx="50" cy="50" r="42" fill="none" className="stroke-[#131930]" strokeWidth="6" />
                   <circle 
                     cx="50" cy="50" r="42" fill="none" 
                     className="stroke-indigo-500 transition-all duration-1000 ease-out" 
@@ -427,7 +427,7 @@ export default function SuggestionDetails() {
             </div>
 
             {/* Breakdown Formula Table */}
-            <div className="space-y-2 border-t border-slate-850 pt-3 text-[10px] text-slate-400 font-medium">
+            <div className="space-y-2 border-t border-[#1e293b]/20 pt-3 text-[10px] text-slate-400 font-medium">
               <div className="flex justify-between">
                 <span>Citizen Support (40% weight)</span>
                 <span className="text-slate-200">
@@ -450,13 +450,13 @@ export default function SuggestionDetails() {
           </div>
 
           {/* Timeline Tracking */}
-          <div className="bg-slate-900/40 border border-slate-900 rounded-3xl p-6 space-y-6">
+          <div className="bg-[#0f142c] border border-[#1e293b]/30 rounded-3xl p-6 space-y-6 shadow-md">
             <h2 className="text-md font-bold text-white flex items-center space-x-2">
               <Calendar className="w-5 h-5 text-indigo-400" />
               <span>Tracking Timeline</span>
             </h2>
 
-            <div className="space-y-8 relative before:absolute before:left-3.5 before:top-2 before:bottom-2 before:w-[2px] before:bg-slate-850">
+            <div className="space-y-8 relative before:absolute before:left-3.5 before:top-2 before:bottom-2 before:w-[2px] before:bg-[#1e293b]/20">
               {TIMELINE_STAGES.map((stage, idx) => {
                 const isPassed = idx <= currentStageIndex;
                 const isCurrent = idx === currentStageIndex;
@@ -471,8 +471,8 @@ export default function SuggestionDetails() {
                       isCurrent 
                         ? 'bg-indigo-600 border-indigo-400 text-white shadow-md shadow-indigo-600/30' 
                         : isPassed 
-                          ? 'bg-slate-950 border-emerald-500 text-emerald-400' 
-                          : 'bg-slate-950 border-slate-850 text-slate-600'
+                          ? 'bg-[#0a0d1e] border-emerald-500/80 text-emerald-400 shadow-md shadow-emerald-500/5' 
+                          : 'bg-slate-950 border-[#1e293b]/20 text-slate-600'
                     }`}>
                       {isPassed ? (
                         <CheckCircle className="w-4 h-4" />

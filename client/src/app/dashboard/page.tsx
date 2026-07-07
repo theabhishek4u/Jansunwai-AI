@@ -25,12 +25,19 @@ interface Suggestion {
   status: string;
   ai_score_completeness: number;
   created_at: string;
+  consensus_score?: number;
+  supporters?: number;
+  village?: string;
+  block?: string;
+  district?: string;
+  estimated_beneficiaries?: number;
 }
 
 export default function DashboardHome() {
   const { user } = useAuth();
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [supportedSuggestions, setSupportedSuggestions] = useState<Suggestion[]>([]);
+  const [constituencyProjects, setConstituencyProjects] = useState<Suggestion[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

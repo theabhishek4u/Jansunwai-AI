@@ -512,7 +512,8 @@ export default function SubmitSuggestion() {
   };
 
   // Final Submit Complaint Form
-  const handleSubmitForm = async () => {
+  const handleSubmitForm = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     setShowPreview(false);
     setIsSubmitting(true);
     try {

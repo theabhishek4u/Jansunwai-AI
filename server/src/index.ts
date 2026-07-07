@@ -6,6 +6,7 @@ import suggestionRoutes from './routes/suggestion.routes';
 import mpRoutes from './routes/mp.routes';
 import adminRoutes from './routes/admin.routes';
 import notificationRoutes from './routes/notification.routes';
+import demographicsRoutes from './routes/demographics.routes';
 import { errorHandler } from './middlewares/errorHandler';
 
 dotenv.config();
@@ -28,6 +29,8 @@ app.use((req, res, next) => {
 app.use('/api/ai', aiRoutes);
 app.use('/api', suggestionRoutes);
 app.use('/api/mp', mpRoutes);
+app.use('/api/mp', demographicsRoutes);
+app.use('/api/admin', demographicsRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/notifications', notificationRoutes);
 
