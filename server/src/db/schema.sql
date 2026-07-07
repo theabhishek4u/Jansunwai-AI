@@ -131,9 +131,22 @@ CREATE TABLE IF NOT EXISTS public.suggestions (
     'accepted', 'rejected', 'planned', 'completed'
   )) DEFAULT 'submitted' NOT NULL,
   duplicate_of_id uuid REFERENCES public.suggestions(id) ON DELETE SET NULL,
+  support_count integer DEFAULT 0 NOT NULL,
+  consensus_score integer DEFAULT 0 NOT NULL,
+  duplicate_group_id uuid,
   created_at timestamp with time zone DEFAULT now() NOT NULL,
   updated_at timestamp with time zone DEFAULT now() NOT NULL
 );
+
+-- 11.5 Proposal Supports Table (Consensus Engine)
+CREATE TABLE IF NOT EXISTS public.proposal_supports (
+  id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
+  proposal_id uuid REFERENCES public.suggestions(id) ON DELETE CASCADE NOT NULL,
+  user_id uuid REFERENCES auth.users ON DELETE CASCADE NOT NULL,
+  supported_at timestamp with time zone DEFAULT now() NOT NULL,
+  UNIQUE(proposal_id, user_id)
+);
+
 
 -- 12. Attachments Table
 CREATE TABLE IF NOT EXISTS public.attachments (

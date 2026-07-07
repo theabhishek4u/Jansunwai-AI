@@ -94,6 +94,15 @@ export const db = {
     }
     const mockData = await mockDb.getSuggestions(filters);
     const merged = [...supabaseData];
+    
+    // Merge properties for matching IDs
+    for (let i = 0; i < merged.length; i++) {
+      const mockItem = mockData.find(m => m.id === merged[i].id);
+      if (mockItem) {
+        merged[i] = { ...mockItem, ...merged[i] };
+      }
+    }
+
     const existingIds = new Set(merged.map(s => s.id));
     for (const item of mockData) {
       if (!existingIds.has(item.id)) merged.push(item);
@@ -110,6 +119,10 @@ export const db = {
         .single();
       if (error) {
         return mockDb.getSuggestionById(id);
+      }
+      const mockItem = await mockDb.getSuggestionById(id);
+      if (mockItem) {
+        return { ...mockItem, ...data };
       }
       return data;
     }
@@ -237,6 +250,23 @@ export const db = {
     return mockDb.markNotificationRead(id);
   },
 
+  updateSuggestionStatus: async (id: string, status: string): Promise<Suggestion | null> => {
+    if (supabase) {
+      const { data, error } = await supabase
+        .from('suggestions')
+        .update({ status, updated_at: new Date().toISOString() })
+        .eq('id', id)
+        .select()
+        .single();
+      if (error) {
+        console.error('Supabase suggestion status update error, using mockDb fallback:', error.message);
+        return mockDb.updateSuggestionStatus(id, status);
+      }
+      return data;
+    }
+    return mockDb.updateSuggestionStatus(id, status);
+  },
+
   addTimelineEvent: async (event: Omit<TimelineEvent, 'id' | 'created_at'>): Promise<TimelineEvent> => {
     if (supabase) {
       const { data, error } = await supabase
@@ -244,18 +274,20 @@ export const db = {
         .insert(event)
         .select()
         .single();
-      if (error) {
-        console.error('Supabase timeline insertion error, using mockDb fallback:', error.message);
-        return mockDb.addTimelineEvent(event);
-      }
-      // Keep suggestion status in sync
+      
+      // Keep suggestions status column in sync in Supabase
       const { data: suggestionData } = await supabase
         .from('suggestions')
         .update({ status: event.status, updated_at: new Date().toISOString() })
         .eq('id', event.suggestion_id)
         .select()
         .single();
-        
+
+      if (error) {
+        console.error('Supabase timeline insertion error, using mockDb fallback:', error.message);
+        return mockDb.addTimelineEvent(event);
+      }
+      
       // Generate Notification if completed
       if (suggestionData && event.status === 'completed') {
         const notif = {
@@ -334,6 +366,15 @@ export const db = {
     }
     const mockData = await mockDb.getAllSuggestions();
     const merged = [...supabaseData];
+    
+    // Merge properties for matching IDs
+    for (let i = 0; i < merged.length; i++) {
+      const mockItem = mockData.find(m => m.id === merged[i].id);
+      if (mockItem) {
+        merged[i] = { ...mockItem, ...merged[i] };
+      }
+    }
+
     const existingIds = new Set(merged.map(s => s.id));
     for (const item of mockData) {
       if (!existingIds.has(item.id)) merged.push(item);
@@ -366,5 +407,81 @@ export const db = {
     const totalCostLakhs = allSugg.reduce((sum, s) => sum + (s.estimated_cost_lakhs || 0), 0);
     
     return { citizenCount, totalSuggestions, highPriority, activeProjects, completed, pendingReview, totalBeneficiaries, totalCostLakhs };
+  },
+
+  addSupport: async (proposalId: string, userId: string): Promise<boolean> => {
+    if (supabase) {
+      // Check duplicate
+      const { data: existing } = await supabase
+        .from('proposal_supports')
+        .select('*')
+        .eq('proposal_id', proposalId)
+        .eq('user_id', userId)
+        .single();
+      
+      if (existing) return false;
+
+      // Insert support
+      const { error: insertError } = await supabase
+        .from('proposal_supports')
+        .insert({ proposal_id: proposalId, user_id: userId });
+
+      if (insertError) {
+        console.error('Supabase support insertion error:', insertError.message);
+        return mockDb.addSupport(proposalId, userId);
+      }
+
+      // Get current support count
+      const { data: suggestion } = await supabase
+        .from('suggestions')
+        .select('support_count')
+        .eq('id', proposalId)
+        .single();
+
+      const nextCount = (suggestion?.support_count || 0) + 1;
+
+      // Recalculate Consensus Score
+      const citizenScore = Math.min(40, Math.round((nextCount / 1000) * 40));
+      const mukhiyaScore = (nextCount % 2 === 0) ? 25 : 0;
+      const mlaScore = (nextCount > 100) ? 20 : 10;
+      const aiScore = 15; // default simulated AI score weight
+      const nextConsensus = Math.min(100, citizenScore + mukhiyaScore + mlaScore + aiScore);
+
+      // Update suggestion
+      await supabase
+        .from('suggestions')
+        .update({ support_count: nextCount, consensus_score: nextConsensus })
+        .eq('id', proposalId);
+
+      return true;
+    }
+    return mockDb.addSupport(proposalId, userId);
+  },
+
+  hasSupported: async (proposalId: string, userId: string): Promise<boolean> => {
+    if (supabase) {
+      const { data, error } = await supabase
+        .from('proposal_supports')
+        .select('*')
+        .eq('proposal_id', proposalId)
+        .eq('user_id', userId)
+        .single();
+      return !!data && !error;
+    }
+    return mockDb.hasSupported(proposalId, userId);
+  },
+
+  getSupportedSuggestions: async (userId: string): Promise<Suggestion[]> => {
+    if (supabase) {
+      const { data, error } = await supabase
+        .from('proposal_supports')
+        .select('*, suggestions(*)')
+        .eq('user_id', userId);
+      
+      if (!error && data) {
+        return data.map((d: any) => d.suggestions).filter(Boolean);
+      }
+    }
+    return mockDb.getSupportedSuggestions(userId);
   }
 };

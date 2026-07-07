@@ -37,7 +37,7 @@ import {
   BarChart3,
   Clock,
   Lightbulb,
-  Hash, Users
+  Hash, Users, Layers
 } from 'lucide-react';
 
 const CATEGORIES = [
@@ -60,6 +60,7 @@ export default function SubmitSuggestion() {
   // General Form States
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [category, setCategory] = useState('Road');
   const [state, setState] = useState(user?.state || '');
   const [district, setDistrict] = useState(user?.district || '');
   const [block, setBlock] = useState('');
@@ -203,6 +204,19 @@ export default function SubmitSuggestion() {
   } | null>(null);
 
   const [showPreview, setShowPreview] = useState(false);
+
+  // Consensus Engine: Duplicate Interception States
+  const [duplicateFoundInfo, setDuplicateFoundInfo] = useState<{
+    id: string;
+    title: string;
+    status: string;
+    supportCount: number;
+    similarity?: number;
+  } | null>(null);
+  const [showDuplicateModal, setShowDuplicateModal] = useState(false);
+  const [ignoreDuplicateWarning, setIgnoreDuplicateWarning] = useState(false);
+  const [isSupportingFromModal, setIsSupportingFromModal] = useState(false);
+  const [modalSupportSuccess, setModalSupportSuccess] = useState(false);
 
   // Reverse Geocode from lat/lng using OpenStreetMap Nominatim
   const reverseGeocodeFromCoords = useCallback(async (latitude: number, longitude: number) => {
@@ -502,10 +516,37 @@ export default function SubmitSuggestion() {
     setShowPreview(false);
     setIsSubmitting(true);
     try {
+      // 1. Duplicate check interceptor (if warning not ignored)
+      if (!ignoreDuplicateWarning) {
+        const dupRes = await fetch('http://localhost:5000/api/ai/duplicate-check', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title, description, category, district })
+        });
+        
+        if (dupRes.ok) {
+          const dupData = await dupRes.json();
+          if (dupData.isDuplicate && dupData.duplicateOfId) {
+            setDuplicateFoundInfo({
+              id: dupData.duplicateOfId,
+              title: dupData.duplicateTitle || title,
+              status: dupData.duplicateStatus || 'under_review',
+              supportCount: dupData.supportCount || 326,
+              similarity: dupData.similarity || 94
+            });
+            setShowDuplicateModal(true);
+            setIsSubmitting(false);
+            return;
+          }
+        }
+      }
+
+      // 2. Normal creation if not duplicate (or duplicate ignored)
       const formData = new FormData();
       formData.append('citizen_id', user?.id || '');
       formData.append('title', title);
       formData.append('description', description);
+      formData.append('category', category);
       formData.append('language', language);
       formData.append('state', state);
       formData.append('district', district);
@@ -557,6 +598,33 @@ export default function SubmitSuggestion() {
       });
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handleSupportExistingProposal = async () => {
+    if (!duplicateFoundInfo || !user) return;
+    setIsSupportingFromModal(true);
+    try {
+      const res = await fetch(`http://localhost:5000/api/suggestions/${duplicateFoundInfo.id}/support`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id })
+      });
+      if (res.ok) {
+        setModalSupportSuccess(true);
+        setTimeout(() => {
+          setShowDuplicateModal(false);
+          router.push('/dashboard');
+        }, 3000);
+      } else {
+        const errData = await res.json();
+        alert(errData.error || 'Could not support proposal.');
+      }
+    } catch (err) {
+      console.error('Error supporting proposal:', err);
+      alert('Failed to support proposal due to connection issues.');
+    } finally {
+      setIsSupportingFromModal(false);
     }
   };
 
@@ -682,6 +750,31 @@ export default function SubmitSuggestion() {
                     placeholder="AI will generate a formal title, or type your own..."
                     className="w-full bg-slate-950/70 border border-slate-800/80 rounded-2xl py-4 pl-11 pr-4 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-indigo-500/60 focus:ring-2 focus:ring-indigo-500/10 focus:shadow-[0_0_20px_rgba(99,102,241,0.06)] transition-all duration-300"
                   />
+                </div>
+              </div>
+
+              {/* Category dropdown */}
+              <div className="space-y-2.5">
+                <label className="flex items-center gap-2 text-xs font-bold text-slate-300 uppercase tracking-wider">
+                  <Layers className="w-3.5 h-3.5 text-indigo-400" />
+                  Development Category
+                </label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-500 group-focus-within:text-indigo-400 transition-colors">
+                    <Layers className="w-4 h-4" />
+                  </div>
+                  <select
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    className="w-full bg-slate-950/70 border border-slate-800/80 rounded-2xl py-4 pl-11 pr-10 text-sm text-slate-100 focus:outline-none focus:border-indigo-500/60 focus:ring-2 focus:ring-indigo-500/10 transition-all duration-300 appearance-none cursor-pointer"
+                  >
+                    {CATEGORIES.map((cat) => (
+                      <option key={cat} value={cat}>
+                        {cat}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="w-4 h-4 text-slate-500 absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" />
                 </div>
               </div>
 
@@ -1187,13 +1280,12 @@ export default function SubmitSuggestion() {
                   </div>
                 </div>
               </div>
-
               <div className="flex gap-4 pt-4 border-t border-slate-800/60">
-                <button type="button" onClick={() => setShowPreview(false)} disabled={isSubmitting} className="flex-1 py-3.5 rounded-xl text-sm font-bold text-slate-300 bg-slate-800 hover:bg-slate-700 transition-colors disabled:opacity-50">
+                <button type="button" onClick={() => setShowPreview(false)} disabled={isSubmitting} className="grow py-3.5 rounded-xl text-sm font-bold text-slate-300 bg-slate-850 hover:bg-slate-805 transition-colors disabled:opacity-50">
                   Edit Details
                 </button>
-                <button type="button" onClick={handleSubmitForm} disabled={isSubmitting} className="flex-1 py-3.5 rounded-xl text-sm font-bold text-white bg-linear-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2 disabled:opacity-50">
-                  {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+                <button type="button" onClick={handleSubmitForm} disabled={isSubmitting} className="grow py-3.5 rounded-xl text-sm font-bold text-white bg-linear-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 shadow-lg shadow-indigo-500/25 flex items-center justify-center gap-2 disabled:opacity-50">
+                  {isSubmitting ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle className="w-4 h-4" />}
                   {isSubmitting ? 'Submitting...' : 'Confirm & Submit'}
                 </button>
               </div>
@@ -1316,6 +1408,90 @@ export default function SubmitSuggestion() {
               </button>
             </div>
             <MapPicker initialLat={lat || 25.3176} initialLng={lng || 82.9739} onLocationSelect={handleManualLocationSelect} />
+          </div>
+        </div>
+      )}
+
+      {/* ═══════════ SIMILAR PROPOSAL MODAL ═══════════ */}
+      {showDuplicateModal && duplicateFoundInfo && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-6">
+          <div className="absolute inset-0 bg-slate-950/85 backdrop-blur-xl animate-fadeIn" />
+          
+          <div className="relative w-full max-w-xl animate-fadeIn">
+            {/* Background Glow */}
+            <div className="absolute -inset-1 bg-linear-to-r from-amber-500 via-indigo-500 to-violet-500 rounded-[32px] blur-xl opacity-30" />
+            
+            <div className="relative bg-[#0b0f19] border border-slate-800 rounded-[32px] p-6 sm:p-8 shadow-2xl text-center overflow-hidden">
+              <div className="absolute top-0 inset-x-0 h-[3px] bg-linear-to-r from-amber-400 to-indigo-500" />
+              
+              {modalSupportSuccess ? (
+                <div className="py-6 flex flex-col items-center space-y-4">
+                  <div className="relative w-20 h-20 rounded-full bg-emerald-500/10 flex items-center justify-center text-emerald-400 border border-emerald-500/20 shadow-[0_0_30px_rgba(16,185,129,0.1)]">
+                    <CheckCircle className="w-10 h-10 animate-bounce" />
+                  </div>
+                  <h3 className="text-2xl font-black text-white">Thank you!</h3>
+                  <p className="text-sm text-slate-400 leading-relaxed max-w-xs">
+                    You have successfully supported this proposal. Redirecting to your dashboard...
+                  </p>
+                </div>
+              ) : (
+                <div className="space-y-6 text-left">
+                  <div className="flex items-center space-x-3 text-indigo-400 font-bold border-b border-slate-800/80 pb-4">
+                    <Sparkles className="w-5 h-5 animate-pulse text-indigo-400" />
+                    <h3 className="text-md font-black text-white">🤖 AI Recommendation</h3>
+                  </div>
+
+                  <div className="space-y-2">
+                    <p className="text-xs text-slate-400 font-medium">We found a similar development proposal in your constituency:</p>
+                    <div className="bg-slate-950/60 border border-slate-850 rounded-2xl p-5 space-y-4">
+                      <h4 className="text-sm font-black text-slate-100 leading-snug">{duplicateFoundInfo.title}</h4>
+                      
+                      <div className="flex items-center justify-between border-t border-slate-900 pt-3 text-xs">
+                        <span className="text-slate-400 font-semibold">👍 Supported by <strong className="text-white">{duplicateFoundInfo.supportCount}</strong> citizens</span>
+                        <span className="inline-flex items-center gap-1 text-[10px] font-extrabold uppercase text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded border border-indigo-500/20">
+                          AI Similarity {duplicateFoundInfo.similarity || 94}%
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <p className="text-xs text-slate-300 leading-relaxed font-sans">
+                    Supporting this proposal will strengthen the public demand and help the MP prioritize it faster.
+                  </p>
+
+                  <div className="flex flex-col sm:flex-row items-center gap-3 pt-2">
+                    <button
+                      onClick={handleSupportExistingProposal}
+                      disabled={isSupportingFromModal}
+                      className="w-full sm:flex-1 py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white font-black rounded-xl text-xs transition-all shadow-md flex items-center justify-center gap-2 cursor-pointer active:scale-[0.98]"
+                    >
+                      {isSupportingFromModal ? <Loader2 className="w-4 h-4 animate-spin" /> : null}
+                      Support Existing Proposal
+                    </button>
+                    
+                    <button
+                      onClick={() => window.open(`/dashboard/suggestions/${duplicateFoundInfo.id}`, '_blank')}
+                      className="w-full sm:w-auto py-3.5 px-5 bg-slate-900 hover:bg-slate-800 text-slate-300 font-bold rounded-xl text-xs transition-all border border-slate-850 cursor-pointer"
+                    >
+                      View Details
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        setIgnoreDuplicateWarning(true);
+                        setShowDuplicateModal(false);
+                        setTimeout(() => {
+                          handleSubmitForm();
+                        }, 50);
+                      }}
+                      className="w-full sm:w-auto py-3.5 px-4 text-[10px] font-bold text-slate-500 hover:text-rose-400 transition-colors cursor-pointer text-center"
+                    >
+                      Create New Proposal Anyway
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}

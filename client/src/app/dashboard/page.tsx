@@ -28,13 +28,27 @@ interface Suggestion {
 export default function DashboardHome() {
   const { user } = useAuth();
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
+  const [supportedSuggestions, setSupportedSuggestions] = useState<Suggestion[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (user) {
       fetchSuggestions();
+      fetchSupportedSuggestions();
     }
   }, [user]);
+
+  const fetchSupportedSuggestions = async () => {
+    try {
+      const res = await fetch(`http://localhost:5000/api/profile/${user?.id}/supported`);
+      if (res.ok) {
+        const data = await res.json();
+        setSupportedSuggestions(data);
+      }
+    } catch (err) {
+      console.error('Failed to load supported suggestions:', err);
+    }
+  };
 
   const fetchSuggestions = async () => {
     try {
@@ -237,6 +251,64 @@ export default function DashboardHome() {
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
+                    </div>
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* ── SUPPORTED PROPOSALS SECTION ── */}
+      <div className="bg-slate-900/40 border border-slate-900 rounded-3xl p-6 sm:p-8 space-y-6">
+        <div className="flex items-center justify-between">
+          <div className="space-y-1">
+            <h3 className="text-lg font-black text-white flex items-center gap-2">
+              <Sparkles className="w-5 h-5 text-indigo-400" />
+              <span>Supported Proposals</span>
+            </h3>
+            <p className="text-xs text-slate-500 font-medium">Community proposals you are backing to accelerate constituency funding</p>
+          </div>
+          <span className="text-[10px] text-slate-500 font-bold bg-slate-950 border border-slate-850 px-2.5 py-1 rounded-full">
+            {supportedSuggestions.length} Supported
+          </span>
+        </div>
+
+        {supportedSuggestions.length === 0 ? (
+          <div className="text-center py-10 border border-dashed border-slate-800/80 rounded-2xl space-y-3">
+            <MessageSquare className="w-8 h-8 text-slate-650 mx-auto" />
+            <p className="text-slate-500 text-xs font-semibold">You have not supported any community proposals yet.</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {supportedSuggestions.map((sugg) => (
+              <Link
+                key={sugg.id}
+                href={`/dashboard/suggestions/${sugg.id}`}
+                className="block bg-slate-900/10 hover:bg-slate-900/30 border border-slate-900 hover:border-slate-850 p-4 rounded-2xl transition-all"
+              >
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="space-y-1">
+                    <span className="inline-block text-[10px] font-extrabold uppercase tracking-wider text-indigo-400">
+                      {sugg.category}
+                    </span>
+                    <h4 className="text-sm font-bold text-slate-200 line-clamp-1">{sugg.title}</h4>
+                    <span className="block text-[10px] text-slate-500 font-bold">
+                      Supported: {new Date(sugg.created_at).toLocaleDateString()}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0">
+                    <div className="text-right sm:text-center text-xs px-2.5 py-1 bg-slate-950 border border-slate-850 rounded-xl">
+                      <span className="block text-[8px] uppercase tracking-wider text-slate-500 font-bold">Consensus</span>
+                      <span className="font-bold text-slate-300">{sugg.consensus_score || 70}/100</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="block text-[8px] uppercase tracking-wider text-slate-500 font-bold mb-1">Status</span>
+                      <span className={`inline-block border text-[10px] font-semibold px-2.5 py-1 rounded-full uppercase tracking-wider ${getStatusColor(sugg.status)}`}>
+                        {sugg.status.replace('_', ' ')}
+                      </span>
                     </div>
                   </div>
                 </div>

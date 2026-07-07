@@ -88,21 +88,7 @@ export default function MpLayout({ children }: { children: React.ReactNode }) {
           </Link>
         </div>
 
-        {/* MP Info */}
-        <div className="px-4 py-4 border-b border-slate-800/50">
-          <div className="bg-linear-to-br from-slate-900 to-[#111827] border border-amber-900/10 p-3 rounded-2xl flex items-center space-x-3 shadow-inner">
-            <div className="relative">
-              <div className="w-9 h-9 rounded-full bg-linear-to-br from-amber-500 to-amber-700 flex items-center justify-center text-white text-xs font-bold ring-2 ring-amber-500/20">
-                {user.full_name?.charAt(0) || 'M'}
-              </div>
-              <div className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-[#0d1220] animate-pulse" />
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-slate-200 text-xs font-bold truncate">{user.full_name}</p>
-              <p className="text-amber-500/60 text-[9px] font-semibold tracking-wider uppercase mt-0.5">MP • {user.parliamentary_constituency}</p>
-            </div>
-          </div>
-        </div>
+
 
         {/* Navigation */}
         <nav className="flex-1 px-3 py-4 space-y-1">

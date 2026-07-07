@@ -7,7 +7,10 @@ import {
   deleteSuggestion,
   addTimelineStatus,
   syncProfile,
-  getProfileDetails
+  getProfileDetails,
+  supportSuggestion,
+  checkSupport,
+  getSupportedByCitizen
 } from '../controllers/suggestion.controller';
 import { asyncHandler } from '../middlewares/asyncHandler';
 
@@ -26,6 +29,9 @@ router.get('/suggestions', asyncHandler(getSuggestions));
 router.get('/suggestions/:id', asyncHandler(getSuggestionDetails));
 router.delete('/suggestions/:id', asyncHandler(deleteSuggestion));
 router.post('/suggestions/:id/timeline', asyncHandler(addTimelineStatus));
+router.post('/suggestions/:id/support', asyncHandler(supportSuggestion));
+router.get('/suggestions/:id/support/:userId', asyncHandler(checkSupport));
+router.get('/profile/:userId/supported', asyncHandler(getSupportedByCitizen));
 
 // Profile Routing
 router.post('/profile/sync', asyncHandler(syncProfile));

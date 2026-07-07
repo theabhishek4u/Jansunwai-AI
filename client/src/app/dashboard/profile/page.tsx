@@ -7,7 +7,7 @@ import {
   Mail, 
   Phone, 
   Globe, 
-  CheckCircle2, 
+  CheckCircle, 
   AlertCircle, 
   XCircle, 
   RefreshCw, 
@@ -137,7 +137,7 @@ export default function CitizenProfile() {
         return (
           <div className="bg-emerald-950/20 border border-emerald-500/20 p-5 rounded-3xl flex items-start space-x-4">
             <div className="p-3 bg-emerald-500/10 rounded-2xl text-emerald-400">
-              <CheckCircle2 className="w-6 h-6 animate-pulse" />
+              <CheckCircle className="w-6 h-6 animate-pulse" />
             </div>
             <div>
               <h4 className="text-sm font-bold text-white flex items-center gap-1.5">

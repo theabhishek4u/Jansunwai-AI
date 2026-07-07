@@ -54,8 +54,8 @@ export default function AdminDashboard() {
   const [hoveredState, setHoveredState] = useState<StatePerformance | null>(null);
   
   // Real-time ticker logs
-  const [suggestionTicker, setSuggestionTicker] = useState<number>(4892);
-  const [aiRequestsTicker, setAiRequestsTicker] = useState<number>(15420);
+  const [suggestionTicker, setSuggestionTicker] = useState<number>(0);
+  const [aiRequestsTicker, setAiRequestsTicker] = useState<number>(0);
   const [logs, setLogs] = useState<string[]>([
     'AI index completed: Varanasi Census Data 2011',
     'Ingesting public datasets for Uttar Pradesh health registry',
