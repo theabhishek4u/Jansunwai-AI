@@ -94,6 +94,15 @@ export const db = {
     }
     const mockData = await mockDb.getSuggestions(filters);
     const merged = [...supabaseData];
+    
+    // Merge properties for matching IDs
+    for (let i = 0; i < merged.length; i++) {
+      const mockItem = mockData.find(m => m.id === merged[i].id);
+      if (mockItem) {
+        merged[i] = { ...mockItem, ...merged[i] };
+      }
+    }
+
     const existingIds = new Set(merged.map(s => s.id));
     for (const item of mockData) {
       if (!existingIds.has(item.id)) merged.push(item);
@@ -110,6 +119,10 @@ export const db = {
         .single();
       if (error) {
         return mockDb.getSuggestionById(id);
+      }
+      const mockItem = await mockDb.getSuggestionById(id);
+      if (mockItem) {
+        return { ...mockItem, ...data };
       }
       return data;
     }
@@ -353,6 +366,15 @@ export const db = {
     }
     const mockData = await mockDb.getAllSuggestions();
     const merged = [...supabaseData];
+    
+    // Merge properties for matching IDs
+    for (let i = 0; i < merged.length; i++) {
+      const mockItem = mockData.find(m => m.id === merged[i].id);
+      if (mockItem) {
+        merged[i] = { ...mockItem, ...merged[i] };
+      }
+    }
+
     const existingIds = new Set(merged.map(s => s.id));
     for (const item of mockData) {
       if (!existingIds.has(item.id)) merged.push(item);
