@@ -899,115 +899,149 @@ export default function SubmitSuggestion() {
                   <span className="text-[10px] text-slate-500 font-bold bg-slate-900 border border-slate-800 px-2 py-0.5 rounded-full">{attachments.length} attached</span>
                 </div>
 
-                <div 
-                  onDragOver={handleDragOver}
-                  onDragLeave={handleDragLeave}
-                  onDrop={handleDrop}
-                  className={`rounded-2xl border-2 border-dashed p-5 transition-all duration-300 ${
-                    isDragging 
-                      ? 'border-indigo-500 bg-indigo-500/8 scale-[1.01]' 
-                      : 'border-slate-800/60 bg-slate-950/40 hover:border-slate-700/80'
-                  }`}
-                >
-                  <p className="text-[11px] text-slate-500 font-medium text-center mb-4">Drag & drop files or select a category below</p>
-                  
-                  <label className="flex flex-col items-center justify-center py-8 bg-indigo-500/5 border border-indigo-500/20 hover:border-indigo-500/40 rounded-xl cursor-pointer transition-all group hover:bg-indigo-500/10 active:scale-[0.98]">
-                    <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 mb-3 group-hover:scale-110 transition-transform shadow-inner">
-                      <Paperclip className="w-6 h-6" />
-                    </div>
-                    <span className="text-sm font-bold text-indigo-300 mb-1">Click to Upload Files</span>
-                    <span className="text-[10px] text-slate-500">Supports Images, Videos, Audio, and PDFs</span>
-                    <input 
-                      type="file" 
-                      accept="image/*,video/*,audio/*,.pdf,.doc,.docx" 
-                      multiple 
-                      className="hidden" 
-                      onChange={handleFileChange} 
-                    />
-                  </label>
-                </div>
-                
-                {/* AI Image Analysis Results */}
-                {(isAnalyzingImage || imageAnalysis) ? (
-                  <div className="mt-3 p-4 rounded-xl border border-indigo-500/30 bg-indigo-950/20 relative overflow-hidden">
-                    <div className="absolute top-0 left-0 w-1 h-full bg-linear-to-b from-indigo-500 to-purple-500" />
-                    
-                    <div className="flex items-center justify-between mb-3 ml-1">
-                      <div className="flex items-center gap-2">
-                        <Sparkles className={`w-4 h-4 text-indigo-400 ${isAnalyzingImage ? 'animate-spin' : ''}`} />
-                        <span className="text-xs font-bold text-slate-200">AI Image Analysis ⭐⭐⭐⭐⭐</span>
+                {attachments.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-5 gap-4 bg-slate-950/20 border border-slate-800/40 rounded-2xl p-4">
+                    {/* Column 1: Compact Upload Area */}
+                    <div className="md:col-span-2 flex flex-col justify-between border-b md:border-b-0 md:border-r border-slate-800/40 pb-4 md:pb-0 md:pr-4">
+                      <div>
+                        <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block mb-1">Add More Files</span>
+                        <label className="flex flex-col items-center justify-center p-3 bg-indigo-500/5 border border-indigo-500/10 hover:border-indigo-500/30 rounded-xl cursor-pointer transition-all group hover:bg-indigo-500/10 active:scale-[0.98] text-center">
+                          <Paperclip className="w-5 h-5 text-indigo-400 mb-1" />
+                          <span className="text-[10px] font-bold text-indigo-300">Browse Files</span>
+                          <input 
+                            type="file" 
+                            accept="image/*,video/*,audio/*,.pdf,.doc,.docx" 
+                            multiple 
+                            className="hidden" 
+                            onChange={handleFileChange} 
+                          />
+                        </label>
                       </div>
-                      {isAnalyzingImage && <span className="text-[10px] text-indigo-400 animate-pulse font-medium tracking-wide">Analyzing with Gemini Vision...</span>}
+
+                      {/* Attachment Previews */}
+                      <div className="mt-3">
+                        <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block mb-1.5">Attached Files</span>
+                        <div className="flex overflow-x-auto pb-1 gap-2.5 snap-x scrollbar-none">
+                          {attachments.map((att) => (
+                            <div key={att.id} className="relative flex-none w-20 bg-slate-900/60 border border-slate-800/60 rounded-xl p-1.5 snap-center group shadow-sm hover:border-slate-700 transition-all">
+                              <div className="h-11 bg-slate-950 rounded-lg overflow-hidden flex items-center justify-center border border-slate-800/60 mb-1 relative">
+                                {att.type === 'image' && <img src={att.preview} alt="preview" className="w-full h-full object-cover" />}
+                                {att.type === 'video' && (
+                                  <>
+                                    <video src={att.preview} className="w-full h-full object-cover opacity-60" />
+                                    <div className="absolute inset-0 flex items-center justify-center"><FilePlay className="w-4 h-4 text-white/80" /></div>
+                                  </>
+                                )}
+                                {att.type === 'audio' && <FileAudio className="w-5 h-5 text-amber-500" />}
+                                {att.type === 'document' && <FileDown className="w-5 h-5 text-emerald-500" />}
+                              </div>
+                              <div className="truncate text-[8px] font-semibold text-slate-350 px-0.5 block" title={att.file.name}>{att.file.name}</div>
+                              <button 
+                                type="button" 
+                                onClick={() => removeAttachment(att.id)} 
+                                className="absolute -top-1.5 -right-1.5 bg-red-500 text-white p-0.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-md hover:bg-red-600 cursor-pointer"
+                              >
+                                <Trash2 className="w-2.5 h-2.5" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
                     </div>
 
-                    {!isAnalyzingImage && imageAnalysis && (
-                      <div className="ml-1 grid grid-cols-2 sm:grid-cols-4 gap-3">
-                        <div className="bg-slate-900/60 border border-slate-800 rounded-lg p-2.5">
-                          <span className="block text-[9px] uppercase tracking-wider text-slate-500 font-bold mb-1">Detected</span>
-                          <span className="text-xs font-bold text-white flex items-center gap-1.5"><CheckCircle className="w-3.5 h-3.5 text-emerald-400" /> {imageAnalysis.detected}</span>
+                    {/* Column 2: AI analysis diagnostics */}
+                    <div className="md:col-span-3 flex flex-col justify-between">
+                      <div className="flex items-center justify-between mb-2">
+                        <div className="flex items-center gap-1.5">
+                          <Sparkles className={`w-3.5 h-3.5 text-indigo-400 ${isAnalyzingImage ? 'animate-spin' : ''}`} />
+                          <span className="text-[10px] font-black uppercase text-slate-300 tracking-wider">AI Verification Engine</span>
                         </div>
-                        <div className="bg-slate-900/60 border border-slate-800 rounded-lg p-2.5">
-                          <span className="block text-[9px] uppercase tracking-wider text-slate-500 font-bold mb-1">Confidence</span>
-                          <span className="text-xs font-bold text-indigo-300">{imageAnalysis.confidence}</span>
-                        </div>
-                        <div className="bg-slate-900/60 border border-slate-800 rounded-lg p-2.5">
-                          <span className="block text-[9px] uppercase tracking-wider text-slate-500 font-bold mb-1">Estimated</span>
-                          <span className="text-xs font-medium text-slate-300 line-clamp-1">{imageAnalysis.estimatedValue}</span>
-                        </div>
-                        <div className="bg-slate-900/60 border border-slate-800 rounded-lg p-2.5">
-                          <span className="block text-[9px] uppercase tracking-wider text-slate-500 font-bold mb-1">Severity</span>
-                          <span className={`text-xs font-bold ${imageAnalysis.severity?.toLowerCase() === 'critical' ? 'text-rose-500' : imageAnalysis.severity?.toLowerCase() === 'high' ? 'text-amber-500' : 'text-emerald-500'}`}>{imageAnalysis.severity}</span>
-                        </div>
+                        {isAnalyzingImage && <span className="text-[8px] text-indigo-400 animate-pulse font-bold tracking-widest uppercase">Processing Vision...</span>}
                       </div>
-                    )}
+
+                      {isAnalyzingImage ? (
+                        <div className="flex-1 flex items-center justify-center py-6 text-slate-500 text-[10px] font-bold uppercase tracking-wider animate-pulse">
+                          Running diagnostics...
+                        </div>
+                      ) : imageAnalysis ? (
+                        <div className="grid grid-cols-2 gap-2 text-[10px] font-bold">
+                          <div className="bg-slate-900/60 border border-slate-800 rounded-lg p-2 flex flex-col justify-between">
+                            <span className="text-[7.5px] uppercase tracking-widest text-slate-500 font-bold">Detected issue</span>
+                            <span className="text-white block mt-0.5 flex items-center gap-1 truncate"><CheckCircle className="w-3 h-3 text-emerald-400 shrink-0" /> {imageAnalysis.detected}</span>
+                          </div>
+                          <div className="bg-slate-900/60 border border-slate-800 rounded-lg p-2 flex flex-col justify-between">
+                            <span className="text-[7.5px] uppercase tracking-widest text-slate-500 font-bold">Confidence</span>
+                            <span className="text-indigo-400 block mt-0.5">{imageAnalysis.confidence}</span>
+                          </div>
+                          <div className="bg-slate-900/60 border border-slate-800 rounded-lg p-2 flex flex-col justify-between">
+                            <span className="text-[7.5px] uppercase tracking-widest text-slate-500 font-bold">Severity level</span>
+                            <span className={`block mt-0.5 ${imageAnalysis.severity?.toLowerCase() === 'critical' ? 'text-rose-500' : imageAnalysis.severity?.toLowerCase() === 'high' ? 'text-amber-500' : 'text-emerald-500'}`}>{imageAnalysis.severity}</span>
+                          </div>
+                          <div className="bg-slate-900/60 border border-slate-800 rounded-lg p-2 flex flex-col justify-between">
+                            <span className="text-[7.5px] uppercase tracking-widest text-slate-500 font-bold">Valuation index</span>
+                            <span className="text-slate-350 block mt-0.5 truncate">{imageAnalysis.estimatedValue}</span>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex-1 bg-slate-950/40 border border-slate-900 p-3 rounded-xl flex items-center justify-between">
+                          <div className="space-y-1">
+                            <span className="text-[8px] font-black text-slate-500 uppercase tracking-widest block">No image uploaded</span>
+                            <p className="text-[9px] text-slate-450 leading-normal">
+                              AI vision scanning automatically runs duplicate checks and severity evaluation on first attached photo.
+                            </p>
+                          </div>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 ) : (
-                  <div className="mt-3 p-3.5 rounded-xl border border-indigo-500/20 bg-slate-900/40 relative overflow-hidden">
-                    <div className="absolute top-0 left-0 w-1 h-full bg-linear-to-b from-indigo-500 to-purple-500" />
-                    <div className="flex items-center gap-2 mb-2 ml-1">
-                      <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
-                      <span className="text-[11px] font-bold text-slate-300">AI will analyze uploaded media</span>
-                    </div>
-                    <div className="flex flex-wrap gap-2 ml-1">
-                      {['Road Damage', 'Water Logging', 'Garbage', 'School Building', 'Hospital'].map((item) => (
-                        <span key={item} className="flex items-center gap-1 text-[10px] text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded-md border border-emerald-500/20">
-                          <CheckCircle className="w-3 h-3" />
-                          {item}
-                        </span>
-                      ))}
-                    </div>
-                    <div className="mt-2 ml-1 text-[9px] text-slate-500 font-medium tracking-wide uppercase">Detected automatically</div>
-                  </div>
-                )}
-
-                {/* Attachment previews */}
-                {attachments.length > 0 && (
-                  <div className="flex overflow-x-auto pb-2 gap-3 snap-x scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
-                    {attachments.map((att) => (
-                      <div key={att.id} className="relative flex-none w-28 bg-slate-900/80 border border-slate-800/60 rounded-xl p-2 snap-center group shadow-sm hover:border-slate-700 transition-all">
-                        <div className="h-16 bg-slate-950 rounded-lg overflow-hidden flex items-center justify-center border border-slate-800/60 mb-2 relative">
-                          {att.type === 'image' && <img src={att.preview} alt="preview" className="w-full h-full object-cover" />}
-                          {att.type === 'video' && (
-                            <>
-                              <video src={att.preview} className="w-full h-full object-cover opacity-60" />
-                              <div className="absolute inset-0 flex items-center justify-center"><FilePlay className="w-6 h-6 text-white/80 drop-shadow-md" /></div>
-                            </>
-                          )}
-                          {att.type === 'audio' && <FileAudio className="w-8 h-8 text-amber-500" />}
-                          {att.type === 'document' && <FileDown className="w-8 h-8 text-emerald-500" />}
+                  <>
+                    <div 
+                      onDragOver={handleDragOver}
+                      onDragLeave={handleDragLeave}
+                      onDrop={handleDrop}
+                      className={`rounded-2xl border-2 border-dashed p-5 transition-all duration-300 ${
+                        isDragging 
+                          ? 'border-indigo-500 bg-indigo-500/8 scale-[1.01]' 
+                          : 'border-slate-800/60 bg-slate-950/40 hover:border-slate-700/80'
+                      }`}
+                    >
+                      <p className="text-[11px] text-slate-500 font-medium text-center mb-4">Drag & drop files or select a category below</p>
+                      
+                      <label className="flex flex-col items-center justify-center py-8 bg-indigo-500/5 border border-indigo-500/20 hover:border-indigo-500/40 rounded-xl cursor-pointer transition-all group hover:bg-indigo-500/10 active:scale-[0.98]">
+                        <div className="w-12 h-12 rounded-2xl bg-indigo-500/10 flex items-center justify-center text-indigo-400 mb-3 group-hover:scale-110 transition-transform shadow-inner">
+                          <Paperclip className="w-6 h-6" />
                         </div>
-                        <div className="truncate text-[10px] font-semibold text-slate-300 px-1" title={att.file.name}>{att.file.name}</div>
-                        <div className="truncate text-[9px] text-slate-500 px-1">{(att.file.size / 1024 / 1024).toFixed(2)} MB</div>
-                        <button 
-                          type="button" 
-                          onClick={() => removeAttachment(att.id)} 
-                          className="absolute -top-2 -right-2 bg-red-500 text-white p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity shadow-md hover:bg-red-600 cursor-pointer"
-                        >
-                          <Trash2 className="w-3 h-3" />
-                        </button>
+                        <span className="text-sm font-bold text-indigo-300 mb-1">Click to Upload Files</span>
+                        <span className="text-[10px] text-slate-500">Supports Images, Videos, Audio, and PDFs</span>
+                        <input 
+                          type="file" 
+                          accept="image/*,video/*,audio/*,.pdf,.doc,.docx" 
+                          multiple 
+                          className="hidden" 
+                          onChange={handleFileChange} 
+                        />
+                      </label>
+                    </div>
+                    
+                    {/* Default Prompt block when empty */}
+                    <div className="mt-3 p-3.5 rounded-xl border border-indigo-500/20 bg-slate-900/40 relative overflow-hidden">
+                      <div className="absolute top-0 left-0 w-1 h-full bg-linear-to-b from-indigo-500 to-purple-500" />
+                      <div className="flex items-center gap-2 mb-2 ml-1">
+                        <Sparkles className="w-3.5 h-3.5 text-indigo-400" />
+                        <span className="text-[11px] font-bold text-slate-300">AI will analyze uploaded media</span>
                       </div>
-                    ))}
-                  </div>
+                      <div className="flex flex-wrap gap-2 ml-1">
+                        {['Road Damage', 'Water Logging', 'Garbage', 'School Building', 'Hospital'].map((item) => (
+                          <span key={item} className="flex items-center gap-1 text-[10px] text-emerald-400 bg-emerald-500/10 px-2 py-1 rounded-md border border-emerald-500/20">
+                            <CheckCircle className="w-3 h-3" />
+                            {item}
+                          </span>
+                        ))}
+                      </div>
+                      <div className="mt-2 ml-1 text-[9px] text-slate-550 font-medium tracking-wide uppercase">Detected automatically</div>
+                    </div>
+                  </>
                 )}
               </div>
 
