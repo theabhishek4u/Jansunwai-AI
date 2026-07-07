@@ -118,7 +118,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           ))}
         </nav>
 
-
+        {/* Footer Logout */}
+        <div className="px-4 py-4 border-t border-slate-800/60 mt-auto">
+          <button
+            onClick={() => { logout(); router.push('/'); }}
+            className="flex items-center space-x-2 px-3 py-2 rounded-lg text-xs text-red-400/80 hover:text-red-400 hover:bg-red-500/5 transition-colors w-full font-bold"
+          >
+            <LogOut className="w-4 h-4" />
+            <span>Log Out</span>
+          </button>
+        </div>
       </aside>
 
       {/* Main Content Area */}

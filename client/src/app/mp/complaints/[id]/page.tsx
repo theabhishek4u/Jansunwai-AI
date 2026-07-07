@@ -61,11 +61,8 @@ export default function MpSuggestionDetailPage() {
   const [suggestion, setSuggestion] = useState<SuggestionDetail | null>(null);
   const [timeline, setTimeline] = useState<TimelineEvent[]>([]);
   const [loading, setLoading] = useState(true);
-  const [timelineNotes, setTimelineNotes] = useState('');
-  const [selectedStatus, setSelectedStatus] = useState('');
   const [assignedDepartment, setAssignedDepartment] = useState('PWD (Roads)');
   const [taskInstructions, setTaskInstructions] = useState('');
-  const [activeTab, setActiveTab] = useState<'status' | 'assign'>('status');
   const [submitting, setSubmitting] = useState(false);
 
   const fetchSuggestionData = async () => {
@@ -75,9 +72,6 @@ export default function MpSuggestionDetailPage() {
         const sData = await res.json();
         setSuggestion(sData);
         setTimeline(sData.timeline || []);
-        if (!selectedStatus) {
-          setSelectedStatus(sData.status);
-        }
       }
     } catch (e) {
       console.error('Failed to load suggestion details for MP:', e);
@@ -89,40 +83,6 @@ export default function MpSuggestionDetailPage() {
     fetchSuggestionData().finally(() => setLoading(false));
   }, [id]);
 
-  const handleUpdateStatus = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!selectedStatus) return;
-    setSubmitting(true);
-    
-    let notes = timelineNotes.trim();
-    if (!notes) {
-      const defaultNotes: Record<string, string> = {
-        under_review: 'MP planning committee has opened the file for budget review.',
-        accepted: 'MP has accepted the complaint for departmental planning.',
-        planned: 'Funds sanctioned under Rural Development Block Grant.',
-        completed: 'Contractor completed physical site build. Local inspection approved.',
-        rejected: 'Proposal rejected as it does not meet feasibility guidelines.'
-      };
-      notes = defaultNotes[selectedStatus] || `Complaint transitioned to state: ${selectedStatus}`;
-    }
-
-    try {
-      const response = await fetch(`${API}/api/suggestions/${id}/timeline`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: selectedStatus, notes })
-      });
-      if (response.ok) {
-        setTimelineNotes('');
-        await fetchSuggestionData();
-      }
-    } catch (err) {
-      console.error('Failed to update timeline status:', err);
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
   const handleAssignTask = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!assignedDepartment || !taskInstructions.trim()) return;
@@ -131,11 +91,12 @@ export default function MpSuggestionDetailPage() {
     const notes = `Task Assigned to ${assignedDepartment}. Action required: ${taskInstructions.trim()}`;
     
     try {
+      // Transition suggestion status to 'planned' automatically when task is assigned
       const response = await fetch(`${API}/api/suggestions/${id}/timeline`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
-          status: suggestion?.status || 'under_review', 
+          status: 'planned', 
           notes 
         })
       });
@@ -193,7 +154,7 @@ export default function MpSuggestionDetailPage() {
           </div>
 
           <div className="flex items-center space-x-2 shrink-0 bg-slate-900/60 border border-slate-800/80 px-4 py-2 rounded-xl text-slate-400 text-[11px] font-medium">
-            <span>Manage status & tasks using the control panel below</span>
+            <span>Manage tasks using the control panel below</span>
           </div>
         </div>
       </motion.div>
@@ -208,12 +169,12 @@ export default function MpSuggestionDetailPage() {
         {/* Right side widgets: AI Intelligence & MP Command Console */}
         <div className="space-y-6">
           {/* AI Intelligence Card */}
-          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-[#111827] rounded-2xl p-6 border border-slate-800/50">
+          <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="bg-[#111827] rounded-2xl p-6 border border-slate-800/50 text-xs">
             <h2 className="text-sm font-bold text-white mb-4 flex items-center space-x-2">
               <Sparkles className="w-4 h-4 text-violet-400" />
               <span>AI Intelligence</span>
             </h2>
-            <div className="space-y-4">
+            <div className="space-y-4 text-slate-200">
               <div className="flex justify-between items-center">
                 <span className="text-[11px] text-slate-400">Completeness Score</span>
                 <span className="text-sm font-bold text-white">{suggestion.ai_score_completeness || 'N/A'}%</span>
@@ -256,102 +217,46 @@ export default function MpSuggestionDetailPage() {
             
             <h2 className="text-sm font-bold text-white mb-4 flex items-center space-x-2">
               <Wrench className="w-4 h-4 text-amber-400" />
-              <span>MP Command Console</span>
+              <span>MP Command Console (Assign Task)</span>
             </h2>
-            
-            {/* Tabs */}
-            <div className="flex bg-slate-900/60 rounded-xl p-1 mb-5 border border-slate-800/60">
-              <button
-                type="button"
-                onClick={() => setActiveTab('status')}
-                className={`flex-1 py-2 px-3 rounded-lg text-[11px] font-bold transition-all ${activeTab === 'status' ? 'bg-amber-600 text-white shadow-md shadow-amber-600/10' : 'text-slate-400 hover:text-slate-200'}`}
-              >
-                Update Status
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab('assign')}
-                className={`flex-1 py-2 px-3 rounded-lg text-[11px] font-bold transition-all ${activeTab === 'assign' ? 'bg-amber-600 text-white shadow-md shadow-amber-600/10' : 'text-slate-400 hover:text-slate-200'}`}
-              >
-                Assign Task
-              </button>
-            </div>
 
-            {activeTab === 'status' ? (
-              <form onSubmit={handleUpdateStatus} className="space-y-4">
-                <div>
-                  <label className="text-[10px] uppercase font-bold text-slate-500 tracking-wider block mb-1.5">Select Complaint Status</label>
-                  <select
-                    value={selectedStatus}
-                    onChange={e => setSelectedStatus(e.target.value)}
-                    className="w-full px-3 py-2.5 rounded-xl bg-slate-900 border border-slate-850 text-xs text-white focus:outline-none focus:ring-1 focus:ring-amber-500"
-                  >
-                    <option value="under_review">Under MP Review</option>
-                    <option value="accepted">Accept Proposal</option>
-                    <option value="planned">Planned / Budgeted</option>
-                    <option value="completed">Project Completed</option>
-                    <option value="rejected">Reject Complaint</option>
-                  </select>
-                </div>
-                
-                <div>
-                  <label className="text-[10px] uppercase font-bold text-slate-500 tracking-wider block mb-1.5">Timeline Notes / Comments (Optional)</label>
-                  <textarea
-                    value={timelineNotes}
-                    onChange={e => setTimelineNotes(e.target.value)}
-                    placeholder="Leave blank to use default MP timeline update comment..."
-                    rows={3}
-                    className="w-full px-3 py-2.5 rounded-xl bg-slate-900 border border-slate-850 text-xs text-white placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-amber-500 resize-none"
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={submitting}
-                  className="w-full py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold transition-all shadow-lg shadow-amber-600/15 disabled:opacity-40"
+            <form onSubmit={handleAssignTask} className="space-y-4">
+              <div>
+                <label className="text-[10px] uppercase font-bold text-slate-500 tracking-wider block mb-1.5">Select Department / Officer</label>
+                <select
+                  value={assignedDepartment}
+                  onChange={e => setAssignedDepartment(e.target.value)}
+                  className="w-full px-3 py-2.5 rounded-xl bg-slate-900 border border-slate-850 text-xs text-white focus:outline-none focus:ring-1 focus:ring-amber-500"
                 >
-                  {submitting ? 'Updating Status...' : 'Submit Status Transition'}
-                </button>
-              </form>
-            ) : (
-              <form onSubmit={handleAssignTask} className="space-y-4">
-                <div>
-                  <label className="text-[10px] uppercase font-bold text-slate-500 tracking-wider block mb-1.5">Select Department / Officer</label>
-                  <select
-                    value={assignedDepartment}
-                    onChange={e => setAssignedDepartment(e.target.value)}
-                    className="w-full px-3 py-2.5 rounded-xl bg-slate-900 border border-slate-850 text-xs text-white focus:outline-none focus:ring-1 focus:ring-amber-500"
-                  >
-                    <option value="PWD (Roads)">Public Works Department (PWD)</option>
-                    <option value="District Water Board">District Water & Sanitation Board</option>
-                    <option value="Health Department">Chief Medical Officer (CMO)</option>
-                    <option value="Electricity Board">UP Power Corporation Ltd (UPPCL)</option>
-                    <option value="Education Department">Basic Shiksha Adhikari (BSA)</option>
-                    <option value="Municipal Corporation">Varanasi Nagar Nigam</option>
-                  </select>
-                </div>
-                
-                <div>
-                  <label className="text-[10px] uppercase font-bold text-slate-500 tracking-wider block mb-1.5">Task Instructions / Directives</label>
-                  <textarea
-                    value={taskInstructions}
-                    onChange={e => setTaskInstructions(e.target.value)}
-                    placeholder="e.g. Conduct physical site inspection and submit cost estimation DPR by next week."
-                    rows={3}
-                    required
-                    className="w-full px-3 py-2.5 rounded-xl bg-slate-900 border border-slate-850 text-xs text-white placeholder-slate-600 focus:outline-none focus:ring-1 focus:ring-amber-500 resize-none"
-                  />
-                </div>
+                  <option value="PWD (Roads)">Public Works Department (PWD)</option>
+                  <option value="District Water Board">District Water & Sanitation Board</option>
+                  <option value="Health Department">Chief Medical Officer (CMO)</option>
+                  <option value="Electricity Board">UP Power Corporation Ltd (UPPCL)</option>
+                  <option value="Education Department">Basic Shiksha Adhikari (BSA)</option>
+                  <option value="Municipal Corporation">Lucknow Nagar Nigam</option>
+                </select>
+              </div>
+              
+              <div>
+                <label className="text-[10px] uppercase font-bold text-slate-500 tracking-wider block mb-1.5">Task Instructions / Directives</label>
+                <textarea
+                  value={taskInstructions}
+                  onChange={e => setTaskInstructions(e.target.value)}
+                  placeholder="e.g. Conduct physical site inspection and submit cost estimation DPR by next week."
+                  rows={4}
+                  required
+                  className="w-full px-3 py-2.5 rounded-xl bg-slate-900 border border-slate-850 text-xs text-white placeholder-slate-650 focus:outline-none focus:ring-1 focus:ring-amber-500 resize-none"
+                />
+              </div>
 
-                <button
-                  type="submit"
-                  disabled={submitting || !taskInstructions.trim()}
-                  className="w-full py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold transition-all shadow-lg shadow-amber-600/15 disabled:opacity-40"
-                >
-                  {submitting ? 'Assigning Task...' : 'Assign Task & Log Event'}
-                </button>
-              </form>
-            )}
+              <button
+                type="submit"
+                disabled={submitting || !taskInstructions.trim()}
+                className="w-full py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white text-xs font-bold transition-all shadow-lg shadow-amber-600/15 disabled:opacity-40"
+              >
+                {submitting ? 'Assigning Task...' : 'Submit Task Assignment'}
+              </button>
+            </form>
           </motion.div>
         </div>
       </div>
