@@ -7,7 +7,7 @@ import {
   MapPin, X, Users, AlertTriangle, Search, Filter,
   Building2, Droplets, GraduationCap, Heart,
   Lightbulb, Shield, TreePine, Globe,
-  ZoomIn, ZoomOut, Info, Settings, RefreshCw, Navigation, Eye
+  ZoomIn, ZoomOut, Info, Settings, RefreshCw, Eye, ListTodo, ChevronRight, ArrowLeft
 } from 'lucide-react';
 
 const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
@@ -100,7 +100,6 @@ export default function ConstituencyMapPage() {
   const [activeLayer, setActiveLayer] = useState('all');
 
   // Zoom and Pan States
-  // Start scale at 1.5 (zoomed into Lucknow view)
   const [scale, setScale] = useState(1.5);
   const [position, setPosition] = useState({ x: 0, y: 0 });
   const [isDragging, setIsDragging] = useState(false);
@@ -173,7 +172,6 @@ export default function ConstituencyMapPage() {
     const dy = newY - position.y;
     setDraggedDistance(prev => prev + Math.abs(dx) + Math.abs(dy));
 
-    // Allow wider bounds when zoomed out (national explorer view) to pan around the subcontinent
     const maxBound = scale >= 0.75 ? (scale - 1) * 350 : 250;
     setPosition({
       x: Math.max(-maxBound, Math.min(maxBound, newX)),
@@ -185,12 +183,11 @@ export default function ConstituencyMapPage() {
     setIsDragging(false);
   };
 
-  // Zoom Button Controls (Supporting semantic zoom levels down to 0.3x)
+  // Zoom Button Controls
   const zoomIn = () => setScale(prev => Math.min(4, prev + 0.3));
   const zoomOut = () => setScale(prev => {
     const next = Math.max(0.3, prev - 0.3);
     if (next < 0.75) {
-      // Clear local selection if entering India level overview
       setSelectedVillage(null);
     }
     return next;
@@ -239,10 +236,11 @@ export default function ConstituencyMapPage() {
     { id: 'Drainage', label: 'Drainage' },
   ];
 
-  const filteredVillages = villages.filter(v => 
-    v.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    v.topSuggestion.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredVillages = villages;
+
+  // Sorting nodes in descending order by complaints count
+  const sortedVillagesDesc = [...villages].sort((a, b) => b.complaints - a.complaints);
+  const sortedStatesDesc = [...STATE_MAP_NODES].sort((a, b) => b.complaints - a.complaints);
 
   const totalGridTickets = villages.reduce((s, v) => s + v.complaints, 0);
   const totalHighThreat = villages.filter(v => v.urgencyLevel === 'critical' || v.urgencyLevel === 'high').reduce((s, v) => s + v.complaints, 0);
@@ -250,10 +248,13 @@ export default function ConstituencyMapPage() {
   const totalIndiaTickets = 2432;
   const isNationalView = scale < 0.75;
 
+  // Actual complaints matching the selected Lucknow region
+  const selectedRegionComplaints = dbComplaints.filter(c => selectedVillage && c.village === selectedVillage.name);
+
   return (
     <div className="space-y-6 max-w-[1400px] mx-auto font-sans pb-8">
       {/* Title */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-slate-800/60 pb-4">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 border-b border-slate-800/60 pb-4 animate-fadeIn">
         <div>
           <h1 className="text-2xl font-extrabold text-white flex items-center space-x-2.5">
             <Globe className="w-6 h-6 text-indigo-500 animate-pulse" />
@@ -261,32 +262,16 @@ export default function ConstituencyMapPage() {
           </h1>
           <p className="text-xs text-slate-400 mt-1">
             {isNationalView 
-              ? 'National level governance heatmap. Hover over states or click Uttar Pradesh to zoom into Lucknow.' 
+              ? 'National level governance heatmap. Select Uttar Pradesh to drill down to Lucknow.' 
               : 'Detailed tactical twin of Lucknow. Drag to pan, scroll to zoom out to India level.'}
           </p>
         </div>
-        
-        {/* Toggle Mode Buttons (Interactive Zoom Shortcuts) */}
-        <div className="flex bg-slate-900 border border-slate-800 rounded-xl p-1 shrink-0 self-start md:self-center">
-          <button 
-            onClick={resetToIndia}
-            className={`px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center space-x-1.5 ${isNationalView ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'text-slate-400 hover:text-slate-200'}`}
-          >
-            <Globe className="w-3.5 h-3.5" />
-            <span>National Explorer (0.4x)</span>
-          </button>
-          <button 
-            onClick={resetToLucknow}
-            className={`px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center space-x-1.5 ${!isNationalView ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' : 'text-slate-400 hover:text-slate-200'}`}
-          >
-            <MapPin className="w-3.5 h-3.5" />
-            <span>Lucknow Twin (1.5x)</span>
-          </button>
-        </div>
       </div>
 
+      {/* 2-Column Layout: Left/Center Column for Map (3/4 Width), Right Column for Sidebar (1/4 Width) */}
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Map Container */}
+        
+        {/* LEFT COLUMN: Map Area (3/4 Width) */}
         <div 
           ref={mapAreaRef}
           onMouseDown={handleMouseDown}
@@ -319,7 +304,7 @@ export default function ConstituencyMapPage() {
               }}
             >
               {/* SVG Network Grid Overlay */}
-              <svg className="absolute inset-0 w-full h-full opacity-20 pointer-events-none" xmlns="http://www.w3.org/2000/svg">
+              <svg className="absolute inset-0 w-full h-full opacity-20 pointer-none" xmlns="http://www.w3.org/2000/svg">
                 <defs>
                   <pattern id="streetGrid" width="60" height="60" patternUnits="userSpaceOnUse">
                     <path d="M 60 0 L 0 0 0 60" fill="none" stroke="#334155" strokeWidth="0.5" />
@@ -387,7 +372,7 @@ export default function ConstituencyMapPage() {
                     </div>
 
                     {/* Tooltip Label */}
-                    <span className="mt-1.5 px-2 py-0.5 rounded-md bg-slate-950/90 text-white font-extrabold text-[9px] uppercase tracking-wider border border-slate-800 shadow-lg">
+                    <span className="mt-1.5 px-2 py-0.5 rounded-md bg-slate-955/95 text-white font-extrabold text-[9px] uppercase tracking-wider border border-slate-800 shadow-lg">
                       {v.name}
                     </span>
                   </div>
@@ -430,12 +415,10 @@ export default function ConstituencyMapPage() {
                         if (draggedDistance > 12) return;
                         e.stopPropagation();
                         if (isUP) {
-                          // Zoom into Lucknow
                           resetToLucknow();
                         }
                       }}
                     >
-                      {/* Outer pulse for UP to guide user */}
                       {isUP && (
                         <circle cx={state.x} cy={state.y} r={28} fill="none" stroke={state.color} strokeWidth="1" opacity="0.4">
                           <animate attributeName="r" values="20;30;20" dur="2s" repeatCount="indefinite" />
@@ -454,7 +437,6 @@ export default function ConstituencyMapPage() {
                       />
                       <circle cx={state.x} cy={state.y} r={8} fill={state.color} />
                       
-                      {/* Count text */}
                       <text x={state.x} y={state.y - (isUP ? 26 : 22)} textAnchor="middle" fill="white" fontSize="10.5" fontWeight="950" className="uppercase tracking-wide">
                         {state.name}
                       </text>
@@ -468,68 +450,10 @@ export default function ConstituencyMapPage() {
             </div>
           </div>
 
-          {/* Top-Left HUD Controls */}
-          <div className="z-10 w-full max-w-sm space-y-3 pointer-events-auto">
-            <div className="relative group">
-              <Search className="absolute left-3.5 top-3.5 w-4 h-4 text-slate-500 group-hover:text-slate-350 transition-colors" />
-              <input 
-                type="text" 
-                placeholder={isNationalView ? "Search state or district..." : "Search Gomti Nagar, ID, issue..."}
-                value={searchQuery}
-                onChange={e => setSearchQuery(e.target.value)}
-                className="w-full bg-[#0b0f19]/90 backdrop-blur-md text-xs font-bold text-slate-200 pl-10 pr-4 py-3.5 rounded-xl border border-slate-800 focus:border-indigo-500/50 outline-none transition-colors"
-                onMouseDown={e => e.stopPropagation()} 
-              />
-            </div>
-            <button 
-              className="flex items-center space-x-2 bg-[#0b0f19]/90 backdrop-blur-md px-4 py-2.5 rounded-xl border border-slate-800 text-[10px] uppercase font-bold text-slate-300 hover:text-white transition-all shadow-lg shadow-black/30"
-              onMouseDown={e => e.stopPropagation()}
-            >
-              <Filter className="w-3.5 h-3.5 text-indigo-400" />
-              <span>Tactical Filters</span>
-            </button>
-          </div>
-
-          {/* Semantic Map View Status Tag (Top Center) */}
+          {/* Semantic Map Zoom Status Tag */}
           <div className="absolute top-6 left-1/2 transform -translate-x-1/2 z-10 bg-[#0b0f19]/95 border border-slate-800 rounded-full px-4 py-1.5 shadow-2xl text-[9px] uppercase tracking-widest font-black text-slate-300 flex items-center space-x-2">
-            <Eye className="w-3.5 h-3.5 text-amber-500" />
+            <Eye className="w-3.5 h-3.5 text-amber-500 animate-pulse" />
             <span>Map Zoom: {isNationalView ? "India Level" : `Lucknow Twin (${scale.toFixed(1)}x)`}</span>
-          </div>
-
-          {/* Real-time Telemetry HUD Overlay (Top-Right) */}
-          <div className="absolute top-6 right-6 z-10 w-64 bg-[#0b0f19]/95 backdrop-blur-md border border-slate-800 rounded-2xl p-4 shadow-2xl shadow-black/55 space-y-4 pointer-events-auto" onMouseDown={e => e.stopPropagation()}>
-            <div className="flex items-center justify-between border-b border-slate-800/80 pb-2">
-              <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
-                Telemetry Summary
-              </span>
-              <span className="text-[8px] bg-indigo-500/10 text-indigo-400 px-1.5 py-0.5 rounded font-black uppercase">Active</span>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3 text-center">
-              <div className="bg-slate-950/60 p-2 rounded-xl border border-slate-900">
-                <p className="text-xl font-black text-white">{isNationalView ? totalIndiaTickets : totalGridTickets}</p>
-                <p className="text-[8px] text-slate-500 uppercase tracking-widest font-black mt-0.5">{isNationalView ? "India Tickets" : "Lucknow Tickets"}</p>
-              </div>
-              <div className="bg-slate-950/60 p-2 rounded-xl border border-slate-900">
-                <p className="text-xl font-black text-red-500">{isNationalView ? 842 : totalHighThreat}</p>
-                <p className="text-[8px] text-slate-500 uppercase tracking-widest font-black mt-0.5">{isNationalView ? "UP Tickets" : "High Threat"}</p>
-              </div>
-            </div>
-
-            {isNationalView ? (
-              <div className="bg-amber-500/5 border border-amber-500/10 p-2.5 rounded-xl text-[9px] text-slate-400 font-semibold leading-relaxed">
-                💡 <span className="text-amber-450 font-bold">Hint:</span> Click on the <span className="font-extrabold text-white">Uttar Pradesh</span> node or use the tab above to drill down to Lucknow.
-              </div>
-            ) : (
-              <div className="bg-red-500/5 border border-red-500/10 p-2.5 rounded-xl flex items-start space-x-2 text-[9px] leading-relaxed">
-                <AlertTriangle className="w-4 h-4 text-red-400 shrink-0 mt-0.5 animate-bounce" />
-                <div>
-                  <p className="font-bold text-red-400 uppercase tracking-wider">Hotspot Alerts</p>
-                  <p className="text-slate-400 font-medium">{villages.filter(v => v.urgencyLevel === 'critical').length} critical zones active</p>
-                </div>
-              </div>
-            )}
           </div>
 
           {/* Tactical Zoom HUD Controls (Bottom-Right Panel) */}
@@ -564,7 +488,7 @@ export default function ConstituencyMapPage() {
           <div className="z-10 w-full flex items-end justify-between mt-auto pointer-events-none">
             <div className="bg-[#0b0f19]/90 backdrop-blur-md border border-slate-800 rounded-xl px-4 py-2.5 text-[9px] text-slate-450 font-bold max-w-sm flex items-center space-x-2 shadow-lg pointer-events-auto" onMouseDown={e => e.stopPropagation()}>
               <Info className="w-4 h-4 text-indigo-400 shrink-0" />
-              <span>Drag to move map • Zoom out (&lt; 0.75x) to view full India map</span>
+              <span>Drag to move map • Scroll or click buttons on right to zoom</span>
             </div>
             
             <div className="bg-[#0b0f19]/90 backdrop-blur-md border border-slate-800 rounded-lg px-2 py-1 text-[8px] text-slate-600 font-bold tracking-wider pointer-events-auto" onMouseDown={e => e.stopPropagation()}>
@@ -573,111 +497,209 @@ export default function ConstituencyMapPage() {
           </div>
         </div>
 
-        {/* Local twin detail panel */}
+        {/* RIGHT COLUMN: Grievance Regions List / Detail Panel (1/4 Width) */}
         <div className="lg:col-span-1 space-y-4">
           <AnimatePresence mode="wait">
-            {!isNationalView && selectedVillage ? (
+            {selectedVillage ? (
+              // 1. DETAIL VIEW FOR SELECTED NODE/REGION
               <motion.div
-                key={selectedVillage.name}
-                initial={{ opacity: 0, x: 15 }}
+                key="detail-panel"
+                initial={{ opacity: 0, x: 20 }}
                 animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 15 }}
-                className="bg-[#0d1220]/90 backdrop-blur-md rounded-3xl border border-slate-800/60 p-5 space-y-4 shadow-2xl"
+                exit={{ opacity: 0, x: 20 }}
+                className="bg-[#0d1220]/90 backdrop-blur-md rounded-3xl border border-slate-800/60 p-5 space-y-4 shadow-2xl flex flex-col justify-between"
+                style={{ minHeight: '480px' }}
               >
-                <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-                  <h3 className="text-xs uppercase tracking-wider font-black text-white flex items-center space-x-2">
-                    <MapPin className="w-4 h-4 text-amber-500" />
-                    <span>{selectedVillage.name}</span>
-                  </h3>
-                  <button onClick={() => setSelectedVillage(null)} className="text-slate-500 hover:text-white">
-                    <X className="w-4.5 h-4.5" />
-                  </button>
-                </div>
-
-                <div className="space-y-2 text-[10px] font-bold text-slate-455">
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Population Scope:</span>
-                    <span className="text-slate-200">{(selectedVillage.totalBeneficiaries).toLocaleString()} Citizens</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Grid Tickets:</span>
-                    <span className="text-amber-450 font-extrabold">{selectedVillage.complaints} Active</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-slate-500">Threat Matrix:</span>
-                    <span className={`capitalize font-black uppercase text-[9px] px-1.5 py-0.5 rounded ${
-                      selectedVillage.urgencyLevel === 'critical' ? 'bg-red-500/10 text-red-400' : 'bg-orange-500/10 text-orange-400'
-                    }`}>
-                      {selectedVillage.urgencyLevel}
-                    </span>
-                  </div>
-                </div>
-
-                {/* Categories */}
                 <div>
-                  <p className="text-[8px] text-slate-500 uppercase font-black mb-2 tracking-widest">Issue breakdown</p>
-                  <div className="space-y-1.5">
-                    {Object.entries(selectedVillage.categories).map(([cat, count]) => (
-                      <div key={cat} className="flex items-center justify-between px-3 py-2 rounded-xl bg-slate-900/40 border border-slate-850/50">
-                        <span className="flex items-center space-x-1.5 text-[10px] text-slate-300 font-semibold">
-                          {categoryIcons[cat] || <AlertTriangle className="w-3.5 h-3.5 text-amber-500/30" />}
-                          <span>{cat}</span>
-                        </span>
-                        <span className="text-[10px] font-black text-white">{count}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                  {/* Back button to return to region list */}
+                  <button 
+                    onClick={() => setSelectedVillage(null)}
+                    className="flex items-center space-x-1 text-[10px] text-indigo-400 font-bold hover:text-indigo-350 transition-colors uppercase tracking-wider pb-2 border-b border-slate-800/40 w-full"
+                  >
+                    <ArrowLeft className="w-3.5 h-3.5" />
+                    <span>Back to Regions List</span>
+                  </button>
 
-                {/* Infra Gaps */}
-                {selectedVillage.infraGap && (
-                  <div>
-                    <p className="text-[8px] text-slate-500 uppercase font-black mb-2 tracking-widest">Infrastructure Deficits</p>
-                    <div className="space-y-1.5">
-                      {[
-                        { label: 'School Deficit', value: selectedVillage.infraGap.schoolGap, icon: <GraduationCap className="w-3.5 h-3.5" /> },
-                        { label: 'PHC Deficit', value: selectedVillage.infraGap.phcGap, icon: <Heart className="w-3.5 h-3.5" /> },
-                        { label: 'Road Deficit (km)', value: selectedVillage.infraGap.roadGap, icon: <Building2 className="w-3.5 h-3.5" /> },
-                        { label: 'Water Connection Deficit', value: selectedVillage.infraGap.waterGap, icon: <Droplets className="w-3.5 h-3.5" /> },
-                      ].filter(g => g.value > 0).map(g => (
-                        <div key={g.label} className="flex items-center justify-between px-3 py-2 rounded-xl bg-red-500/5 border border-red-500/10">
-                          <span className="flex items-center space-x-1.5 text-[10px] text-red-300 font-bold">
-                            {g.icon}
-                            <span>{g.label}</span>
-                          </span>
-                          <span className="text-[10px] font-black text-red-400">-{g.value}</span>
-                        </div>
-                      ))}
+                  <div className="flex items-center justify-between border-b border-slate-800 pb-3 mt-3">
+                    <h3 className="text-xs uppercase tracking-wider font-black text-white flex items-center space-x-2">
+                      <MapPin className="w-4 h-4 text-amber-500" />
+                      <span>{selectedVillage.name}</span>
+                    </h3>
+                  </div>
+
+                  <div className="space-y-2 mt-3 text-[10px] font-bold text-slate-455">
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Population Scope:</span>
+                      <span className="text-slate-200">{(selectedVillage.totalBeneficiaries).toLocaleString()} Citizens</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Grid Tickets:</span>
+                      <span className="text-amber-450 font-extrabold">{selectedVillage.complaints} Active</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-500">Threat Matrix:</span>
+                      <span className={`capitalize font-black uppercase text-[8px] px-2 py-0.5 rounded ${
+                        selectedVillage.urgencyLevel === 'critical' ? 'bg-red-500/10 text-red-400' : 'bg-orange-500/10 text-orange-400'
+                      }`}>
+                        {selectedVillage.urgencyLevel}
+                      </span>
                     </div>
                   </div>
-                )}
+
+                  {/* Grievance list under active node */}
+                  <div className="mt-4">
+                    <p className="text-[8px] text-slate-500 uppercase font-black mb-2.5 tracking-widest border-b border-slate-800 pb-1.5">Grievance List</p>
+                    <div className="space-y-2 max-h-40 overflow-y-auto pr-1 scrollbar-thin">
+                      {selectedRegionComplaints.length === 0 ? (
+                        <p className="text-[10px] text-slate-500 italic py-2">No database complaints found</p>
+                      ) : (
+                        selectedRegionComplaints.map(c => (
+                          <Link 
+                            key={c.id} 
+                            href={`/mp/complaints/${c.id}`} 
+                            className="block p-2 bg-slate-900/40 hover:bg-slate-900 border border-slate-900 hover:border-slate-800 rounded-xl transition-all"
+                          >
+                            <p className="text-[10px] font-bold text-slate-200 truncate">{c.title}</p>
+                            <div className="flex items-center justify-between text-[8px] text-slate-500 font-semibold mt-1">
+                              <span className="inline-flex items-center gap-1">
+                                {categoryIcons[c.category] || <AlertTriangle className="w-2.5 h-2.5 text-amber-500/35" />}
+                                <span>{c.category}</span>
+                              </span>
+                              <span className="text-emerald-400">👍 {c.supporters}</span>
+                            </div>
+                          </Link>
+                        ))
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Deficits */}
+                  {selectedVillage.infraGap && (
+                    <div className="mt-4">
+                      <p className="text-[8px] text-slate-500 uppercase font-black mb-2 tracking-widest">Infrastructure Deficits</p>
+                      <div className="space-y-1.5">
+                        {[
+                          { label: 'School Deficit', value: selectedVillage.infraGap.schoolGap, icon: <GraduationCap className="w-3.5 h-3.5" /> },
+                          { label: 'PHC Deficit', value: selectedVillage.infraGap.phcGap, icon: <Heart className="w-3.5 h-3.5" /> },
+                          { label: 'Road Deficit (km)', value: selectedVillage.infraGap.roadGap, icon: <Building2 className="w-3.5 h-3.5" /> },
+                          { label: 'Water Connection Deficit', value: selectedVillage.infraGap.waterGap, icon: <Droplets className="w-3.5 h-3.5" /> },
+                        ].filter(g => g.value > 0).map(g => (
+                          <div key={g.label} className="flex items-center justify-between px-3 py-1.5 rounded-xl bg-red-500/5 border border-red-500/10">
+                            <span className="flex items-center space-x-1.5 text-[10px] text-red-300 font-bold">
+                              {g.icon}
+                              <span>{g.label}</span>
+                            </span>
+                            <span className="text-[10px] font-black text-red-400">-{g.value}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
 
                 {/* Top suggestion */}
-                <div className="p-3.5 rounded-xl bg-amber-500/5 border border-amber-500/10 space-y-1">
+                <div className="p-3 rounded-xl bg-amber-500/5 border border-amber-500/10 space-y-0.5 mt-4">
                   <p className="text-[8px] text-amber-500/60 uppercase font-black tracking-wider">Top Priority Demand</p>
-                  <p className="text-[10.5px] text-amber-200 leading-relaxed font-bold">{selectedVillage.topSuggestion}</p>
+                  <p className="text-[10px] text-amber-200 leading-relaxed font-bold">{selectedVillage.topSuggestion}</p>
                 </div>
               </motion.div>
             ) : (
-              <div className="bg-[#0d1220]/90 backdrop-blur-md rounded-3xl border border-slate-800/60 p-5 text-center py-12 space-y-3">
-                <div className="w-10 h-10 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-slate-500 mx-auto">
-                  <Info className="w-5 h-5 animate-pulse" />
-                </div>
+              // 2. LIST VIEW FOR ALL REGIONS/STATES
+              <motion.div
+                key="list-panel"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                className="bg-[#0d1220]/80 rounded-3xl border border-slate-800/60 p-5 space-y-4 shadow-2xl flex flex-col justify-between"
+                style={{ minHeight: '480px' }}
+              >
                 <div>
-                  <h3 className="text-xs uppercase tracking-wider font-black text-slate-200">
-                    {isNationalView ? "National Overview" : "Grievance Node Drilldown"}
-                  </h3>
-                  <p className="text-[10px] text-slate-500 mt-1 leading-relaxed">
-                    {isNationalView 
-                      ? "Select the Uttar Pradesh node or zoom in to activate local telemetry mode for Lucknow." 
-                      : "Select a localized hotspot marker on the Lucknow street grid telemetry map to audit active public grievances."}
+                  <div className="flex items-center space-x-2 border-b border-slate-800 pb-3">
+                    <ListTodo className="w-4 h-4 text-indigo-400" />
+                    <h2 className="text-xs uppercase tracking-widest font-black text-white">
+                      {isNationalView ? "National State Scorecard" : "Lucknow Grievance Regions"}
+                    </h2>
+                  </div>
+                  
+                  <p className="text-[10px] text-slate-500 mt-2 font-semibold">
+                    Sorted by active complaint volume (highest threat first)
+                  </p>
+
+                  <div className="mt-4 space-y-2.5 max-h-[380px] overflow-y-auto pr-1 scrollbar-thin">
+                    {isNationalView ? (
+                      // India view - state level list
+                      sortedStatesDesc.map((state, idx) => {
+                        const isUP = state.id === 'IN-UP';
+                        return (
+                          <button
+                            key={state.id}
+                            onClick={() => isUP && resetToLucknow()}
+                            className={`w-full flex items-center justify-between p-3 rounded-2xl border text-left transition-all duration-200 ${
+                              isUP 
+                                ? 'bg-amber-500/5 border-amber-500/20 hover:bg-amber-500/10' 
+                                : 'bg-slate-950/40 border-slate-900 hover:border-slate-800'
+                            }`}
+                          >
+                            <div className="flex items-center space-x-3">
+                              <span className="w-5 h-5 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-[9px] font-black text-slate-400">
+                                {idx + 1}
+                              </span>
+                              <div className="flex flex-col">
+                                <span className="text-xs font-bold text-slate-200">{state.name}</span>
+                                {isUP && <span className="text-[8px] text-amber-500 font-bold uppercase tracking-wider mt-0.5">Click to Drilldown</span>}
+                              </div>
+                            </div>
+                            <span className="text-xs font-black text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-lg border border-indigo-500/15">
+                              {state.complaints}
+                            </span>
+                          </button>
+                        );
+                      })
+                    ) : (
+                      // Lucknow view - region level list
+                      sortedVillagesDesc.map((v, idx) => {
+                        const color = urgencyColors[v.urgencyLevel] || urgencyColors.low;
+                        return (
+                          <button
+                            key={v.name}
+                            onClick={() => setSelectedVillage(v)}
+                            className="w-full flex items-center justify-between p-3 rounded-2xl border border-slate-900 bg-slate-955/40 hover:bg-slate-900 hover:border-slate-800 text-left transition-all duration-200 hover:translate-x-0.5"
+                          >
+                            <div className="flex items-center space-x-3 min-w-0">
+                              <span className="w-5 h-5 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-[9px] font-black text-slate-400 shrink-0">
+                                {idx + 1}
+                              </span>
+                              <div className="flex flex-col min-w-0">
+                                <span className="text-xs font-bold text-slate-200 truncate">{v.name}</span>
+                                <span className="text-[8px] text-slate-500 font-semibold mt-0.5">{v.block || 'Lucknow District'}</span>
+                              </div>
+                            </div>
+                            
+                            <div className="flex items-center space-x-2 shrink-0">
+                              <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: color }} />
+                              <span className="text-xs font-black text-indigo-400 bg-indigo-500/10 px-2 py-0.5 rounded-lg border border-indigo-500/15">
+                                {v.complaints}
+                              </span>
+                            </div>
+                          </button>
+                        );
+                      })
+                    )}
+                  </div>
+                </div>
+
+                {/* Database summary index */}
+                <div className="bg-slate-950/60 border border-slate-900 rounded-2xl p-3.5 text-center">
+                  <p className="text-[8px] text-slate-500 uppercase font-black tracking-widest">Active Database Index</p>
+                  <p className="text-[10px] text-slate-400 font-medium">
+                    {isNationalView ? `${dbComplaints.length} registered grievances connected.` : `Grievance Twin contains ${totalGridTickets} Lucknow tickets.`}
                   </p>
                 </div>
-              </div>
+              </motion.div>
             )}
           </AnimatePresence>
 
-          {/* Summary details */}
+          {/* Persistent Summary Index Box */}
           <div className="bg-[#0d1220]/90 backdrop-blur-md rounded-3xl border border-slate-800/60 p-5 space-y-3">
             <p className="text-[8px] text-slate-500 uppercase font-black tracking-widest">
               {isNationalView ? "India Grid Summary" : "Lucknow Grid Summary"}
@@ -694,6 +716,7 @@ export default function ConstituencyMapPage() {
             </div>
           </div>
         </div>
+
       </div>
     </div>
   );
