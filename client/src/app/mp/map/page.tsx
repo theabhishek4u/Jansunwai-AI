@@ -266,7 +266,7 @@ export default function ConstituencyMapPage() {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-slate-500">Threat Matrix:</span>
-                      <span className={`capitalize font-black uppercase text-[8px] px-2 py-0.5 rounded ${
+                      <span className={`font-black uppercase text-[8px] px-2 py-0.5 rounded ${
                         selectedVillage.urgencyLevel === 'critical' ? 'bg-red-500/10 text-red-400' : 'bg-orange-500/10 text-orange-400'
                       }`}>
                         {selectedVillage.urgencyLevel}

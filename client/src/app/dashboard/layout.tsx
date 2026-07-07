@@ -79,9 +79,9 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   ];
 
   return (
-    <div className="min-h-screen bg-[#060814] flex flex-col md:flex-row text-slate-100 min-h-screen">
+    <div className="min-h-screen bg-[#060814] flex flex-col md:flex-row text-slate-100">
       {/* Sidebar - Desktop */}
-      <aside className="hidden md:flex flex-col w-64 bg-[#090d1a] border-r border-[#1e293b]/20 p-5 shrink-0 sticky top-0 h-screen overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-slate-800 scrollbar-track-transparent">
+      <aside className="hidden md:flex flex-col w-64 bg-[#090d1a] border-r border-[#1e293b]/20 p-5 shrink-0 sticky top-0 h-screen overflow-y-auto overflow-x-hidden custom-scrollbar">
         {/* Brand */}
         <div className="flex items-center space-x-3 mb-8">
           <div className="w-9 h-9 rounded-xl bg-linear-to-tr from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
