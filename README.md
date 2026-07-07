@@ -1,126 +1,193 @@
-# Jansunwai AI (जनसुनवाई)
-### AI-Powered Constituency Development Planning Platform
-> *Helping Members of Parliament (MPs) make data-driven, transparent, and prompt development decisions.*
+<div align="center">
+  <img src="https://via.placeholder.com/150/4f46e5/ffffff?text=Jansunwai+AI" alt="Jansunwai AI Logo" width="120" />
+  <h1>🇮🇳 Jansunwai AI (जनसुनवाई)</h1>
+  <p><strong>AI-Powered Constituency Decision Intelligence Platform for Modern India</strong></p>
+  
+  [![Next.js 15](https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
+  [![Node.js](https://img.shields.io/badge/Node.js-Express-339933?style=for-the-badge&logo=nodedotjs)](https://nodejs.org/)
+  [![Gemini 2.5 Flash](https://img.shields.io/badge/AI-Gemini%202.5%20Flash-4285F4?style=for-the-badge&logo=google)](https://deepmind.google/technologies/gemini/)
+  [![Supabase](https://img.shields.io/badge/Database-Supabase-3ECF8E?style=for-the-badge&logo=supabase)](https://supabase.com/)
+  [![Tailwind CSS](https://img.shields.io/badge/Styling-Tailwind%20CSS-06B6D4?style=for-the-badge&logo=tailwindcss)](https://tailwindcss.com/)
+</div>
+
+<br/>
+
+## 🌟 The Vision
+
+Traditional public grievance filing is often broken—plagued by duplicate complaints, lack of structural context, and delayed responses. Members of Parliament (MPs) struggle to parse thousands of physical letters and unstructured digital complaints, making data-driven budget allocation almost impossible.
+
+**Jansunwai AI** is a complete paradigm shift. It transforms static complaint filing into an interactive, **Data-Driven Constituency Decision Intelligence Platform**. By aggregating citizen suggestions and applying advanced **Artificial Intelligence**, it filters noise, verifies physical realities via Image Analysis, and empowers MPs to simulate and execute the most impactful infrastructural developments.
 
 ---
 
-## 📌 Project Overview
-**Jansunwai AI** transforms traditional public grievance filing into a collaborative, data-driven **Constituency Decision Intelligence Platform**. 
+## 🧠 Core AI Innovations
 
-Instead of routing citizen requests through standard static complaint lines, Jansunwai aggregates citizen developmental suggestions, applies **Artificial Intelligence** (Gemini 2.5 Flash) to filter duplicates and verify submissions with geo-coordinates/photos, overlays grounded infrastructure/census datasets, and assists MPs in prioritizing budgets and simulating developmental impacts.
+Jansunwai AI isn't just a dashboard; it's an intelligent agent embedded within governance.
+
+* 👁️ **Gemini Vision (Real-Time Image Analyzer):** Citizens upload photos of damaged roads, broken pipes, or unbuilt schools. The AI instantly analyzes the image in real-time, detecting the exact issue, estimating severity, and generating a confidence score—preventing fraudulent submissions.
+* 🎙️ **Multilingual Voice-to-Text & Co-Author:** Illiterate or non-tech-savvy citizens can record audio in their native language. The AI transcribes the audio and instantly translates and structures it into a highly professional, formalized English proposal.
+* 🔍 **Semantic Duplicate Detection:** Before a complaint is logged, the AI scans historical records to find semantically similar complaints, merging them into a single "high-impact" petition to prevent database clutter.
+* 📈 **Priority Engine & Scoring:** AI grades every incoming complaint on Completeness (0-100%), Urgency, and Estimated Beneficiaries, automatically pushing critical issues to the top of the MP's dashboard.
 
 ---
 
-## 🚀 Key Features
+## 🏗️ System Architecture
 
-### 1. Citizen Engagement Portal (`/dashboard`)
-* **Voice-Assisted Submissions**: Citizen suggestion reporting with built-in voice audio recordings and AI speech-to-text transcription.
-* **AI Writing Co-author**: Instant writing assist to expand short descriptions into formal project statements.
-* **Vision Validation**: Automatic image auditing to verify if attached photos correspond to report categories (e.g. validating road potholes or broken pipes).
-* **Project Timelines**: Real-time suggestion lifecycle tracking (AI Audit, Review, Scheduled, Active, Completed).
-* **Gamification Engine**: Badges and social contributor rankings based on submission completeness and verification.
+```mermaid
+graph TD
+    %% Entities
+    Citizen([🧑‍🤝‍🧑 Citizen])
+    MP([🏛️ Member of Parliament])
+    Admin([🛡️ Super Admin])
 
-### 2. MP Decision Intelligence Portal (`/mp`)
-* **KPI Command Gauge**: Comprehensive Circular health indicators displaying priority categories, registered users, and budget utilization dials.
-* **AI Priority Engine**: Multi-factor scoring index based on population affected, cost estimates, urgency, and infrastructure gaps.
-* **Budget Allocation Planner**: Drag-and-drop Recharts-powered budget sliders allowing MPs to tune funding values with immediate category-wide adjustments.
-* **Scenario Impact Simulator**: Dynamic sliders simulating changes to Health, Education, or Connectivity scores if suggested projects are executed.
-* **PDF Governance Reporter**: Clean summaries generator for parliamentary sessions.
+    %% Frontend Portals
+    subgraph Frontend [Next.js 15 Client]
+        CP[Citizen Portal]
+        MD[MP Dashboard]
+        AC[Admin Command Center]
+    end
 
-### 3. Super Admin National Command Center (`/admin`)
-* **Executive India Operations Map**: Dynamic vector SVG India map presenting state performance levels and census indicators on hover.
-* **Real-time Live Tick Ticker**: Live suggestions feed simulation showing platform operations stream from all parts of India.
-* **System Diagnostic Dials**: Operational hardware statuses (CPU, RAM, API latencies).
-* **Prompt configuration Suite**: Live codearea editor allowing Super Admins to dynamically update Gemini System instructions (e.g., MP Copilot prompt) instantly.
-* **Public Datasets Ingestion**: Drag-and-drop file indexer with simulated chunking and semantic grounding progress bars.
-* **Targeted Announcements & Security Audit Console**: Admin broadcast notifications and terminal-style audit trails panel.
+    %% Backend Services
+    subgraph Backend [Node.js / Express API]
+        Router[API Router]
+        AI_Controller[AI Controller]
+        Sugg_Controller[Suggestion Controller]
+    end
+
+    %% External Services
+    Gemini[🧠 Google Gemini 2.5 Flash]
+    Supabase[(🐘 Supabase PostgreSQL)]
+
+    %% Connections
+    Citizen <-->|Voice/Photo/Text| CP
+    MP <-->|View & Approve| MD
+    Admin <-->|Manage Prompts & Data| AC
+
+    CP <-->|REST| Router
+    MD <-->|REST| Router
+    AC <-->|REST| Router
+
+    Router --> AI_Controller
+    Router --> Sugg_Controller
+
+    AI_Controller <-->|Vision / NLP / Processing| Gemini
+    Sugg_Controller <-->|CRUD Operations| Supabase
+```
+
+---
+
+## 👥 Deep-Dive: User Portals
+
+### 1. 🧑‍🤝‍🧑 Citizen Engagement Portal (`/dashboard`)
+Designed for extreme accessibility and empowerment.
+* **Smart Submission Form:** Real-time map picker (OpenStreetMap), drag-and-drop evidence hub, and instant AI validation.
+* **AI Image Analysis in Real-Time:** Upload a photo, and the AI evaluates it on the spot (Detects Issue, Severity, Estimated Scope).
+* **Live Tracker & Gamification:** Citizens can track the exact timeline of their complaint (AI Audit -> Under Review -> Planned -> Completed) and earn badges for verified infrastructural reporting.
+
+### 2. 🏛️ MP Decision Intelligence Portal (`/mp`)
+A command center for elected representatives to make the best use of their budgets.
+* **KPI Command Gauge:** Health indicators displaying priority categories, registered users, and active projects.
+* **AI Copilot & Priority Engine:** An embedded AI assistant that summarizes thousands of complaints into actionable insights. It sorts issues by **Impact vs. Cost**.
+* **Budget Allocation Simulator:** Interactive sliders allowing MPs to tune funding across categories (Health, Roads, Water) and instantly see the simulated impact on the constituency's HDI (Human Development Index).
+* **PDF Governance Reporter:** One-click generation of beautifully formatted parliamentary session reports.
+
+### 3. 🛡️ Super Admin National Command Center (`/admin`)
+The overarching view of the nation's operational health.
+* **Executive India Operations Map:** Dynamic vector mapping showing live API traffic and suggestion hotspots across states.
+* **Live Tick Ticker:** A real-time terminal feed of suggestions being processed nationally.
+* **Dynamic Prompt Configuration Suite:** Admins can edit the fundamental system prompts for the AI models on the fly—adjusting how strict the AI auditor should be without writing a single line of code.
+* **Public Datasets Ingestion:** Ground the AI's logic by uploading Census data or infrastructural baselines.
+
+---
+
+## 🔄 Complaint AI Workflow
+
+```mermaid
+sequenceDiagram
+    participant Citizen
+    participant Client as Frontend Portal
+    participant Server as Node.js API
+    participant AI as Gemini 2.5 Flash
+    participant DB as Supabase
+    participant MP
+
+    Citizen->>Client: Uploads Photo & Voice Note
+    Client->>Server: POST /api/ai/analyze-image
+    Server->>AI: Image + Prompt
+    AI-->>Server: Returns {"detected": "Pothole", "severity": "High"}
+    Server-->>Client: Renders Real-Time AI Score Card
+    Citizen->>Client: Clicks "Confirm & Submit"
+    Client->>Server: POST /api/suggestions (FormData)
+    Server->>AI: Transcript Translation & Priority Scoring
+    Server->>DB: Stores Complaint + Timeline Event
+    DB-->>Server: 201 Created
+    Server-->>Client: Success Animation (No Auto-Redirect)
+    Client-->>Citizen: Shows "Track Complaint Timeline"
+    
+    MP->>DB: Fetches Dashboard Analytics
+    DB-->>MP: High Priority Complaints First
+```
 
 ---
 
 ## 🛠️ Technology Stack
 
-### Frontend (Client)
-* **Framework**: Next.js 15 (App Router, React 19)
-* **Styling**: Tailwind CSS v4 & Vanilla CSS
-* **Animations**: Framer Motion (smooth micro-interactions)
-* **Visualization**: Recharts (Pie Chart, Bar Chart, Line Chart) & Vector SVG Mapping
-
-### Backend (Server)
-* **Runtime**: Node.js & Express (TypeScript, tsx watcher)
-* **AI Engine**: Google GenAI SDK (Gemini 2.5 Flash)
-* **File Processing**: Multer (in-memory buffer parsing)
-* **Middlewares**: Custom Async Router wrapper (`asyncHandler`) and centralized API controller error catch (`errorHandler`)
-* **Database**: Postgres / Supabase Client (fully integrated with an automated in-memory SQLite mockup db fallback when credentials are absent)
+* **Frontend:** Next.js 15 (App Router), React 19, Tailwind CSS v4, Framer Motion (Micro-animations), Recharts (Data Viz), Lucide Icons.
+* **Backend:** Node.js, Express.js, TypeScript.
+* **AI & Machine Learning:** Google GenAI SDK (Gemini 2.5 Flash for Multimodal Vision & NLP).
+* **Database & Storage:** Supabase (PostgreSQL), Multer (In-memory Buffer processing).
+* **Geospatial:** OpenStreetMap Nominatim API (Reverse Geocoding).
 
 ---
 
-## ⚙️ Getting Started & Run Guidelines
+## ⚙️ Getting Started (Local Development)
 
 ### 1. Prerequisites
-Ensure you have **Node.js** (v18+) and **npm** installed on your system.
+Ensure you have **Node.js** (v18+) and **npm** installed.
 
 ### 2. Clone and Install Dependencies
-Install all package dependencies in the workspace root:
 ```bash
+git clone https://github.com/your-username/jansunwai-ai.git
+cd jansunwai-ai
 npm install
 ```
 
-### 3. Environment Configuration
-Create a `.env` file in the `server` directory:
+### 3. Environment Variables
+Create a `.env` file inside the `server/` directory:
 ```env
 PORT=5000
 GEMINI_API_KEY=your_gemini_api_key
 SUPABASE_URL=your_supabase_url
 SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
-> *Note: If no `.env` credentials are set, the platform will automatically boot into **Simulation Mode**, pre-populating mock databases, active suggestions, and simulating AI completions locally.*
+*(💡 Note: If Supabase credentials are not provided, the backend seamlessly falls back to a robust In-Memory Mock Database, perfect for Hackathon demos!)*
 
-### 4. Running the Dev Stack
-Launch both the Express backend and the Next.js client concurrently from the root directory:
+### 4. Boot up the System
+Run both the Next.js frontend and Express backend concurrently:
 ```bash
 npm run dev
 ```
-* **Frontend Portal**: [http://localhost:3000](http://localhost:3000)
-* **Backend API server**: [http://localhost:5000](http://localhost:5000)
+* **Frontend Portal:** [http://localhost:3000](http://localhost:3000)
+* **Backend API:** [http://localhost:5000](http://localhost:5000)
 
 ---
 
 ## 🔑 Demo Quick-Access Credentials
-For testing and validation, the `/auth` portal provides **Quick Login Presets**:
 
-| Portal | Email | Preset Password | Target Redirect |
+To experience the platform across different roles, use the built-in preset login buttons on the `/auth` page, or use the credentials below:
+
+| Role | Email | Password | Redirects To |
 | :--- | :--- | :--- | :--- |
-| **Citizen Portal** | `aarav@mail.com` | `password` | `/dashboard` |
-| **MP Dashboard** | `mp@jansunwai.gov.in` | `password` | `/mp` |
+| **Citizen** | `aarav@mail.com` | `password` | `/dashboard` |
+| **MP / Official** | `mp@jansunwai.gov.in` | `password` | `/mp` |
 | **Super Admin** | `admin@jansunwai.gov.in` | `password` | `/admin` |
 
 ---
 
-## 📂 Codebase Directory Outline
+## 🏆 Real-World Impact
 
-```
-Jansunwai/
-├── client/                 # Next.js 15 Frontend
-│   ├── src/
-│   │   ├── app/           # Pages & Routes Grouping
-│   │   │   ├── admin/     # Super Admin pages
-│   │   │   ├── dashboard/ # Citizen engagement workspace
-│   │   │   ├── mp/        # MP Decision Intelligence
-│   │   │   └── auth/      # Dynamic role-based login
-│   │   └── lib/           # Session Context & Hook Providers
-│   └── package.json
-│
-├── server/                 # Express REST API Backend
-│   ├── src/
-│   │   ├── controllers/   # Gemini, MP planner & Admin APIs
-│   │   ├── routes/        # Router endpoints
-│   │   ├── middlewares/   # asyncHandler & errorHandler
-│   │   ├── utils/         # Structured AppError class definitions
-│   │   └── db/            # Schema scripts & Mock databases
-│   └── package.json
-```
+Jansunwai AI doesn't just digitize complaints; it **optimizes governance**. By drastically reducing the noise of duplicate and invalid complaints, and by structuring raw citizen grief into actionable, AI-estimated project proposals, it allows our leaders to spend less time reading and more time **building**.
 
----
-
-## 🛡️ License
-Distributed under the **MIT License**. See `LICENSE` for more information.
+<p align="center">
+  <i>Built with ❤️ for a smarter, data-driven India.</i>
+</p>
