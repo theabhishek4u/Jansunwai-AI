@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/AuthContext';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Vote, 
   Sparkles, 
@@ -14,6 +15,10 @@ import {
   HelpCircle, 
   ChevronDown, 
   ChevronUp, 
+  User,
+  Building2,
+  Wrench,
+  Shield, 
   BarChart3,
   Database,
   Activity,
@@ -32,6 +37,7 @@ const liveTickerActivities = [
 export default function LandingPage() {
   const { user } = useAuth();
   const [activeFaq, setActiveFaq] = useState<number | null>(null);
+  const [portalDropdownOpen, setPortalDropdownOpen] = useState(false);
   
   // Interactive Telemetry Preview State
   const [selectedPreviewPC, setSelectedPreviewPC] = useState<'varanasi' | 'lucknow' | 'bangalore'>('varanasi');
@@ -248,26 +254,86 @@ export default function LandingPage() {
                 </button>
               </div>
             ) : (
-              <>
-                <Link 
-                  href="/auth/citizen" 
-                  className="px-4 py-2 rounded-xl border border-indigo-600/20 text-indigo-400 hover:bg-indigo-600/10 text-xs font-bold transition-all"
+              <div 
+                className="relative"
+                onMouseEnter={() => setPortalDropdownOpen(true)}
+                onMouseLeave={() => setPortalDropdownOpen(false)}
+              >
+                <button
+                  className="flex items-center space-x-1.5 px-4 py-2 rounded-xl bg-linear-to-r from-indigo-650 to-blue-650 hover:from-indigo-600 hover:to-blue-600 text-white text-xs font-bold transition-all shadow-md shadow-indigo-600/10 border border-indigo-500/20 cursor-pointer"
                 >
-                  Citizen Login
-                </Link>
-                <Link 
-                  href="/auth/mp" 
-                  className="px-4 py-2 rounded-xl border border-amber-500/20 text-amber-400 hover:bg-amber-500/10 text-xs font-bold transition-all"
-                >
-                  MP Portal
-                </Link>
-                <Link 
-                  href="/auth/admin" 
-                  className="px-4 py-2 rounded-xl border border-cyan-500/20 text-cyan-400 hover:bg-cyan-500/10 text-xs font-bold transition-all"
-                >
-                  Super Admin
-                </Link>
-              </>
+                  <span>Portal Login</span>
+                  <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-300 ${portalDropdownOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                <AnimatePresence>
+                  {portalDropdownOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 12, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 12, scale: 0.95 }}
+                      transition={{ duration: 0.15 }}
+                      className="absolute right-0 mt-2 w-72 rounded-2xl bg-[#0b1329]/95 border border-slate-800/80 shadow-2xl p-2.5 backdrop-blur-xl z-50 overflow-hidden"
+                    >
+                      <div className="absolute top-0 left-0 right-0 h-[2px] bg-linear-to-r from-indigo-500 via-blue-500 to-indigo-500" />
+                      
+                      <div className="space-y-1 mt-1">
+                        <Link 
+                          href="/auth/citizen"
+                          className="flex items-start space-x-3 p-2.5 rounded-xl hover:bg-slate-900/60 transition-all group"
+                        >
+                          <div className="w-8 h-8 rounded-lg bg-indigo-500/10 border border-indigo-500/15 flex items-center justify-center text-indigo-400 group-hover:scale-105 transition-transform shrink-0">
+                            <User className="w-4 h-4" />
+                          </div>
+                          <div className="text-left">
+                            <span className="text-[11px] font-black text-white block group-hover:text-indigo-400 transition-colors">Citizen Portal</span>
+                            <span className="text-[9px] text-slate-450 block mt-0.5">Submit suggestions & track progress</span>
+                          </div>
+                        </Link>
+
+                        <Link 
+                          href="/auth/mp"
+                          className="flex items-start space-x-3 p-2.5 rounded-xl hover:bg-slate-900/60 transition-all group"
+                        >
+                          <div className="w-8 h-8 rounded-lg bg-amber-500/10 border border-amber-500/15 flex items-center justify-center text-amber-400 group-hover:scale-105 transition-transform shrink-0">
+                            <Building2 className="w-4 h-4" />
+                          </div>
+                          <div className="text-left">
+                            <span className="text-[11px] font-black text-white block group-hover:text-amber-400 transition-colors">MP Portal</span>
+                            <span className="text-[9px] text-slate-455 block mt-0.5">Constituency Hotspots & Simulator</span>
+                          </div>
+                        </Link>
+
+                        <Link 
+                          href="/department/login"
+                          className="flex items-start space-x-3 p-2.5 rounded-xl hover:bg-slate-900/60 transition-all group"
+                        >
+                          <div className="w-8 h-8 rounded-lg bg-blue-500/10 border border-blue-500/15 flex items-center justify-center text-blue-400 group-hover:scale-105 transition-transform shrink-0">
+                            <Wrench className="w-4 h-4" />
+                          </div>
+                          <div className="text-left">
+                            <span className="text-[11px] font-black text-white block group-hover:text-blue-400 transition-colors">Department Portal</span>
+                            <span className="text-[9px] text-slate-455 block mt-0.5">Execution tracking & evidence upload</span>
+                          </div>
+                        </Link>
+
+                        <Link 
+                          href="/auth/admin"
+                          className="flex items-start space-x-3 p-2.5 rounded-xl hover:bg-slate-900/60 transition-all group"
+                        >
+                          <div className="w-8 h-8 rounded-lg bg-cyan-500/10 border border-cyan-500/15 flex items-center justify-center text-cyan-400 group-hover:scale-105 transition-transform shrink-0">
+                            <Shield className="w-4 h-4" />
+                          </div>
+                          <div className="text-left">
+                            <span className="text-[11px] font-black text-white block group-hover:text-cyan-400 transition-colors">Super Admin</span>
+                            <span className="text-[9px] text-slate-455 block mt-0.5">Platform management & settings</span>
+                          </div>
+                        </Link>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
             )}
           </div>
         </div>

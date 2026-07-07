@@ -18,6 +18,7 @@ interface PriorityItem {
   title: string;
   category: string;
   village: string;
+  block: string;
   urgency: string;
   status: string;
   priorityScore: number;
@@ -26,6 +27,7 @@ interface PriorityItem {
   estimatedCostLakhs: number;
   aiCompleteness: number;
   aiConfidence: number;
+  isVerifiedCitizen?: boolean;
 }
 
 const getCategoryIcon = (category: string) => {

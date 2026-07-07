@@ -6,11 +6,13 @@ import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/AuthContext';
 import { 
   Vote, 
-  LayoutDashboard, 
-  PlusCircle, 
+  LayoutGrid, 
+  FileEdit, 
   UserCircle, 
   LogOut, 
   Bell,
+  Award,
+  Shield,
   Sparkles
 } from 'lucide-react';
 
@@ -71,22 +73,22 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   }
 
   const sidebarLinks = [
-    { href: '/dashboard', label: 'Overview', icon: <LayoutDashboard className="w-5 h-5" /> },
-    { href: '/dashboard/submit', label: 'Submit Complaint', icon: <PlusCircle className="w-5 h-5" /> },
-    { href: '/dashboard/supported', label: 'Supported Proposals', icon: <Sparkles className="w-5 h-5" /> }
+    { href: '/dashboard', label: 'Overview', icon: <LayoutGrid className="w-5.5 h-5.5 transition-transform group-hover:scale-110" /> },
+    { href: '/dashboard/submit', label: 'Submit Complaint', icon: <FileEdit className="w-5.5 h-5.5 transition-transform group-hover:scale-110" /> },
+    { href: '/dashboard/supported', label: 'Supported Proposals', icon: <Award className="w-5.5 h-5.5 transition-transform group-hover:scale-110" /> }
   ];
 
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col md:flex-row">
+    <div className="min-h-screen bg-[#060814] flex flex-col md:flex-row text-slate-100 min-h-screen">
       {/* Sidebar - Desktop */}
-      <aside className="hidden md:flex flex-col w-64 bg-slate-900 border-r border-slate-900 p-6 shrink-0">
+      <aside className="hidden md:flex flex-col w-64 bg-[#090d1a] border-r border-[#1e293b]/20 p-5 shrink-0 sticky top-0 h-screen overflow-y-auto overflow-x-hidden scrollbar-thin scrollbar-thumb-slate-800 scrollbar-track-transparent">
         {/* Brand */}
         <div className="flex items-center space-x-3 mb-8">
-          <div className="w-9 h-9 rounded-xl bg-linear-to-tr from-orange-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
+          <div className="w-9 h-9 rounded-xl bg-linear-to-tr from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
             <Vote className="w-5 h-5 text-white" />
           </div>
           <div>
-            <span className="font-extrabold text-md tracking-tight bg-clip-text text-transparent bg-linear-to-r from-orange-400 to-indigo-400">Jansunwai AI</span>
+            <span className="font-extrabold text-md tracking-tight bg-clip-text text-transparent bg-linear-to-r from-blue-400 to-indigo-400">Jansunwai AI</span>
             <p className="text-[8px] text-slate-400 uppercase tracking-wider font-semibold">Citizen Portal</p>
           </div>
         </div>
@@ -100,10 +102,10 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               <Link
                 key={link.href}
                 href={link.href}
-                className={`flex items-center space-x-3.5 px-4 py-3 rounded-xl text-sm font-semibold transition-all ${
+                className={`flex items-center space-x-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${
                   isActive 
-                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-600/10' 
-                    : 'text-slate-400 hover:text-white hover:bg-slate-850'
+                    ? 'bg-[#131930] text-[#3b82f6] border border-[#3b82f6]/20 font-extrabold border-l-4 border-l-[#3b82f6] pl-3' 
+                    : 'text-slate-400 hover:text-white hover:bg-[#131930]/40 border-l-4 border-transparent pl-3'
                 }`}
               >
                 {link.icon}
@@ -114,7 +116,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         </nav>
 
         {/* Footer actions */}
-        <div className="pt-6 border-t border-slate-800">
+        <div className="pt-6 border-t border-[#1e293b]/20">
           <button
             onClick={logout}
             className="w-full flex items-center space-x-3.5 px-4 py-3 text-sm font-semibold text-slate-400 hover:text-red-400 hover:bg-red-500/10 rounded-xl transition-all"
@@ -128,7 +130,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col min-w-0 overflow-x-hidden">
         {/* Top Navbar */}
-        <header className="h-16 border-b border-slate-900 bg-slate-900/40 px-6 flex items-center justify-between sticky top-0 backdrop-blur-md z-40">
+        <header className="h-16 border-b border-[#1e293b]/45 bg-[#0a0d1e]/80 px-6 flex items-center justify-between sticky top-0 backdrop-blur-xl z-40 shadow-md shadow-black/15">
           {/* Mobile Logo Brand */}
           <div className="flex items-center space-x-2 md:hidden">
             <div className="w-7 h-7 rounded-lg bg-linear-to-tr from-orange-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
@@ -242,7 +244,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       </div>
 
       {/* Mobile Bottom Navigation Bar */}
-      <nav className="fixed bottom-0 left-0 right-0 md:hidden bg-slate-900/90 backdrop-blur-xl border-t border-slate-800/60 z-50 flex items-center justify-around h-16 pb-safe">
+      <nav className="fixed bottom-0 left-0 right-0 md:hidden bg-[#0a0d1e]/90 backdrop-blur-xl border-t border-[#1e293b]/25 z-50 flex items-center justify-around h-16 pb-safe shadow-lg shadow-black/20">
         {sidebarLinks.map(link => {
           const isActive = pathname === link.href;
           const label = link.label === 'Submit Complaint' ? 'Submission' : link.label;
@@ -252,11 +254,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               href={link.href}
               className={`flex flex-col items-center justify-center flex-1 h-full py-1 text-center transition-all ${
                 isActive 
-                  ? 'text-indigo-400 font-bold scale-105' 
+                  ? 'text-[#3b82f6] font-bold scale-105' 
                   : 'text-slate-400 hover:text-slate-200'
               }`}
             >
-              <div className={`p-1 rounded-xl transition-all ${isActive ? 'bg-indigo-500/10' : ''}`}>
+              <div className={`p-1 rounded-xl transition-all ${isActive ? 'bg-[#1c223c]/60' : ''}`}>
                 {link.icon}
               </div>
               <span className="text-[9px] tracking-tight mt-0.5">{label}</span>

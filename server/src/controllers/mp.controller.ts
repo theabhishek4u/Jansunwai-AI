@@ -71,6 +71,7 @@ export const getConstituencyHealth = async (_req: Request, res: Response) => {
 export const getPriorityEngine = async (_req: Request, res: Response) => {
   try {
     const allSugg = await db.getAllSuggestions();
+    const pops = await db.getPopulations();
 
     const urgencyWeight: Record<string, number> = { critical: 4, high: 3, medium: 2, low: 1 };
     const ranked = await Promise.all(allSugg.map(async s => {
@@ -81,7 +82,13 @@ export const getPriorityEngine = async (_req: Request, res: Response) => {
       const supporterScore = Math.min(25, ((s.supporters || 0) / 100) * 5);
       const completenessScore = ((s.ai_score_completeness || 50) / 100) * 25;
       const beneficiaryScore = Math.min(25, (s.estimated_beneficiaries / 1000) * 3);
-      const priorityScore = Math.round(urgencyScore + supporterScore + completenessScore + beneficiaryScore + (isVerified ? 20 : 0));
+      
+      // Match suggestion area against database area census populations
+      const suggestionArea = (s.village || s.block || '').trim().toLowerCase();
+      const matchPop = pops.find(p => p.area.trim().toLowerCase() === suggestionArea);
+      const popWeight = matchPop ? Math.min(20, (matchPop.total_population / 100000) * 8) : 0;
+
+      const priorityScore = Math.round(urgencyScore + supporterScore + completenessScore + beneficiaryScore + popWeight + (isVerified ? 10 : 0));
 
       return {
         id: s.id,
@@ -98,7 +105,9 @@ export const getPriorityEngine = async (_req: Request, res: Response) => {
         estimatedCostLakhs: s.estimated_cost_lakhs || 0,
         aiCompleteness: s.ai_score_completeness || 0,
         aiConfidence: s.ai_score_confidence || 0,
-        isVerifiedCitizen: isVerified
+        isVerifiedCitizen: isVerified,
+        location_lat: s.location_lat || 26.8500,
+        location_lng: s.location_lng || 80.9499
       };
     }));
 

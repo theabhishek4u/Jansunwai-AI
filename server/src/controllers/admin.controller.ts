@@ -214,3 +214,75 @@ export const verifyCitizen = async (req: Request, res: Response) => {
     return res.status(500).json({ error: 'Failed to update citizen status' });
   }
 };
+
+/**
+ * GET /api/admin/departments
+ */
+export const getDepartments = async (_req: Request, res: Response) => {
+  try {
+    const list = await db.getDepartments();
+    return res.json(list);
+  } catch (error) {
+    return res.status(500).json({ error: 'Failed to fetch departments' });
+  }
+};
+
+/**
+ * POST /api/admin/departments
+ */
+export const createDepartment = async (req: Request, res: Response) => {
+  const { id, name, email, password, officer, category, status, verification_status } = req.body;
+  if (!id || !name || !email || !officer || !category) {
+    return res.status(400).json({ error: 'Missing required parameters (id, name, email, officer, category)' });
+  }
+
+  try {
+    const newDept = await db.createDepartment({
+      id,
+      name,
+      email,
+      password: password || 'password123',
+      officer,
+      category,
+      status: status || 'active',
+      verification_status: verification_status || 'verified'
+    });
+    return res.status(201).json(newDept);
+  } catch (error) {
+    return res.status(500).json({ error: 'Failed to create department' });
+  }
+};
+
+/**
+ * PUT /api/admin/departments/:id
+ */
+export const updateDepartment = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const updates = req.body;
+  if (!id) return res.status(400).json({ error: 'Department ID is required' });
+
+  try {
+    const updated = await db.updateDepartment(id, updates);
+    if (!updated) return res.status(404).json({ error: 'Department not found' });
+    return res.json(updated);
+  } catch (error) {
+    return res.status(500).json({ error: 'Failed to update department' });
+  }
+};
+
+/**
+ * DELETE /api/admin/departments/:id
+ */
+export const deleteDepartment = async (req: Request, res: Response) => {
+  const { id } = req.params;
+  if (!id) return res.status(400).json({ error: 'Department ID is required' });
+
+  try {
+    const success = await db.deleteDepartment(id);
+    if (!success) return res.status(404).json({ error: 'Department not found' });
+    return res.json({ message: 'Department successfully deleted' });
+  } catch (error) {
+    return res.status(500).json({ error: 'Failed to delete department' });
+  }
+};
+

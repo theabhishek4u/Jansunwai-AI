@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { FileText, MapPin, Loader2, ArrowRight } from 'lucide-react';
+import { FileText, MapPin, Loader2, ArrowRight, CheckCircle2, Clock, AlertTriangle, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 
 interface Suggestion {
@@ -45,18 +45,27 @@ export default function AdminComplaintsList() {
 
   return (
     <div className="p-6 md:p-8 max-w-7xl mx-auto min-h-screen">
-      <div className="flex justify-between items-end mb-8">
-        <div>
-          <h1 className="text-3xl font-black text-white mb-2">Complaints Registry</h1>
-          <p className="text-slate-400">Overview of all complaints submitted across the nation.</p>
-        </div>
-        <div className="bg-slate-900 rounded-xl px-4 py-2 border border-slate-800 flex items-center gap-3 shadow-inner">
-          <FileText className="w-5 h-5 text-indigo-400" />
-          <div className="flex flex-col">
-            <span className="text-[10px] uppercase font-bold text-slate-500 tracking-wider">Total Complaints</span>
-            <span className="text-lg font-black text-white leading-none">{complaints.length}</span>
+
+
+      {/* Metrics Dashboard Grid */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        {[
+          { label: 'Total Complaints', count: complaints.length, icon: <FileText className="w-5 h-5 text-indigo-400" />, glow: 'border-indigo-500/10 shadow-indigo-500/5', bg: 'from-indigo-600/10' },
+          { label: 'Submitted & Active', count: complaints.filter(c => c.status === 'submitted' || c.status === 'ai_processing' || c.status === 'under_review').length, icon: <Clock className="w-5 h-5 text-amber-450 animate-pulse" />, glow: 'border-amber-500/10 shadow-amber-500/5', bg: 'from-amber-600/10' },
+          { label: 'Completed Deliveries', count: complaints.filter(c => c.status === 'completed' || c.status === 'planned').length, icon: <CheckCircle2 className="w-5 h-5 text-emerald-450" />, glow: 'border-emerald-500/10 shadow-emerald-500/5', bg: 'from-emerald-600/10' },
+          { label: 'Rejected / Discarded', count: complaints.filter(c => c.status === 'rejected').length, icon: <AlertTriangle className="w-5 h-5 text-rose-450" />, glow: 'border-rose-500/10 shadow-rose-500/5', bg: 'from-rose-600/10' }
+        ].map(kpi => (
+          <div key={kpi.label} className={`p-5 bg-slate-900/60 backdrop-blur-md border border-slate-800/80 rounded-2xl flex items-center justify-between shadow-xl relative overflow-hidden ${kpi.glow}`}>
+            <div className={`absolute inset-0 bg-linear-to-br ${kpi.bg} via-transparent to-transparent -z-10`} />
+            <div>
+              <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest block">{kpi.label}</span>
+              <span className="text-2xl font-extrabold text-white block mt-1.5 tracking-tight">{kpi.count}</span>
+            </div>
+            <div className="w-9 h-9 rounded-xl bg-slate-950 flex items-center justify-center border border-slate-800">
+              {kpi.icon}
+            </div>
           </div>
-        </div>
+        ))}
       </div>
 
       {loading ? (

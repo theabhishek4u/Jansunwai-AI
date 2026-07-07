@@ -11,7 +11,9 @@ import {
   PlusCircle, 
   MessageSquare, 
   Sparkles,
-  Trash2
+  Trash2,
+  MapPin,
+  Users
 } from 'lucide-react';
 
 interface Suggestion {
@@ -23,12 +25,19 @@ interface Suggestion {
   status: string;
   ai_score_completeness: number;
   created_at: string;
+  consensus_score?: number;
+  supporters?: number;
+  village?: string;
+  block?: string;
+  district?: string;
+  estimated_beneficiaries?: number;
 }
 
 export default function DashboardHome() {
   const { user } = useAuth();
   const [suggestions, setSuggestions] = useState<Suggestion[]>([]);
   const [supportedSuggestions, setSupportedSuggestions] = useState<Suggestion[]>([]);
+  const [constituencyProjects, setConstituencyProjects] = useState<Suggestion[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -47,6 +56,22 @@ export default function DashboardHome() {
       }
     } catch (err) {
       console.error('Failed to load supported suggestions:', err);
+    }
+  };
+
+  const fetchAllSuggestions = async () => {
+    try {
+      const response = await fetch(`http://localhost:5000/api/suggestions?t=${Date.now()}`, { cache: 'no-store' });
+      if (response.ok) {
+        const data = await response.json();
+        // Filter active constituency projects managed by the MP (planned, under_review, completed)
+        const activeProjects = data.filter((s: Suggestion) => 
+          s.status === 'planned' || s.status === 'under_review' || s.status === 'completed'
+        );
+        setConstituencyProjects(activeProjects);
+      }
+    } catch (err) {
+      console.error('Failed to load constituency projects:', err);
     }
   };
 
@@ -124,7 +149,7 @@ export default function DashboardHome() {
   return (
     <div className="space-y-8">
       {/* Welcome Banner */}
-      <div className="bg-linear-to-r from-indigo-900/40 via-indigo-950/20 to-slate-900 border border-slate-900 rounded-3xl p-6 sm:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden">
+      <div className="bg-linear-to-br from-[#0e142c] to-[#0a0d1e] border border-[#1e293b]/30 rounded-3xl shadow-lg shadow-black/10 p-6 sm:p-8 flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden">
         <div className="absolute top-0 right-0 w-80 h-80 bg-indigo-500/5 blur-3xl -z-10" />
         <div className="space-y-2">
           <h1 className="text-2xl sm:text-3xl font-black text-white">Jai Hind, {user?.full_name}! 🇮🇳</h1>
@@ -134,7 +159,7 @@ export default function DashboardHome() {
         </div>
         <Link 
           href="/dashboard/submit" 
-          className="bg-linear-to-r from-orange-500 to-indigo-600 hover:from-orange-400 hover:to-indigo-500 text-white font-bold text-sm px-6 py-4 rounded-xl shadow-md shadow-indigo-600/20 flex items-center space-x-2 shrink-0 self-stretch md:self-auto text-center justify-center transition-all"
+          className="bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold text-sm px-6 py-4 rounded-xl shadow-md shadow-indigo-600/20 flex items-center space-x-2 shrink-0 self-stretch md:self-auto text-center justify-center transition-all"
         >
           <PlusCircle className="w-5 h-5" />
           <span>New Complaint</span>
@@ -143,7 +168,7 @@ export default function DashboardHome() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-        <div className="bg-slate-900/40 border border-slate-900 p-5 rounded-2xl">
+        <div className="bg-[#0f142c] border border-[#1e293b]/30 p-5 rounded-2xl shadow-sm hover:border-[#3b82f6]/30 transition-all duration-300">
           <div className="flex items-center justify-between mb-3 text-slate-500">
             <span className="text-xs font-bold uppercase tracking-wider">Total Submitted</span>
             <FileText className="w-5 h-5 text-indigo-400" />
@@ -151,7 +176,7 @@ export default function DashboardHome() {
           <span className="text-2xl sm:text-3xl font-black text-white">{total}</span>
         </div>
 
-        <div className="bg-slate-900/40 border border-slate-900 p-5 rounded-2xl">
+        <div className="bg-[#0f142c] border border-[#1e293b]/30 p-5 rounded-2xl shadow-sm hover:border-[#3b82f6]/30 transition-all duration-300">
           <div className="flex items-center justify-between mb-3 text-slate-500">
             <span className="text-xs font-bold uppercase tracking-wider">Active Tasks</span>
             <Clock className="w-5 h-5 text-indigo-400" />
@@ -159,7 +184,7 @@ export default function DashboardHome() {
           <span className="text-2xl sm:text-3xl font-black text-white">{activeCount}</span>
         </div>
 
-        <div className="bg-slate-900/40 border border-slate-900 p-5 rounded-2xl">
+        <div className="bg-[#0f142c] border border-[#1e293b]/30 p-5 rounded-2xl shadow-sm hover:border-[#3b82f6]/30 transition-all duration-300">
           <div className="flex items-center justify-between mb-3 text-slate-500">
             <span className="text-xs font-bold uppercase tracking-wider">Under MP Review</span>
             <Clock className="w-5 h-5 text-amber-500" />
@@ -167,7 +192,7 @@ export default function DashboardHome() {
           <span className="text-2xl sm:text-3xl font-black text-white">{underReview}</span>
         </div>
 
-        <div className="bg-slate-900/40 border border-slate-900 p-5 rounded-2xl">
+        <div className="bg-[#0f142c] border border-[#1e293b]/30 p-5 rounded-2xl shadow-sm hover:border-[#3b82f6]/30 transition-all duration-300">
           <div className="flex items-center justify-between mb-3 text-slate-500">
             <span className="text-xs font-bold uppercase tracking-wider">Implemented</span>
             <CheckCircle className="w-5 h-5 text-emerald-400" />
@@ -175,7 +200,7 @@ export default function DashboardHome() {
           <span className="text-2xl sm:text-3xl font-black text-white">{completed}</span>
         </div>
 
-        <div className="bg-slate-900/40 border border-slate-900 p-5 rounded-2xl col-span-2 lg:col-span-1">
+        <div className="bg-[#0f142c] border border-[#1e293b]/30 p-5 rounded-2xl shadow-sm hover:border-[#3b82f6]/30 transition-all duration-300 col-span-2 lg:col-span-1">
           <div className="flex items-center justify-between mb-3 text-slate-500">
             <span className="text-xs font-bold uppercase tracking-wider">Avg AI Score</span>
             <Sparkles className="w-5 h-5 text-indigo-400 animate-pulse" />
@@ -191,11 +216,11 @@ export default function DashboardHome() {
         </div>
 
         {loading ? (
-          <div className="bg-slate-900/20 border border-slate-900 rounded-3xl p-10 text-center text-slate-500 text-sm">
+          <div className="bg-[#0b1329]/30 backdrop-blur-md border border-[#1e293b]/30 rounded-3xl p-10 text-center text-slate-500 text-sm">
             Loading recent requests...
           </div>
         ) : suggestions.length === 0 ? (
-          <div className="bg-slate-900/20 border border-slate-900 rounded-3xl p-12 text-center space-y-4">
+          <div className="bg-[#0b1329]/30 backdrop-blur-md border border-[#1e293b]/30 rounded-3xl p-12 text-center space-y-4">
             <MessageSquare className="w-10 h-10 text-slate-600 mx-auto" />
             <div className="space-y-1">
               <p className="text-white font-bold text-sm">No complaints yet</p>
@@ -214,7 +239,7 @@ export default function DashboardHome() {
               <Link
                 key={sugg.id}
                 href={`/dashboard/suggestions/${sugg.id}`}
-                className="block bg-slate-900/20 hover:bg-slate-900/50 border border-slate-900 hover:border-slate-850 p-5 rounded-2xl transition-all"
+                className="block bg-[#0a0d1e] hover:bg-[#0f142c] border border-[#1e293b]/20 hover:border-[#3b82f6]/30 p-5 rounded-2xl transition-all shadow-sm"
               >
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="space-y-1">
@@ -233,7 +258,7 @@ export default function DashboardHome() {
                   </div>
 
                   <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0">
-                    <div className="text-right sm:text-center text-xs px-2.5 py-1.5 bg-slate-950 border border-slate-850 rounded-xl">
+                    <div className="text-right sm:text-center text-xs px-2.5 py-1.5 bg-slate-950 border border-[#1e293b]/30 rounded-xl">
                       <span className="block text-[8px] uppercase tracking-wider text-slate-500 font-bold">AI Complete</span>
                       <span className="font-bold text-slate-300">{sugg.ai_score_completeness || 0}%</span>
                     </div>
@@ -261,7 +286,7 @@ export default function DashboardHome() {
       </div>
 
       {/* ── SUPPORTED PROPOSALS SECTION ── */}
-      <div className="bg-slate-900/40 border border-slate-900 rounded-3xl p-6 sm:p-8 space-y-6">
+      <div className="bg-[#0a0d1e]/90 border border-[#1e293b]/20 rounded-3xl p-6 sm:p-8 space-y-6 shadow-md">
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <h3 className="text-lg font-black text-white flex items-center gap-2">
@@ -270,7 +295,7 @@ export default function DashboardHome() {
             </h3>
             <p className="text-xs text-slate-500 font-medium">Community proposals you are backing to accelerate constituency funding</p>
           </div>
-          <span className="text-[10px] text-slate-500 font-bold bg-slate-950 border border-slate-850 px-2.5 py-1 rounded-full">
+          <span className="text-[10px] text-slate-500 font-bold bg-slate-950 border border-[#1e293b]/30 px-2.5 py-1 rounded-full">
             {supportedSuggestions.length} Supported
           </span>
         </div>
@@ -286,7 +311,7 @@ export default function DashboardHome() {
               <Link
                 key={sugg.id}
                 href={`/dashboard/suggestions/${sugg.id}`}
-                className="block bg-slate-900/10 hover:bg-slate-900/30 border border-slate-900 hover:border-slate-850 p-4 rounded-2xl transition-all"
+                className="block bg-[#0a0d1e] hover:bg-[#0f142c] border border-[#1e293b]/20 hover:border-[#3b82f6]/30 p-4 rounded-2xl transition-all shadow-sm"
               >
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="space-y-1">
@@ -300,7 +325,7 @@ export default function DashboardHome() {
                   </div>
 
                   <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0">
-                    <div className="text-right sm:text-center text-xs px-2.5 py-1 bg-slate-950 border border-slate-850 rounded-xl">
+                    <div className="text-right sm:text-center text-xs px-2.5 py-1 bg-slate-950 border border-[#1e293b]/30 rounded-xl">
                       <span className="block text-[8px] uppercase tracking-wider text-slate-500 font-bold">Consensus</span>
                       <span className="font-bold text-slate-300">{sugg.consensus_score || 70}/100</span>
                     </div>
