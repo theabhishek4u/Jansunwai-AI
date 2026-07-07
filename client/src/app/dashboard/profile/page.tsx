@@ -17,12 +17,6 @@ import {
   Check
 } from 'lucide-react';
 
-interface Badge {
-  id: string;
-  badge_type: 'top_contributor' | 'community_leader' | 'verified_citizen' | 'problem_solver';
-  earned_at: string;
-}
-
 const PRESET_AVATARS = [
   'https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=200&auto=format&fit=crop',
   'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=200&auto=format&fit=crop',
@@ -32,7 +26,6 @@ const PRESET_AVATARS = [
 
 export default function CitizenProfile() {
   const { user, refreshProfile } = useAuth();
-  const [badges, setBadges] = useState<Badge[]>([]);
   const [suggestionsCount, setSuggestionsCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [isEditing, setIsEditing] = useState(false);
@@ -70,7 +63,6 @@ export default function CitizenProfile() {
       const response = await fetch(`http://localhost:5000/api/profile/${user?.id}`);
       if (response.ok) {
         const data = await response.json();
-        setBadges(data.badges || []);
         setSuggestionsCount(data.suggestionsCount || 0);
       }
     } catch (err) {
@@ -153,7 +145,7 @@ export default function CitizenProfile() {
                 <span className="text-[9px] bg-emerald-500/10 text-emerald-400 px-2 py-0.5 rounded font-black uppercase">👑 Trusted</span>
               </h4>
               <p className="text-xs text-slate-400 leading-relaxed mt-1">
-                Your credentials and constituency mapping have been fully verified by Super Admin. Suggestions posted by you will receive boosted priority in the MP planning queue.
+                Your credentials and constituency mapping have been fully verified by Super Admin. Complaints posted by you will receive boosted priority in the MP planning queue.
               </p>
             </div>
           </div>
@@ -259,12 +251,7 @@ export default function CitizenProfile() {
             <div className="border-t border-slate-950/40 pt-4 flex justify-around text-center">
               <div>
                 <span className="block text-xl font-black text-white">{suggestionsCount}</span>
-                <span className="text-[10px] uppercase text-slate-500 font-bold">Suggestions</span>
-              </div>
-              <div className="border-l border-slate-950/40 h-8" />
-              <div>
-                <span className="block text-xl font-black text-indigo-400">{user?.contribution_score || 0}</span>
-                <span className="text-[10px] uppercase text-slate-500 font-bold">Points (XP)</span>
+                <span className="text-[10px] uppercase text-slate-500 font-bold">Complaints</span>
               </div>
             </div>
           </div>

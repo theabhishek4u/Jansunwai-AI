@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { db } from '../db/db';
+import { db, supabase } from '../db/db';
 import { mockDb, Suggestion } from '../db/mockDb';
 import { GoogleGenAI } from '@google/genai';
 import dotenv from 'dotenv';
@@ -171,50 +171,52 @@ export const createSuggestion = async (req: Request, res: Response) => {
       ai_score_location_verified: locationVerified,
       ai_score_photo_verified: photoVerified,
       ai_score_confidence: confidenceScore,
-      duplicate_of_id: duplicateOfId
-    };
+      duplicate_of_id: duplicateOfId,
+      complaint_number: `JSN-${Math.floor(100000 + Math.random() * 900000)}`
+    } as any;
 
     const newSuggestion = await db.createSuggestion(suggestionInput);
 
-    // 4. Handle attachment if present
-    if (imageFile) {
-      // Mock File Upload (since it is a buffer, in production this goes to Supabase Storage.
-      // We will create a URL string representing the file, e.g., mapping to a local asset or data URL)
-      // For simplicity, we can use a placeholder or data URI, or standard public photo
-      const mockFileUrl = `https://images.unsplash.com/photo-1515162305285-0293e4767cc2?q=80&w=600&auto=format&fit=crop`;
-      await db.addMediaAttachment({
-        suggestion_id: newSuggestion.id,
-        file_url: mockFileUrl,
-        file_type: 'image'
-      });
-    }
+    // 4. Handle attachments if present
+    if (files && files.length > 0) {
+      for (const file of files) {
+        let fileUrl = `https://images.unsplash.com/photo-1515162305285-0293e4767cc2?q=80&w=600&auto=format&fit=crop`; // fallback mock
+        let fileType = 'document';
+        
+        if (file.mimetype.startsWith('image/')) fileType = 'image';
+        else if (file.mimetype.startsWith('video/')) fileType = 'video';
+        else if (file.mimetype.startsWith('audio/')) fileType = 'voice';
 
-    // 5. Award Points for Gamification
-    // Citizen gets 20 points for submit, +30 points if completeness > 80, +20 points if photo verified
-    let pointsAwarded = 20;
-    if (completenessScore > 80) pointsAwarded += 30;
-    if (photoVerified) pointsAwarded += 20;
+        if (supabase) {
+          const ext = file.originalname.split('.').pop() || 'bin';
+          const fileName = `${newSuggestion.id}_${Date.now()}_${Math.random().toString(36).substring(7)}.${ext}`;
+          
+          const { data, error } = await supabase.storage
+            .from('media')
+            .upload(fileName, file.buffer, {
+              contentType: file.mimetype,
+              upsert: false
+            });
 
-    await db.incrementScore(citizen_id, pointsAwarded);
+          if (error) {
+            console.error('Failed to upload file to Supabase Storage:', error);
+          } else {
+            const { data: { publicUrl } } = supabase.storage.from('media').getPublicUrl(fileName);
+            fileUrl = publicUrl;
+          }
+        }
 
-    // Auto Badge triggers:
-    // If total user contribution points > 100, award "Verified Citizen"
-    // If suggestions count > 3, award "Top Contributor"
-    const currentProfile = await db.getProfile(citizen_id);
-    if (currentProfile) {
-      if (currentProfile.contribution_score >= 100) {
-        await db.addBadge(citizen_id, 'verified_citizen');
-      }
-      const userSuggs = await db.getSuggestions({ citizen_id });
-      if (userSuggs.length >= 3) {
-        await db.addBadge(citizen_id, 'top_contributor');
+        await db.addMediaAttachment({
+          suggestion_id: newSuggestion.id,
+          file_url: fileUrl,
+          file_type: fileType as any
+        });
       }
     }
 
     return res.status(201).json({
       message: 'Suggestion submitted successfully!',
       suggestion: newSuggestion,
-      pointsAwarded,
       isDuplicate: !!duplicateOfId,
       duplicateOfId
     });
@@ -287,14 +289,6 @@ export const addTimelineStatus = async (req: Request, res: Response) => {
       notes: notes || `Suggestion transitioned to state: ${status}`
     });
 
-    // Check if transition to 'completed' awards the 'problem_solver' badge
-    if (status === 'completed') {
-      const sugg = await db.getSuggestionById(id);
-      if (sugg) {
-        await db.addBadge(sugg.citizen_id, 'problem_solver');
-      }
-    }
-
     return res.json({ message: 'Timeline updated successfully', event });
   } catch (error: any) {
     return res.status(500).json({ error: 'Failed to update timeline', details: error.message });
@@ -362,12 +356,11 @@ export const getProfileDetails = async (req: Request, res: Response) => {
       return res.status(404).json({ error: 'Profile not found' });
     }
 
-    const badges = await db.getUserBadges(id);
+    
     const suggestionsList = await db.getSuggestions({ citizen_id: id });
 
     return res.json({
       profile,
-      badges,
       suggestionsCount: suggestionsList.length
     });
   } catch (error: any) {

@@ -37,7 +37,7 @@ import {
   BarChart3,
   Clock,
   Lightbulb,
-  Hash
+  Hash, Users
 } from 'lucide-react';
 
 const CATEGORIES = [
@@ -159,7 +159,6 @@ export default function SubmitSuggestion() {
   const [submitResult, setSubmitResult] = useState<{
     success: boolean;
     message?: string;
-    pointsAwarded?: number;
     isDuplicate?: boolean;
     duplicateOfId?: string;
     suggestionId?: string;
@@ -358,7 +357,7 @@ export default function SubmitSuggestion() {
         setDescription(newText);
         // Automatically suggest a title if it's empty
         if (!title && currentTranscript.length > 10) {
-          setTitle("Voice Complaint / Suggestion");
+          setTitle("Voice Complaint");
         }
       }
     };
@@ -451,7 +450,7 @@ export default function SubmitSuggestion() {
     }
   };
 
-  // Submit Suggestion Form
+  // Submit Complaint Form
   const handleSubmitForm = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!description || !title) {
@@ -497,12 +496,10 @@ export default function SubmitSuggestion() {
       if (response.ok) {
         setSubmitResult({
           success: true,
-          pointsAwarded: data.pointsAwarded,
           isDuplicate: data.isDuplicate,
           duplicateOfId: data.duplicateOfId,
           suggestionId: data.suggestion?.id
         });
-        refreshProfile(); // Refresh points in header
       } else {
         setSubmitResult({
           success: false,
@@ -554,7 +551,7 @@ export default function SubmitSuggestion() {
               </div>
               <div>
                 <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-white">
-                  Submit Development Suggestion
+                  Submit Development Complaint
                 </h1>
                 <p className="text-xs text-slate-400 mt-0.5">AI-powered proposal builder with voice input, auto-formatting & priority scoring</p>
               </div>
@@ -622,7 +619,7 @@ export default function SubmitSuggestion() {
                       </div>
                       <div>
                         <h3 className="text-sm font-bold text-white">
-                          {isRecording ? `🔴 Recording... ${recordingTime}s` : 'Speak Your Suggestion'}
+                          {isRecording ? `🔴 Recording... ${recordingTime}s` : 'Speak Your Complaint'}
                         </h3>
                         <p className="text-[11px] text-slate-500">AI auto-structures title, description & metadata</p>
                       </div>
@@ -671,7 +668,7 @@ export default function SubmitSuggestion() {
                         className="group relative bg-linear-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white font-bold text-xs px-7 py-4 rounded-2xl flex items-center gap-2.5 shadow-xl shadow-indigo-600/25 hover:-translate-y-0.5 active:scale-95 transition-all cursor-pointer"
                       >
                         <Mic className="w-4.5 h-4.5" />
-                        <span>Record Suggestion</span>
+                        <span>Record Complaint</span>
                         <div className="absolute -inset-px bg-linear-to-r from-indigo-500/20 to-violet-500/20 rounded-2xl blur-sm -z-10 group-hover:blur-md transition-all" />
                       </button>
                     )}
@@ -692,7 +689,7 @@ export default function SubmitSuggestion() {
                 <div className="flex items-center justify-between">
                   <label className="flex items-center gap-2 text-xs font-bold text-slate-300 uppercase tracking-wider">
                     <Hash className="w-3.5 h-3.5 text-indigo-400" />
-                    Suggestion Title
+                    Complaint Title
                   </label>
                   {title && (
                     <span className="text-[9px] font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full flex items-center gap-1">
@@ -777,6 +774,26 @@ export default function SubmitSuggestion() {
                     <option value="critical">🔴 Critical — Urgent Public Hazard</option>
                   </select>
                   <ChevronDown className="w-4 h-4 text-slate-500 absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" />
+                </div>
+              </div>
+
+              {/* Estimated Beneficiaries */}
+              <div className="space-y-2.5">
+                <label className="flex items-center gap-2 text-xs font-bold text-slate-300 uppercase tracking-wider">
+                  <Users className="w-3.5 h-3.5 text-emerald-400" />
+                  People Affected
+                </label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-slate-500 group-focus-within:text-emerald-400 transition-colors">
+                    <Users className="w-4 h-4" />
+                  </div>
+                  <input
+                    type="number"
+                    value={beneficiaries}
+                    onChange={(e) => setBeneficiaries(e.target.value)}
+                    placeholder="e.g. 500"
+                    className="w-full bg-slate-950/70 border border-slate-800/80 rounded-2xl py-4 pl-11 pr-4 text-sm text-slate-100 placeholder-slate-600 focus:outline-none focus:border-indigo-500/60 focus:ring-2 focus:ring-indigo-500/10 transition-all duration-300"
+                  />
                 </div>
               </div>
 
@@ -986,7 +1003,7 @@ export default function SubmitSuggestion() {
                   ) : (
                     <span className="flex items-center gap-2.5 relative z-10">
                       <Send className="w-5 h-5" />
-                      <span>Register Development Suggestion</span>
+                      <span>Register Development Complaint</span>
                       <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                     </span>
                   )}
@@ -1032,34 +1049,23 @@ export default function SubmitSuggestion() {
                       Proposal Registered!
                     </h3>
                     <p className="text-[13px] text-slate-400 leading-relaxed max-w-[280px] mx-auto">
-                      Your suggestion has been logged on the constituency map. <span className="text-emerald-400 font-medium">AI verification complete.</span>
+                      Your complaint has been logged on the constituency map. <span className="text-emerald-400 font-medium">AI verification complete.</span>
                     </p>
                   </div>
 
-                  {/* Points Box */}
-                  <div className="w-full bg-[#13182b]/80 p-5 rounded-2xl border border-indigo-500/20 shadow-inner mb-8 group-hover:border-indigo-500/40 transition-colors">
-                    <div className="flex justify-between items-center">
-                      <span className="text-[11px] text-slate-400 font-bold uppercase tracking-wider">Contribution Points</span>
-                      <div className="relative">
-                        <div className="absolute inset-0 bg-orange-500/20 blur-md rounded-full opacity-50" />
-                        <span className="relative flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-linear-to-r from-orange-500/10 to-amber-500/10 border border-orange-500/30 text-orange-400 font-black text-[13px] shadow-sm">
-                          <Zap className="w-3.5 h-3.5 text-amber-400 fill-amber-400/30" />
-                          +{submitResult.pointsAwarded || 50} XP
-                        </span>
-                      </div>
-                    </div>
-                    {submitResult.isDuplicate && (
-                      <div className="mt-4 pt-4 border-t border-slate-800/60 flex flex-col space-y-2 text-left">
-                        <span className="font-bold text-indigo-400 flex items-center gap-2 text-xs">
-                          <AlertTriangle className="w-4 h-4 text-amber-400" />
+                  {submitResult.isDuplicate && (
+                    <div className="w-full bg-[#13182b]/80 p-5 rounded-2xl border border-amber-500/30 shadow-inner mb-8 transition-colors">
+                      <div className="flex flex-col space-y-2 text-left">
+                        <span className="font-bold text-amber-400 flex items-center gap-2 text-xs">
+                          <AlertTriangle className="w-4 h-4" />
                           Duplicate Match Detected
                         </span>
                         <p className="text-[11px] text-slate-400 leading-relaxed">
                           This development request has already been supported by others. Your request is linked to ensure group impact.
                         </p>
                       </div>
-                    )}
-                  </div>
+                    </div>
+                  )}
 
                   {/* CTA Button */}
                   <button
@@ -1068,7 +1074,7 @@ export default function SubmitSuggestion() {
                   >
                     <div className="absolute inset-0 bg-linear-to-r from-indigo-500 via-purple-500 to-indigo-500 animate-[spin_4s_linear_infinite] opacity-70" />
                     <div className="relative flex items-center justify-center gap-2.5 bg-[#0b0f19] group-hover:bg-linear-to-r group-hover:from-indigo-600/10 group-hover:to-purple-600/10 px-6 py-4 rounded-[14.5px] transition-colors">
-                      <span className="font-bold text-sm text-transparent bg-clip-text bg-linear-to-r from-indigo-300 to-purple-300">Track Suggestion Timeline</span>
+                      <span className="font-bold text-sm text-transparent bg-clip-text bg-linear-to-r from-indigo-300 to-purple-300">Track Complaint Timeline</span>
                       <ArrowRight className="w-4 h-4 text-purple-400 group-hover:translate-x-1 transition-transform" />
                     </div>
                   </button>

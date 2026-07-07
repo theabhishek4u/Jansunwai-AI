@@ -22,6 +22,7 @@ export interface Profile {
 
 export interface Suggestion {
   id: string;
+  complaint_number?: string;
   citizen_id: string;
   title: string;
   category: string;
@@ -68,6 +69,15 @@ export interface UserBadge {
   user_id: string;
   badge_type: 'top_contributor' | 'community_leader' | 'verified_citizen' | 'problem_solver';
   earned_at: string;
+}
+
+export interface AppNotification {
+  id: string;
+  user_id: string;
+  title: string;
+  message: string;
+  is_read: boolean;
+  created_at: string;
 }
 
 // Helper: days ago
@@ -459,6 +469,8 @@ let userBadges: UserBadge[] = [
   { id: 'badge-4', user_id: 'citizen-504', badge_type: 'top_contributor', earned_at: daysAgo(5) },
 ];
 
+let appNotifications: AppNotification[] = [];
+
 // DB Operations implementation
 export const mockDb = {
   getProfile: async (id: string) => {
@@ -532,14 +544,39 @@ export const mockDb = {
       .sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
   },
   addTimelineEvent: async (event: Omit<TimelineEvent, 'id' | 'created_at'>) => {
-    const newEvent: TimelineEvent = { ...event, id: `t-${uuidv4()}`, created_at: new Date().toISOString() };
+    const newEvent: TimelineEvent = {
+      ...event,
+      id: `evt-${Date.now()}`,
+      created_at: new Date().toISOString()
+    };
     timelineEvents.push(newEvent);
-    const suggIdx = suggestions.findIndex(s => s.id === event.suggestion_id);
-    if (suggIdx > -1 && event.status) {
-      suggestions[suggIdx].status = event.status as Suggestion['status'];
-      suggestions[suggIdx].updated_at = new Date().toISOString();
+    // keep suggestion status in sync
+    const suggestion = suggestions.find(s => s.id === event.suggestion_id);
+    if (suggestion) {
+      suggestion.status = event.status as any;
+      suggestion.updated_at = new Date().toISOString();
     }
     return newEvent;
+  },
+  getNotifications: async (user_id: string) => {
+    return appNotifications.filter(n => n.user_id === user_id).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+  },
+  addNotification: async (notification: Omit<AppNotification, 'id' | 'created_at' | 'is_read'>) => {
+    const newNotification: AppNotification = {
+      ...notification,
+      id: `notif-${uuidv4()}`,
+      is_read: false,
+      created_at: new Date().toISOString()
+    };
+    appNotifications.push(newNotification);
+    return newNotification;
+  },
+  markNotificationRead: async (id: string) => {
+    const notif = appNotifications.find(n => n.id === id);
+    if (notif) {
+      notif.is_read = true;
+    }
+    return notif;
   },
   getUserBadges: async (userId: string) => {
     return userBadges.filter(b => b.user_id === userId);

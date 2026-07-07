@@ -145,7 +145,7 @@ export default function PriorityEnginePage() {
                     <span className="text-sm font-black text-amber-400">{item.priorityScore}</span>
                   </td>
                   <td className="px-4 py-3 text-right">
-                    <Link href={`/mp/suggestions/${item.id}`} className="text-slate-600 hover:text-amber-400 transition-colors">
+                    <Link href={`/mp/complaints/${item.id}`} className="text-slate-600 hover:text-amber-400 transition-colors">
                       <ChevronRight className="w-4 h-4" />
                     </Link>
                   </td>

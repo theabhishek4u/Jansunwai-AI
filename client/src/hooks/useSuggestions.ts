@@ -3,6 +3,7 @@ import { suggestionService, SuggestionInput } from '../services/suggestionServic
 
 export interface Suggestion {
   id: string;
+  complaint_number?: string;
   citizen_id: string;
   title: string;
   description: string;

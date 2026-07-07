@@ -20,6 +20,7 @@ import {
   LogOut,
   Sparkles,
   Users,
+  UserCheck,
   X
 } from 'lucide-react';
 
@@ -56,9 +57,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     );
   }
 
-  const sidebarLinks = [
-    { href: '/admin', label: 'Command Center', icon: <LayoutDashboard className="w-5 h-5" />, exact: true },
-    { href: '/admin/mps', label: 'MP Management', icon: <Users className="w-5 h-5" /> },
+  const sidebarLinks: Array<{ href: string; label: string; icon: React.ReactNode; badge?: string; exact?: boolean }> = [
+    { href: '/admin', label: 'Overview', icon: <LayoutDashboard className="w-5 h-5" />, exact: true },
+    { href: '/admin/complaints', label: 'Complaints', icon: <FileText className="w-5 h-5" /> },
+    { href: '/admin/mps', label: 'MP Directory', icon: <UserCheck className="w-5 h-5" /> },
     { href: '/admin/citizens', label: 'Citizen Verification', icon: <Users className="w-5 h-5" />, badge: 'VERIFY' },
     { href: '/admin/datasets', label: 'Public Datasets', icon: <Database className="w-5 h-5" /> },
     { href: '/admin/ai-config', label: 'AI Configuration', icon: <Bot className="w-5 h-5" />, badge: 'CONFIG' },

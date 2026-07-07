@@ -29,7 +29,7 @@ export default function MpLayout({ children }: { children: React.ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const notifications = [
-    '3 new critical suggestions awaiting review.',
+    '3 new critical Complaints awaiting review.',
     'AI detected infrastructure gap in Harahua block.',
     'Budget utilization report for June ready.',
     'Constituency health score updated to 72.'
@@ -57,7 +57,7 @@ export default function MpLayout({ children }: { children: React.ReactNode }) {
   const sidebarLinks = [
     { href: '/mp', label: 'Dashboard', icon: <LayoutDashboard className="w-5 h-5" />, exact: true },
     { href: '/mp/copilot', label: 'AI Copilot', icon: <Bot className="w-5 h-5" />, badge: 'AI' },
-    { href: '/mp/suggestions', label: 'Suggestions', icon: <ListTodo className="w-5 h-5" /> },
+    { href: '/mp/complaints', label: 'Complaints', icon: <ListTodo className="w-5 h-5" /> },
     { href: '/mp/map', label: 'Constituency Map', icon: <Map className="w-5 h-5" /> },
     { href: '/mp/priority', label: 'Priority Engine', icon: <Trophy className="w-5 h-5" /> },
     { href: '/mp/budget', label: 'Budget Planner', icon: <Wallet className="w-5 h-5" /> },

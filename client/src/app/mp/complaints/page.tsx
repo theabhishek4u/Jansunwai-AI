@@ -13,6 +13,7 @@ const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 interface SuggestionItem {
   id: string;
+  complaint_number?: string;
   title: string;
   category: string;
   village: string;
@@ -44,8 +45,8 @@ const urgencyBadge: Record<string, string> = {
   low: 'bg-green-500/10 text-green-400 border-green-500/20',
 };
 
-export default function MpSuggestionsPage() {
-  const [suggestions, setSuggestions] = useState<SuggestionItem[]>([]);
+export default function MpComplaintsPage() {
+  const [complaints, setComplaints] = useState<SuggestionItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
@@ -57,15 +58,15 @@ export default function MpSuggestionsPage() {
   useEffect(() => {
     fetch(`${API}/api/mp/priority-engine`)
       .then(r => r.json())
-      .then(data => setSuggestions(data))
+      .then(data => setComplaints(data))
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
 
-  const categories = [...new Set(suggestions.map(s => s.category))].sort();
-  const villages = [...new Set(suggestions.map(s => s.village))].sort();
+  const categories = [...new Set(complaints.map(s => s.category))].sort();
+  const villages = [...new Set(complaints.map(s => s.village))].sort();
 
-  const filtered = suggestions
+  const filtered = complaints
     .filter(s => {
       if (searchQuery && !s.title.toLowerCase().includes(searchQuery.toLowerCase())) return false;
       if (filterCategory && s.category !== filterCategory) return false;
@@ -81,7 +82,7 @@ export default function MpSuggestionsPage() {
       <div className="flex items-center justify-center min-h-[60vh]">
         <div className="flex flex-col items-center space-y-3">
           <ListTodo className="w-8 h-8 text-amber-400 animate-pulse" />
-          <p className="text-sm text-slate-400">Loading suggestions...</p>
+          <p className="text-sm text-slate-400">Loading complaints...</p>
         </div>
       </div>
     );
@@ -90,8 +91,8 @@ export default function MpSuggestionsPage() {
   return (
     <div className="space-y-6 max-w-[1400px] mx-auto">
       <div>
-        <h1 className="text-2xl font-bold text-white">Suggestion Management</h1>
-        <p className="text-sm text-slate-400 mt-1">Review, prioritize, and manage citizen development suggestions</p>
+        <h1 className="text-2xl font-bold text-white">Complaint Management</h1>
+        <p className="text-sm text-slate-400 mt-1">Review, prioritize, and manage citizen development complaints</p>
       </div>
 
       {/* Filters */}
@@ -103,7 +104,7 @@ export default function MpSuggestionsPage() {
               type="text"
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
-              placeholder="Search suggestions..."
+              placeholder="Search complaints..."
               className="w-full pl-10 pr-4 py-2.5 rounded-lg bg-slate-800/50 border border-slate-700/50 text-xs text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-amber-500/20"
             />
           </div>
@@ -132,7 +133,7 @@ export default function MpSuggestionsPage() {
           </select>
           <div className="flex items-center space-x-1 ml-auto">
             <Filter className="w-3.5 h-3.5 text-slate-500" />
-            <span className="text-[10px] text-slate-500">{filtered.length} of {suggestions.length}</span>
+            <span className="text-[10px] text-slate-500">{filtered.length} of {complaints.length}</span>
           </div>
         </div>
       </div>
@@ -156,7 +157,7 @@ export default function MpSuggestionsPage() {
         ))}
       </div>
 
-      {/* Suggestions List */}
+      {/* Complaints List */}
       <div className="space-y-3">
         {filtered.map((s, i) => {
           const sc = statusConfig[s.status] || statusConfig.submitted;
@@ -168,7 +169,7 @@ export default function MpSuggestionsPage() {
               transition={{ delay: i * 0.02 }}
             >
               <Link
-                href={`/mp/suggestions/${s.id}`}
+                href={`/mp/complaints/${s.id}`}
                 className="flex items-center gap-4 p-4 rounded-2xl bg-[#111827] border border-slate-800/50 hover:border-slate-700/80 transition-all group"
               >
                 {/* Rank */}
@@ -178,7 +179,10 @@ export default function MpSuggestionsPage() {
 
                 {/* Content */}
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-slate-200 truncate group-hover:text-white">{s.title}</p>
+                  <div className="flex flex-col">
+                    <span className="text-[10px] text-slate-400 font-mono mb-1">{s.complaint_number || s.id.substring(0, 8)}</span>
+                    <p className="text-sm font-semibold text-slate-200 truncate group-hover:text-white">{s.title}</p>
+                  </div>
                   <div className="flex flex-wrap items-center gap-2 mt-1.5">
                     <span className="flex items-center space-x-1 text-[10px] text-slate-500">
                       <MapPin className="w-3 h-3" />

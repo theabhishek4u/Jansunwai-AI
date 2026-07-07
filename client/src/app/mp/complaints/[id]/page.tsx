@@ -16,6 +16,7 @@ const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 interface SuggestionDetail {
   id: string;
   citizen_id: string;
+  complaint_number?: string;
   title: string;
   category: string;
   description: string;
@@ -69,15 +70,11 @@ export default function MpSuggestionDetailPage() {
 
   const fetchSuggestionData = async () => {
     try {
-      const [sRes, tRes] = await Promise.all([
-        fetch(`${API}/api/suggestions/${id}`),
-        fetch(`${API}/api/suggestions/${id}/timeline`)
-      ]);
-      if (sRes.ok && tRes.ok) {
-        const sData = await sRes.json();
-        const tData = await tRes.json();
+      const res = await fetch(`${API}/api/suggestions/${id}`);
+      if (res.ok) {
+        const sData = await res.json();
         setSuggestion(sData);
-        setTimeline(tData);
+        setTimeline(sData.timeline || []);
         if (!selectedStatus) {
           setSelectedStatus(sData.status);
         }
@@ -101,12 +98,12 @@ export default function MpSuggestionDetailPage() {
     if (!notes) {
       const defaultNotes: Record<string, string> = {
         under_review: 'MP planning committee has opened the file for budget review.',
-        accepted: 'MP has accepted the suggestion for departmental planning.',
+        accepted: 'MP has accepted the complaint for departmental planning.',
         planned: 'Funds sanctioned under Rural Development Block Grant.',
         completed: 'Contractor completed physical site build. Local inspection approved.',
         rejected: 'Proposal rejected as it does not meet feasibility guidelines.'
       };
-      notes = defaultNotes[selectedStatus] || `Suggestion transitioned to state: ${selectedStatus}`;
+      notes = defaultNotes[selectedStatus] || `Complaint transitioned to state: ${selectedStatus}`;
     }
 
     try {
@@ -167,9 +164,9 @@ export default function MpSuggestionDetailPage() {
 
   return (
     <div className="max-w-5xl mx-auto space-y-6">
-      <Link href="/mp/suggestions" className="inline-flex items-center space-x-2 text-xs text-slate-400 hover:text-white transition-colors">
+      <Link href="/mp/complaints" className="inline-flex items-center space-x-2 text-xs text-slate-400 hover:text-white transition-colors">
         <ArrowLeft className="w-4 h-4" />
-        <span>Back to Suggestions</span>
+        <span>Back to Complaints</span>
       </Link>
 
       {/* Header Card */}
@@ -183,7 +180,10 @@ export default function MpSuggestionDetailPage() {
               </span>
               <span className="text-[10px] text-slate-500">{suggestion.category}</span>
             </div>
-            <h1 className="text-xl font-bold text-white mb-2">{suggestion.title}</h1>
+            <span className="text-xs text-slate-400 font-mono font-medium block mb-2">Complaint #{suggestion.complaint_number || suggestion.id.substring(0,8)}</span>
+            <h1 className="text-2xl font-bold text-white leading-snug mb-3">
+              {suggestion.title}
+            </h1>
             <div className="flex flex-wrap items-center gap-3 text-xs text-slate-400">
               <span className="flex items-center space-x-1"><MapPin className="w-3.5 h-3.5" /><span>{suggestion.village}, {suggestion.block}</span></span>
               <span className="flex items-center space-x-1"><Users className="w-3.5 h-3.5" /><span>{suggestion.estimated_beneficiaries.toLocaleString()} beneficiaries</span></span>
@@ -280,7 +280,7 @@ export default function MpSuggestionDetailPage() {
             {activeTab === 'status' ? (
               <form onSubmit={handleUpdateStatus} className="space-y-4">
                 <div>
-                  <label className="text-[10px] uppercase font-bold text-slate-500 tracking-wider block mb-1.5">Select Suggestion Status</label>
+                  <label className="text-[10px] uppercase font-bold text-slate-500 tracking-wider block mb-1.5">Select Complaint Status</label>
                   <select
                     value={selectedStatus}
                     onChange={e => setSelectedStatus(e.target.value)}
@@ -290,7 +290,7 @@ export default function MpSuggestionDetailPage() {
                     <option value="accepted">Accept Proposal</option>
                     <option value="planned">Planned / Budgeted</option>
                     <option value="completed">Project Completed</option>
-                    <option value="rejected">Reject Suggestion</option>
+                    <option value="rejected">Reject Complaint</option>
                   </select>
                 </div>
                 

@@ -15,6 +15,7 @@ import {
 
 interface Suggestion {
   id: string;
+  complaint_number?: string;
   title: string;
   category: string;
   urgency: string;
@@ -89,7 +90,7 @@ export default function DashboardHome() {
         <div className="space-y-2">
           <h1 className="text-2xl sm:text-3xl font-black text-white">Jai Hind, {user?.full_name}! 🇮🇳</h1>
           <p className="text-sm text-slate-400 max-w-xl leading-relaxed">
-            Welcome to your Jansunwai AI dashboard. Here you can submit development ideas, track live works, and earn badges for verified location audits.
+            Welcome to your Jansunwai AI dashboard. Here you can submit complaints, track live works.
           </p>
         </div>
         <Link 
@@ -97,7 +98,7 @@ export default function DashboardHome() {
           className="bg-linear-to-r from-orange-500 to-indigo-600 hover:from-orange-400 hover:to-indigo-500 text-white font-bold text-sm px-6 py-4 rounded-xl shadow-md shadow-indigo-600/20 flex items-center space-x-2 shrink-0 self-stretch md:self-auto text-center justify-center transition-all"
         >
           <PlusCircle className="w-5 h-5" />
-          <span>New Suggestion</span>
+          <span>New Complaint</span>
         </Link>
       </div>
 
@@ -147,7 +148,7 @@ export default function DashboardHome() {
       {/* Recent Suggestions */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold text-white">Your Recent Suggestions</h2>
+          <h2 className="text-lg font-bold text-white">Your Recent Complaints</h2>
         </div>
 
         {loading ? (
@@ -158,14 +159,14 @@ export default function DashboardHome() {
           <div className="bg-slate-900/20 border border-slate-900 rounded-3xl p-12 text-center space-y-4">
             <MessageSquare className="w-10 h-10 text-slate-600 mx-auto" />
             <div className="space-y-1">
-              <p className="text-white font-bold text-sm">No suggestions yet</p>
+              <p className="text-white font-bold text-sm">No complaints yet</p>
               <p className="text-slate-500 text-xs">Your voice counts! Draft your first development idea today.</p>
             </div>
             <Link 
               href="/dashboard/submit" 
               className="inline-flex items-center space-x-2 bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-xs px-4 py-2.5 rounded-xl"
             >
-              <span>Draft Suggestion</span>
+              <span>Draft Complaint</span>
             </Link>
           </div>
         ) : (
@@ -181,10 +182,15 @@ export default function DashboardHome() {
                     <span className="inline-block text-[10px] font-bold uppercase tracking-wider text-indigo-400">
                       {sugg.category}
                     </span>
-                    <h3 className="text-sm font-bold text-white">{sugg.title}</h3>
-                    <p className="text-xs text-slate-500">
-                      Submitted: {new Date(sugg.created_at).toLocaleDateString()}
-                    </p>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex flex-col">
+                        <span className="text-[10px] text-slate-400 font-mono mb-1">{sugg.complaint_number || sugg.id.substring(0,8)}</span>
+                        <h4 className="text-sm font-bold text-slate-200 line-clamp-1">{sugg.title}</h4>
+                      </div>
+                      <div className="flex items-center gap-2 mt-1.5 text-[10px] text-slate-500">
+                        Submitted: {new Date(sugg.created_at).toLocaleDateString()}
+                      </div>
+                    </div>
                   </div>
 
                   <div className="flex items-center justify-between sm:justify-end gap-3 shrink-0">

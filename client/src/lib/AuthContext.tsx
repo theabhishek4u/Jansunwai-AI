@@ -9,7 +9,7 @@ interface AuthContextType {
   user: ProfileData | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (profile: Omit<ProfileData, 'contribution_score' | 'id'> & { password?: string }) => Promise<void>;
+  register: (profile: Omit<ProfileData, 'id'> & { password?: string }) => Promise<void>;
   logout: () => Promise<void>;
   refreshProfile: () => Promise<void>;
 }
@@ -73,7 +73,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
 
-  const register = async (profileData: Omit<ProfileData, 'contribution_score' | 'id'> & { password?: string }): Promise<void> => {
+  const register = async (profileData: Omit<ProfileData, 'id'> & { password?: string }): Promise<void> => {
     setLoading(true);
     try {
       const { email, password, role, ...metadata } = profileData;
@@ -106,7 +106,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const profile = await profileService.getProfile(user.id, user.role);
       setUser(profile);
     } catch (err) {
-      console.warn('Failed to refresh user points from Supabase:', err);
+      console.warn('Failed to refresh user profile from Supabase:', err);
     }
   };
 

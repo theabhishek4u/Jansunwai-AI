@@ -20,7 +20,7 @@ const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
 
 interface DashboardStats {
   citizenCount: number;
-  totalSuggestions: number;
+  totalComplaints: number;
   highPriority: number;
   activeProjects: number;
   completed: number;
@@ -112,7 +112,7 @@ export default function MpDashboard() {
 
   const kpiCards = [
     { label: 'Registered Citizens', value: stats?.citizenCount || 0, icon: <Users className="w-5 h-5" />, color: 'from-blue-500/20 to-blue-600/5 border-blue-500/20 text-blue-400', change: '+12%', sparkline: [{ v: 20 }, { v: 22 }, { v: 24 }, { v: 25 }, { v: 27 }, { v: 30 }], lineColor: '#3b82f6' },
-    { label: 'Total Suggestions', value: stats?.totalSuggestions || 0, icon: <FileText className="w-5 h-5" />, color: 'from-violet-500/20 to-violet-600/5 border-violet-500/20 text-violet-400', change: '+8%', sparkline: [{ v: 12 }, { v: 14 }, { v: 15 }, { v: 18 }, { v: 17 }, { v: 22 }], lineColor: '#8b5cf6' },
+    { label: 'Total Complaints', value: stats?.totalComplaints || 0, icon: <FileText className="w-5 h-5" />, color: 'from-violet-500/20 to-violet-600/5 border-violet-500/20 text-violet-400', change: '+8%', sparkline: [{ v: 12 }, { v: 14 }, { v: 15 }, { v: 18 }, { v: 17 }, { v: 22 }], lineColor: '#8b5cf6' },
     { label: 'High Priority', value: stats?.highPriority || 0, icon: <AlertTriangle className="w-5 h-5" />, color: 'from-red-500/20 to-red-600/5 border-red-500/20 text-red-400', change: '-2', sparkline: [{ v: 10 }, { v: 8 }, { v: 7 }, { v: 5 }, { v: 4 }, { v: 3 }], lineColor: '#ef4444' },
     { label: 'Active Projects', value: stats?.activeProjects || 0, icon: <Activity className="w-5 h-5" />, color: 'from-emerald-500/20 to-emerald-600/5 border-emerald-500/20 text-emerald-400', change: '+3', sparkline: [{ v: 2 }, { v: 3 }, { v: 3 }, { v: 4 }, { v: 5 }, { v: 6 }], lineColor: '#10b981' },
     { label: 'Completed Projects', value: stats?.completed || 0, icon: <Building2 className="w-5 h-5" />, color: 'from-teal-500/20 to-teal-600/5 border-teal-500/20 text-teal-400', change: '+2', sparkline: [{ v: 1 }, { v: 2 }, { v: 2 }, { v: 3 }, { v: 3 }, { v: 4 }], lineColor: '#14b8a6' },
@@ -303,7 +303,7 @@ export default function MpDashboard() {
                 <div className="space-y-2">
                   {priorities.map((p, i) => (
                     <Link
-                      href={`/mp/suggestions/${p.id}`}
+                      href={`/mp/complaints/${p.id}`}
                       key={p.id}
                       className="flex items-center space-x-4 p-3 rounded-xl bg-slate-900/40 hover:bg-slate-800/30 transition-all border border-slate-800/30 hover:border-slate-700/50 group cursor-pointer"
                     >
@@ -342,7 +342,7 @@ export default function MpDashboard() {
               <div className="bg-[#0d1220]/80 rounded-2xl p-6 border border-slate-800/50 flex flex-col justify-between">
                 <h2 className="text-xs uppercase tracking-wider font-black text-slate-400 mb-5 flex items-center space-x-2">
                   <BarChart3 className="w-4 h-4 text-violet-400" />
-                  <span>Suggestion Categories</span>
+                  <span>Complaint Categories</span>
                 </h2>
                 {analytics?.categoryChart && (
                   <ResponsiveContainer width="100%" height={240}>
@@ -378,11 +378,11 @@ export default function MpDashboard() {
                 </div>
               </div>
 
-              {/* Suggestions by Village */}
+              {/* Complaints by Village */}
               <div className="bg-[#0d1220]/80 rounded-2xl p-6 border border-slate-800/50">
                 <h2 className="text-xs uppercase tracking-wider font-black text-slate-400 mb-5 flex items-center space-x-2">
                   <TrendingUp className="w-4 h-4 text-emerald-400" />
-                  <span>Suggestions by Village</span>
+                  <span>Complaints by Village</span>
                 </h2>
                 {analytics?.villageChart && (
                   <ResponsiveContainer width="100%" height={320}>
@@ -437,7 +437,7 @@ export default function MpDashboard() {
                 <h2 className="text-xs uppercase tracking-wider font-black text-slate-400 mb-4">Quick Actions</h2>
                 <div className="grid grid-cols-2 gap-3">
                   {[
-                    { href: '/mp/suggestions', label: 'Review Suggestions', desc: `${stats?.pendingReview || 0} pending`, icon: <ListTodo className="w-5 h-5" />, color: 'from-blue-500/15 to-blue-500/5 border-blue-500/25 text-blue-400 hover:border-blue-500/50' },
+                    { href: '/mp/complaints', label: 'Review Complaints', desc: `${stats?.pendingReview || 0} pending`, icon: <ListTodo className="w-5 h-5" />, color: 'from-blue-500/15 to-blue-500/5 border-blue-500/25 text-blue-400 hover:border-blue-500/50' },
                     { href: '/mp/copilot', label: 'Ask AI Copilot', desc: 'Natural language queries', icon: <Bot className="w-5 h-5" />, color: 'from-violet-500/15 to-violet-500/5 border-violet-500/25 text-violet-400 hover:border-violet-500/50' },
                     { href: '/mp/budget', label: 'Plan Budget', desc: `₹${((stats?.totalCostLakhs || 0) / 100).toFixed(0)} Cr needed`, icon: <Wallet className="w-5 h-5" />, color: 'from-emerald-500/15 to-emerald-500/5 border-emerald-500/25 text-emerald-400 hover:border-emerald-500/50' },
                     { href: '/mp/map', label: 'View Heatmap', desc: 'Constituency map layers', icon: <BarChart3 className="w-5 h-5" />, color: 'from-amber-500/15 to-amber-500/5 border-amber-500/25 text-amber-400 hover:border-amber-500/50' },

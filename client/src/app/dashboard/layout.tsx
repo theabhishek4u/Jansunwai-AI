@@ -10,21 +10,24 @@ import {
   PlusCircle, 
   UserCircle, 
   LogOut, 
-  Bell, 
-  Menu, 
-  X, 
+  Bell,
   Sparkles
 } from 'lucide-react';
+
+interface AppNotification {
+  id: string;
+  user_id: string;
+  title: string;
+  message: string;
+  is_read: boolean;
+  created_at: string;
+}
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, loading, logout, refreshProfile } = useAuth();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [notifications, setNotifications] = useState<string[]>([
-    'Your suggestion is currently under AI review.',
-    'Varanasi road project completed successfully!'
-  ]);
+  const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
 
   useEffect(() => {
@@ -35,6 +38,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         router.push('/admin');
       } else if (user.role === 'mp') {
         router.push('/mp');
+      } else {
+        // Fetch real notifications for this citizen
+        fetch(`/api/notifications?citizen_id=${user.id}`)
+          .then(res => res.json())
+          .then(data => {
+            if (Array.isArray(data)) setNotifications(data);
+          })
+          .catch(console.error);
       }
     }
   }, [user, loading, router]);
@@ -61,7 +72,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   const sidebarLinks = [
     { href: '/dashboard', label: 'Overview', icon: <LayoutDashboard className="w-5 h-5" /> },
-    { href: '/dashboard/submit', label: 'Submit Suggestion', icon: <PlusCircle className="w-5 h-5" /> },
+    { href: '/dashboard/submit', label: 'Submit Complaint', icon: <PlusCircle className="w-5 h-5" /> },
     { href: '/dashboard/profile', label: 'My Profile', icon: <UserCircle className="w-5 h-5" /> }
   ];
 
@@ -144,29 +155,35 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               </button>
 
               {showNotifications && (
-                <div className="absolute right-0 mt-3 w-80 bg-slate-900 border border-slate-800 shadow-2xl rounded-2xl p-4 z-50">
-                  <div className="flex items-center justify-between border-b border-slate-800 pb-2 mb-3">
-                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Notifications</span>
-                    <button 
-                      onClick={() => setNotifications([])} 
-                      className="text-[10px] text-indigo-400 font-semibold hover:underline"
-                    >
-                      Clear all
-                    </button>
-                  </div>
-                  {notifications.length === 0 ? (
-                    <p className="text-slate-500 text-xs text-center py-4">No new notifications</p>
-                  ) : (
-                    <div className="space-y-3">
-                      {notifications.map((notif, idx) => (
-                        <div key={idx} className="flex items-start space-x-2 text-xs text-slate-300 border-b border-slate-850 pb-2 last:border-0 last:pb-0">
-                          <Sparkles className="w-3.5 h-3.5 text-indigo-400 shrink-0 mt-0.5" />
-                          <p>{notif}</p>
-                        </div>
-                      ))}
+                  <div className="absolute right-0 mt-3 w-80 bg-slate-900 border border-slate-800 shadow-2xl rounded-2xl p-4 z-50">
+                    <div className="flex items-center justify-between border-b border-slate-800 pb-2 mb-3">
+                      <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Notifications</span>
+                      <button 
+                        onClick={() => {
+                          setNotifications([]);
+                          notifications.forEach(n => fetch(`/api/notifications/${n.id}/read`, { method: 'POST' }).catch(console.error));
+                        }} 
+                        className="text-[10px] text-indigo-400 font-semibold hover:underline"
+                      >
+                        Clear all
+                      </button>
                     </div>
-                  )}
-                </div>
+                    {notifications.length === 0 ? (
+                      <p className="text-slate-500 text-xs text-center py-4">No new notifications</p>
+                    ) : (
+                      <div className="space-y-3">
+                        {notifications.map((notif, idx) => (
+                          <div key={notif.id || idx} className="flex items-start space-x-2 text-xs text-slate-300 border-b border-slate-850 pb-2 last:border-0 last:pb-0">
+                            <Sparkles className="w-3.5 h-3.5 text-indigo-400 shrink-0 mt-0.5" />
+                            <div className="flex flex-col">
+                              <span className="font-bold text-slate-200">{notif.title}</span>
+                              <p className="text-slate-400 mt-0.5">{notif.message}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
               )}
             </div>
           </div>
@@ -182,7 +199,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <nav className="fixed bottom-0 left-0 right-0 md:hidden bg-slate-900/90 backdrop-blur-xl border-t border-slate-800/60 z-50 flex items-center justify-around h-16 pb-safe">
         {sidebarLinks.map(link => {
           const isActive = pathname === link.href;
-          const label = link.label === 'Submit Suggestion' ? 'Submission' : link.label;
+          const label = link.label === 'Submit Complaint' ? 'Submission' : link.label;
           return (
             <Link
               key={link.href}

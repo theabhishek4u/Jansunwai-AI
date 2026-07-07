@@ -5,6 +5,7 @@ import aiRoutes from './routes/ai.routes';
 import suggestionRoutes from './routes/suggestion.routes';
 import mpRoutes from './routes/mp.routes';
 import adminRoutes from './routes/admin.routes';
+import notificationRoutes from './routes/notification.routes';
 import { errorHandler } from './middlewares/errorHandler';
 
 dotenv.config();
@@ -28,6 +29,7 @@ app.use('/api/ai', aiRoutes);
 app.use('/api', suggestionRoutes);
 app.use('/api/mp', mpRoutes);
 app.use('/api/admin', adminRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 // Health check endpoint
 app.get('/health', (req, res) => {

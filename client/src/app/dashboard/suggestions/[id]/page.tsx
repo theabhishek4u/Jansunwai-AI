@@ -26,6 +26,7 @@ interface TimelineEvent {
 
 interface SuggestionDetail {
   id: string;
+  complaint_number?: string;
   title: string;
   category: string;
   description: string;
@@ -100,7 +101,7 @@ export default function SuggestionDetails() {
   if (!sugg) {
     return (
       <div className="text-center py-20 space-y-4">
-        <p className="text-slate-400 text-sm font-bold">Suggestion not found.</p>
+        <p className="text-slate-400 text-sm font-bold">Complaint not found.</p>
         <button onClick={() => router.push('/dashboard')} className="text-indigo-400 text-xs font-bold hover:underline">
           Go back to Overview
         </button>
@@ -140,7 +141,12 @@ export default function SuggestionDetails() {
                   {sugg.urgency} Urgency
                 </span>
               </div>
-              <h1 className="text-xl sm:text-2xl font-black text-white leading-snug">{sugg.title}</h1>
+              
+              {/* Title Area */}
+              <div className="flex-1">
+                <span className="text-xs text-slate-400 font-mono font-medium block mb-2">Complaint #{sugg.complaint_number || sugg.id.substring(0,8)}</span>
+                <h1 className="text-xl sm:text-2xl font-black text-white leading-snug">{sugg.title}</h1>
+              </div>
             </div>
 
             {/* Description */}

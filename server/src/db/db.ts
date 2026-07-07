@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { mockDb, Profile, Suggestion, MediaAttachment, TimelineEvent, UserBadge } from './mockDb';
+import { mockDb, Profile, Suggestion, MediaAttachment, TimelineEvent,  } from './mockDb';
 import dotenv from 'dotenv';
 
 dotenv.config();
@@ -75,6 +75,7 @@ export const db = {
   },
 
   getSuggestions: async (filters?: { citizen_id?: string; category?: string; district?: string }): Promise<Suggestion[]> => {
+    let supabaseData: Suggestion[] = [];
     if (supabase) {
       let query = supabase.from('suggestions').select('*');
       if (filters?.citizen_id) {
@@ -87,13 +88,17 @@ export const db = {
         query = query.ilike('district', filters.district);
       }
       const { data, error } = await query.order('created_at', { ascending: false });
-      if (error) {
-        console.error('Supabase suggestions fetch error, using mockDb fallback:', error.message);
-        return mockDb.getSuggestions(filters);
+      if (!error && data) {
+        supabaseData = data;
       }
-      return data || [];
     }
-    return mockDb.getSuggestions(filters);
+    const mockData = await mockDb.getSuggestions(filters);
+    const merged = [...supabaseData];
+    const existingIds = new Set(merged.map(s => s.id));
+    for (const item of mockData) {
+      if (!existingIds.has(item.id)) merged.push(item);
+    }
+    return merged.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
   },
 
   getSuggestionById: async (id: string): Promise<Suggestion | null> => {
@@ -185,6 +190,37 @@ export const db = {
     return mockDb.getTimelineEvents(suggestionId);
   },
 
+  getNotifications: async (userId: string) => {
+    if (supabase) {
+      const { data, error } = await supabase
+        .from('app_notifications')
+        .select('*')
+        .eq('user_id', userId)
+        .order('created_at', { ascending: false });
+      if (error) {
+        return mockDb.getNotifications(userId);
+      }
+      return data || [];
+    }
+    return mockDb.getNotifications(userId);
+  },
+
+  markNotificationRead: async (id: string) => {
+    if (supabase) {
+      const { data, error } = await supabase
+        .from('app_notifications')
+        .update({ is_read: true })
+        .eq('id', id)
+        .select()
+        .single();
+      if (error) {
+        return mockDb.markNotificationRead(id);
+      }
+      return data;
+    }
+    return mockDb.markNotificationRead(id);
+  },
+
   addTimelineEvent: async (event: Omit<TimelineEvent, 'id' | 'created_at'>): Promise<TimelineEvent> => {
     if (supabase) {
       const { data, error } = await supabase
@@ -197,67 +233,45 @@ export const db = {
         return mockDb.addTimelineEvent(event);
       }
       // Keep suggestion status in sync
-      await supabase
+      const { data: suggestionData } = await supabase
         .from('suggestions')
         .update({ status: event.status, updated_at: new Date().toISOString() })
-        .eq('id', event.suggestion_id);
+        .eq('id', event.suggestion_id)
+        .select()
+        .single();
+        
+      // Generate Notification if completed
+      if (suggestionData && event.status === 'completed') {
+        const notif = {
+          user_id: suggestionData.citizen_id,
+          title: 'Complaint Completed',
+          message: `Your complaint ${suggestionData.complaint_number || event.suggestion_id.substring(0, 8)} has been marked as completed by the MP.`
+        };
+        const { error: notifErr } = await supabase.from('app_notifications').insert([notif]);
+        if (notifErr) {
+          console.log('Falling back to mockDb for notifications (table might not exist yet).');
+          await mockDb.addNotification(notif);
+        }
+      }
         
       return data;
     }
-    return mockDb.addTimelineEvent(event);
+    
+    const newEvent = await mockDb.addTimelineEvent(event);
+    if (event.status === 'completed') {
+      const suggestion = await mockDb.getSuggestionById(event.suggestion_id);
+      if (suggestion) {
+        await mockDb.addNotification({
+          user_id: suggestion.citizen_id,
+          title: 'Complaint Completed',
+          message: `Your complaint ${suggestion.complaint_number || event.suggestion_id.substring(0,8)} has been marked as completed by the MP.`
+        });
+      }
+    }
+    return newEvent;
   },
 
-  getUserBadges: async (userId: string): Promise<UserBadge[]> => {
-    if (supabase) {
-      const { data, error } = await supabase
-        .from('user_badges')
-        .select('*')
-        .eq('user_id', userId);
-      if (error) {
-        return mockDb.getUserBadges(userId);
-      }
-      return data || [];
-    }
-    return mockDb.getUserBadges(userId);
-  },
 
-  addBadge: async (userId: string, badgeType: UserBadge['badge_type']): Promise<UserBadge> => {
-    if (supabase) {
-      const { data, error } = await supabase
-        .from('user_badges')
-        .insert({ user_id: userId, badge_type: badgeType })
-        .select()
-        .single();
-      if (error) {
-        console.error('Supabase badge addition error, using mockDb fallback:', error.message);
-        return mockDb.addBadge(userId, badgeType);
-      }
-      await db.incrementScore(userId, 50);
-      return data;
-    }
-    return mockDb.addBadge(userId, badgeType);
-  },
-
-  incrementScore: async (userId: string, points: number): Promise<number> => {
-    if (supabase) {
-      // First fetch
-      const profile = await db.getProfile(userId);
-      if (profile) {
-        const newScore = (profile.contribution_score || 0) + points;
-        const { error } = await supabase
-          .from('profiles')
-          .update({ contribution_score: newScore })
-          .eq('id', userId);
-        if (error) {
-          console.error('Supabase score increment error, using mockDb fallback:', error.message);
-          return mockDb.incrementScore(userId, points);
-        }
-        return newScore;
-      }
-      return 0;
-    }
-    return mockDb.incrementScore(userId, points);
-  },
 
   getCitizens: async () => {
     if (supabase) {
@@ -292,39 +306,49 @@ export const db = {
   },
 
   getAllSuggestions: async () => {
+    let supabaseData: Suggestion[] = [];
     if (supabase) {
       const { data, error } = await supabase
         .from('suggestions')
         .select('*')
         .order('created_at', { ascending: false });
-      if (error) {
-        return mockDb.getAllSuggestions();
+      if (!error && data) {
+        supabaseData = data;
       }
-      return data || [];
     }
-    return mockDb.getAllSuggestions();
+    const mockData = await mockDb.getAllSuggestions();
+    const merged = [...supabaseData];
+    const existingIds = new Set(merged.map(s => s.id));
+    for (const item of mockData) {
+      if (!existingIds.has(item.id)) merged.push(item);
+    }
+    return merged.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
   },
 
   getStats: async () => {
+    const allSugg = await db.getAllSuggestions();
+    
+    let profilesData: any[] = [];
     if (supabase) {
-      const { data: allSugg, error: suggError } = await supabase.from('suggestions').select('*');
-      const { data: profiles, error: profError } = await supabase.from('profiles').select('role');
-      
-      if (suggError || profError || !allSugg || !profiles) {
-        return mockDb.getStats();
+      const { data, error } = await supabase.from('profiles').select('role');
+      if (!error && data) {
+        profilesData = data;
       }
-
-      const citizenCount = profiles.filter(p => p.role === 'citizen').length;
-      const totalSuggestions = allSugg.length;
-      const highPriority = allSugg.filter(s => s.urgency === 'critical' || s.urgency === 'high').length;
-      const activeProjects = allSugg.filter(s => s.status === 'planned' || s.status === 'under_review').length;
-      const completed = allSugg.filter(s => s.status === 'completed').length;
-      const pendingReview = allSugg.filter(s => s.status === 'submitted' || s.status === 'under_review').length;
-      const totalBeneficiaries = allSugg.reduce((sum, s) => sum + (s.estimated_beneficiaries || 0), 0);
-      const totalCostLakhs = allSugg.reduce((sum, s) => sum + (s.estimated_cost_lakhs || 0), 0);
-      
-      return { citizenCount, totalSuggestions, highPriority, activeProjects, completed, pendingReview, totalBeneficiaries, totalCostLakhs };
     }
-    return mockDb.getStats();
+    
+    const mockStats = await mockDb.getStats();
+    const citizenCount = profilesData.length > 0 
+      ? profilesData.filter(p => p.role === 'citizen').length 
+      : mockStats.citizenCount;
+
+    const totalSuggestions = allSugg.length;
+    const highPriority = allSugg.filter(s => s.urgency === 'critical' || s.urgency === 'high').length;
+    const activeProjects = allSugg.filter(s => s.status === 'planned' || s.status === 'under_review').length;
+    const completed = allSugg.filter(s => s.status === 'completed').length;
+    const pendingReview = allSugg.filter(s => s.status === 'submitted' || s.status === 'under_review').length;
+    const totalBeneficiaries = allSugg.reduce((sum, s) => sum + (s.estimated_beneficiaries || 0), 0);
+    const totalCostLakhs = allSugg.reduce((sum, s) => sum + (s.estimated_cost_lakhs || 0), 0);
+    
+    return { citizenCount, totalSuggestions, highPriority, activeProjects, completed, pendingReview, totalBeneficiaries, totalCostLakhs };
   }
 };

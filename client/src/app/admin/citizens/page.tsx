@@ -22,7 +22,6 @@ interface Citizen {
   pincode?: string;
   aadhaar_number?: string;
   verification_status?: 'incomplete' | 'pending' | 'verified' | 'rejected';
-  contribution_score: number;
   avatar_url?: string;
 }
 
@@ -222,7 +221,6 @@ export default function CitizenVerificationPage() {
                       <h3 className="font-extrabold text-white text-sm flex items-center gap-1.5">
                         {c.full_name}
                       </h3>
-                      <p className="text-[10px] text-slate-500 font-semibold mt-0.5">Contribution Score: {c.contribution_score} XP</p>
                     </div>
                   </div>
                   {getStatusBadge(c.verification_status)}

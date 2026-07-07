@@ -17,7 +17,7 @@ interface VillageNode {
   block: string;
   lat: number;
   lng: number;
-  suggestions: number;
+  complaints: number;
   urgencyLevel: string;
   categories: Record<string, number>;
   totalBeneficiaries: number;
@@ -48,45 +48,45 @@ interface PriorityItem {
 }
 
 const STATE_MAP_NODES = [
-  { id: 'IN-UP', name: 'Uttar Pradesh', x: 390, y: 170, color: '#f59e0b', suggestions: 842 },
-  { id: 'IN-MH', name: 'Maharashtra', x: 270, y: 290, color: '#8b5cf6', suggestions: 450 },
-  { id: 'IN-KA', name: 'Karnataka', x: 280, y: 390, color: '#06b6d4', suggestions: 430 },
-  { id: 'IN-DL', name: 'Delhi', x: 320, y: 120, color: '#ef4444', suggestions: 140 },
-  { id: 'IN-BR', name: 'Bihar', x: 480, y: 190, color: '#10b981', suggestions: 300 },
-  { id: 'IN-RJ', name: 'Rajasthan', x: 230, y: 190, color: '#ec4899', suggestions: 270 }
+  { id: 'IN-UP', name: 'Uttar Pradesh', x: 390, y: 170, color: '#f59e0b', complaints: 842 },
+  { id: 'IN-MH', name: 'Maharashtra', x: 270, y: 290, color: '#8b5cf6', complaints: 450 },
+  { id: 'IN-KA', name: 'Karnataka', x: 280, y: 390, color: '#06b6d4', complaints: 430 },
+  { id: 'IN-DL', name: 'Delhi', x: 320, y: 120, color: '#ef4444', complaints: 140 },
+  { id: 'IN-BR', name: 'Bihar', x: 480, y: 190, color: '#10b981', complaints: 300 },
+  { id: 'IN-RJ', name: 'Rajasthan', x: 230, y: 190, color: '#ec4899', complaints: 270 }
 ];
 
 // Active districts per state
-const DISTRICTS_DATA: Record<string, { name: string; suggestions: number; score: number; categories: Record<string, number> }[]> = {
+const DISTRICTS_DATA: Record<string, { name: string; complaints: number; score: number; categories: Record<string, number> }[]> = {
   'Uttar Pradesh': [
-    { name: 'Varanasi', suggestions: 18, score: 72, categories: { PHC: 2, Road: 2, School: 1, 'Water Supply': 1, 'Street Lights': 1, Drainage: 1, "Women's Safety": 1, Agriculture: 1, Electricity: 1, Bridge: 1, Park: 1, Internet: 1, 'Waste Management': 1, 'Skill Center': 1, Environment: 1 } },
-    { name: 'Lucknow', suggestions: 124, score: 79, categories: { Road: 40, School: 30, Healthcare: 25, Water: 15, Drainage: 14 } },
-    { name: 'Prayagraj', suggestions: 82, score: 68, categories: { Road: 25, Water: 20, Electricity: 18, School: 19 } },
-    { name: 'Kanpur', suggestions: 98, score: 64, categories: { Infrastructure: 35, Safety: 25, School: 18, Water: 20 } },
-    { name: 'Noida', suggestions: 140, score: 85, categories: { Internet: 40, Safety: 30, Environment: 35, Park: 35 } }
+    { name: 'Varanasi', complaints: 18, score: 72, categories: { PHC: 2, Road: 2, School: 1, 'Water Supply': 1, 'Street Lights': 1, Drainage: 1, "Women's Safety": 1, Agriculture: 1, Electricity: 1, Bridge: 1, Park: 1, Internet: 1, 'Waste Management': 1, 'Skill Center': 1, Environment: 1 } },
+    { name: 'Lucknow', complaints: 124, score: 79, categories: { Road: 40, School: 30, Healthcare: 25, Water: 15, Drainage: 14 } },
+    { name: 'Prayagraj', complaints: 82, score: 68, categories: { Road: 25, Water: 20, Electricity: 18, School: 19 } },
+    { name: 'Kanpur', complaints: 98, score: 64, categories: { Infrastructure: 35, Safety: 25, School: 18, Water: 20 } },
+    { name: 'Noida', complaints: 140, score: 85, categories: { Internet: 40, Safety: 30, Environment: 35, Park: 35 } }
   ],
   'Maharashtra': [
-    { name: 'Mumbai', suggestions: 210, score: 81, categories: { Drainage: 60, Road: 50, Safety: 45, Internet: 55 } },
-    { name: 'Pune', suggestions: 150, score: 78, categories: { School: 40, Road: 35, Environment: 45, Water: 30 } },
-    { name: 'Nagpur', suggestions: 90, score: 69, categories: { Electricity: 30, PHC: 25, Agriculture: 20, Road: 15 } }
+    { name: 'Mumbai', complaints: 210, score: 81, categories: { Drainage: 60, Road: 50, Safety: 45, Internet: 55 } },
+    { name: 'Pune', complaints: 150, score: 78, categories: { School: 40, Road: 35, Environment: 45, Water: 30 } },
+    { name: 'Nagpur', complaints: 90, score: 69, categories: { Electricity: 30, PHC: 25, Agriculture: 20, Road: 15 } }
   ],
   'Karnataka': [
-    { name: 'Bengaluru', suggestions: 280, score: 83, categories: { Road: 90, Water: 70, Drainage: 60, Environment: 60 } },
-    { name: 'Mysuru', suggestions: 90, score: 74, categories: { Tourism: 30, School: 25, Road: 20, Water: 15 } },
-    { name: 'Hubli', suggestions: 60, score: 65, categories: { Electricity: 20, Road: 18, School: 12, PHC: 10 } }
+    { name: 'Bengaluru', complaints: 280, score: 83, categories: { Road: 90, Water: 70, Drainage: 60, Environment: 60 } },
+    { name: 'Mysuru', complaints: 90, score: 74, categories: { Tourism: 30, School: 25, Road: 20, Water: 15 } },
+    { name: 'Hubli', complaints: 60, score: 65, categories: { Electricity: 20, Road: 18, School: 12, PHC: 10 } }
   ],
   'Delhi': [
-    { name: 'Central Delhi', suggestions: 140, score: 82, categories: { Safety: 45, Environment: 35, School: 30, Park: 30 } }
+    { name: 'Central Delhi', complaints: 140, score: 82, categories: { Safety: 45, Environment: 35, School: 30, Park: 30 } }
   ],
   'Bihar': [
-    { name: 'Patna', suggestions: 180, score: 61, categories: { Road: 60, PHC: 45, School: 40, Water: 35 } },
-    { name: 'Gaya', suggestions: 70, score: 58, categories: { Tourism: 20, Water: 25, Road: 15, School: 10 } },
-    { name: 'Bhagalpur', suggestions: 50, score: 54, categories: { Electricity: 18, PHC: 15, Agriculture: 12, School: 5 } }
+    { name: 'Patna', complaints: 180, score: 61, categories: { Road: 60, PHC: 45, School: 40, Water: 35 } },
+    { name: 'Gaya', complaints: 70, score: 58, categories: { Tourism: 20, Water: 25, Road: 15, School: 10 } },
+    { name: 'Bhagalpur', complaints: 50, score: 54, categories: { Electricity: 18, PHC: 15, Agriculture: 12, School: 5 } }
   ],
   'Rajasthan': [
-    { name: 'Jaipur', suggestions: 130, score: 76, categories: { Water: 40, Tourism: 30, Road: 30, School: 30 } },
-    { name: 'Jodhpur', suggestions: 80, score: 70, categories: { Water: 35, Road: 20, Electricity: 15, PHC: 10 } },
-    { name: 'Udaipur', suggestions: 60, score: 72, categories: { Environment: 20, Water: 15, Road: 15, Tourism: 10 } }
+    { name: 'Jaipur', complaints: 130, score: 76, categories: { Water: 40, Tourism: 30, Road: 30, School: 30 } },
+    { name: 'Jodhpur', complaints: 80, score: 70, categories: { Water: 35, Road: 20, Electricity: 15, PHC: 10 } },
+    { name: 'Udaipur', complaints: 60, score: 72, categories: { Environment: 20, Water: 15, Road: 15, Tourism: 10 } }
   ]
 };
 
@@ -123,14 +123,14 @@ export default function ConstituencyMapPage() {
   const [mapMode, setMapMode] = useState<'india' | 'constituency'>('india');
   const [villages, setVillages] = useState<VillageNode[]>([]);
   const [infraGaps, setInfraGaps] = useState<InfraGap[]>([]);
-  const [dbSuggestions, setDbSuggestions] = useState<PriorityItem[]>([]);
+  const [dbComplaints, setDbComplaints] = useState<PriorityItem[]>([]);
   const [selectedVillage, setSelectedVillage] = useState<VillageNode | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeLayer, setActiveLayer] = useState('all');
 
   // National Explorer States
   const [selectedState, setSelectedState] = useState<string | null>(null);
-  const [selectedDistrict, setSelectedDistrict] = useState<{ name: string; suggestions: number; score: number; categories: Record<string, number> } | null>(null);
+  const [selectedDistrict, setSelectedDistrict] = useState<{ name: string; complaints: number; score: number; categories: Record<string, number> } | null>(null);
   const [hoveredStateNode, setHoveredStateNode] = useState<typeof STATE_MAP_NODES[0] | null>(null);
 
   useEffect(() => {
@@ -138,7 +138,7 @@ export default function ConstituencyMapPage() {
       fetch(`${API}/api/mp/priority-engine`).then(r => r.json()),
       fetch(`${API}/api/mp/infrastructure-gaps`).then(r => r.json()),
     ]).then(([priorities, gaps]) => {
-      setDbSuggestions(priorities);
+      setDbComplaints(priorities);
       // Build village nodes from priority data
       const villageMap: Record<string, VillageNode> = {};
       (priorities as PriorityItem[]).forEach(p => {
@@ -147,14 +147,14 @@ export default function ConstituencyMapPage() {
             name: p.village,
             block: '',
             lat: 0, lng: 0,
-            suggestions: 0,
+            complaints: 0,
             urgencyLevel: 'low',
             categories: {},
             totalBeneficiaries: 0,
             topSuggestion: '',
           };
         }
-        villageMap[p.village].suggestions += 1;
+        villageMap[p.village].complaints += 1;
         villageMap[p.village].categories[p.category] = (villageMap[p.village].categories[p.category] || 0) + 1;
         if (p.urgency === 'critical' || (p.urgency === 'high' && villageMap[p.village].urgencyLevel !== 'critical')) {
           villageMap[p.village].urgencyLevel = p.urgency;
@@ -199,7 +199,7 @@ export default function ConstituencyMapPage() {
     { id: 'Environment', label: 'Environment' },
   ];
 
-  const totalIndiaSuggestions = STATE_MAP_NODES.reduce((sum, s) => sum + s.suggestions, 0);
+  const totalIndiaComplaints = STATE_MAP_NODES.reduce((sum, s) => sum + s.complaints, 0);
 
   return (
     <div className="space-y-6 max-w-[1400px] mx-auto font-sans">
@@ -319,7 +319,7 @@ export default function ConstituencyMapPage() {
                             fontSize="11" fontWeight="900" textAnchor="middle"
                             className="pointer-events-none transition-all duration-300"
                           >
-                            {state.suggestions}
+                            {state.complaints}
                           </text>
                           
                           {/* State Label */}
@@ -359,7 +359,7 @@ export default function ConstituencyMapPage() {
                           <MapPin className={`w-3.5 h-3.5 ${selectedDistrict?.name === dist.name ? 'text-amber-400' : 'text-slate-600'}`} />
                         </div>
                         <div>
-                          <p className="text-xl font-black text-white">{dist.suggestions}</p>
+                          <p className="text-xl font-black text-white">{dist.complaints}</p>
                           <div className="flex justify-between items-center mt-1">
                             <span className="text-[8px] text-slate-500 uppercase font-black">Complaints</span>
                             <span className="text-[9px] font-black text-amber-500/80">Index: {dist.score}</span>
@@ -390,12 +390,12 @@ export default function ConstituencyMapPage() {
                   <div className="space-y-1">
                     <p className="text-[10px] font-extrabold text-amber-400 uppercase">{hoveredStateNode.name}</p>
                     <div className="flex justify-between text-[9px] text-slate-400 font-semibold">
-                      <span>Total Suggestions:</span>
-                      <span className="text-white">{hoveredStateNode.suggestions}</span>
+                      <span>Total Complaints:</span>
+                      <span className="text-white">{hoveredStateNode.complaints}</span>
                     </div>
                     <div className="flex justify-between text-[9px] text-slate-400 font-semibold">
                       <span>National Contribution:</span>
-                      <span className="text-white">{((hoveredStateNode.suggestions / totalIndiaSuggestions) * 100).toFixed(0)}%</span>
+                      <span className="text-white">{((hoveredStateNode.complaints / totalIndiaComplaints) * 100).toFixed(0)}%</span>
                     </div>
                   </div>
                 ) : (
@@ -429,7 +429,7 @@ export default function ConstituencyMapPage() {
                   {/* High level stats */}
                   <div className="grid grid-cols-2 gap-3">
                     <div className="bg-slate-900/60 p-2.5 rounded-xl border border-slate-850 text-center">
-                      <p className="text-lg font-black text-amber-400">{selectedDistrict.suggestions}</p>
+                      <p className="text-lg font-black text-amber-400">{selectedDistrict.complaints}</p>
                       <p className="text-[8px] text-slate-500 uppercase tracking-widest font-black mt-0.5">District Total</p>
                     </div>
                     <div className="bg-slate-900/60 p-2.5 rounded-xl border border-slate-850 text-center">
@@ -452,7 +452,7 @@ export default function ConstituencyMapPage() {
                       </div>
                       <div className="flex justify-between">
                         <span>National Contribution:</span>
-                        <span className="text-white">{((selectedDistrict.suggestions / totalIndiaSuggestions) * 100).toFixed(1)}%</span>
+                        <span className="text-white">{((selectedDistrict.complaints / totalIndiaComplaints) * 100).toFixed(1)}%</span>
                       </div>
                     </div>
                   </div>
@@ -481,10 +481,10 @@ export default function ConstituencyMapPage() {
                         <span>Varanasi Database Connection</span>
                       </p>
                       <p className="text-[10px] text-slate-400 leading-relaxed font-medium">
-                        Real suggestions: {dbSuggestions.filter(s => s.urgency === 'critical').length} critical, {dbSuggestions.filter(s => s.status === 'completed').length} completed.
+                        Real complaints: {dbComplaints.filter(s => s.urgency === 'critical').length} critical, {dbComplaints.filter(s => s.status === 'completed').length} completed.
                       </p>
-                      <Link href="/mp/suggestions" className="text-[9px] font-black text-amber-400 mt-2 block hover:underline">
-                        Launch suggestions manager →
+                      <Link href="/mp/complaints" className="text-[9px] font-black text-amber-400 mt-2 block hover:underline">
+                        Launch complaints manager →
                       </Link>
                     </div>
                   )}
@@ -555,9 +555,9 @@ export default function ConstituencyMapPage() {
               {villages.map((v) => {
                 const coords = VILLAGE_COORDS[v.name];
                 if (!coords) return null;
-                const radius = Math.max(20, Math.min(40, v.suggestions * 8));
+                const radius = Math.max(20, Math.min(40, v.complaints * 8));
                 const color = urgencyColors[v.urgencyLevel] || urgencyColors.low;
-                const filteredCount = activeLayer === 'all' ? v.suggestions : (v.categories[activeLayer] || 0);
+                const filteredCount = activeLayer === 'all' ? v.complaints : (v.categories[activeLayer] || 0);
                 if (activeLayer !== 'all' && filteredCount === 0) return null;
 
                 return (
@@ -572,7 +572,7 @@ export default function ConstituencyMapPage() {
                     <circle cx={coords.x} cy={coords.y} r={radius * 0.6} fill={color} opacity="0.4" />
                     {/* Count */}
                     <text x={coords.x} y={coords.y + 4} textAnchor="middle" fill="white" fontSize="12" fontWeight="800">
-                      {activeLayer === 'all' ? v.suggestions : filteredCount}
+                      {activeLayer === 'all' ? v.complaints : filteredCount}
                     </text>
                     {/* Label */}
                     <text x={coords.x} y={coords.y + radius + 16} textAnchor="middle" fill="#94a3b8" fontSize="11" fontWeight="600">
@@ -638,8 +638,8 @@ export default function ConstituencyMapPage() {
                       <span className="text-white">{selectedVillage.totalBeneficiaries.toLocaleString()}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>Active Suggestions:</span>
-                      <span className="text-amber-400 font-bold">{selectedVillage.suggestions}</span>
+                      <span>Active Complaints:</span>
+                      <span className="text-amber-400 font-bold">{selectedVillage.complaints}</span>
                     </div>
                     <div className="flex justify-between">
                       <span>Max Urgency:</span>
@@ -718,8 +718,8 @@ export default function ConstituencyMapPage() {
                   <p className="text-[8px] text-slate-500 uppercase font-bold mt-0.5">Villages</p>
                 </div>
                 <div>
-                  <p className="text-lg font-black text-amber-450">{villages.reduce((s, v) => s + v.suggestions, 0)}</p>
-                  <p className="text-[8px] text-slate-500 uppercase font-bold mt-0.5">Suggestions</p>
+                  <p className="text-lg font-black text-amber-450">{villages.reduce((s, v) => s + v.complaints, 0)}</p>
+                  <p className="text-[8px] text-slate-500 uppercase font-bold mt-0.5">Complaints</p>
                 </div>
               </div>
             </div>
