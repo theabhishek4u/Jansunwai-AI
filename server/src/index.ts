@@ -16,7 +16,10 @@ const PORT = process.env.PORT || 5000;
 
 // Enable CORS and parsing of JSON/URL-encoded bodies
 app.use(cors({
-  origin: process.env.CLIENT_URL || '*',
+  origin: function(origin, callback) {
+    if (!origin) return callback(null, true);
+    return callback(null, origin);
+  },
   credentials: true
 }));
 app.use(express.json());

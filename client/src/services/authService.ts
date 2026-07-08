@@ -270,17 +270,35 @@ export const authService = {
   },
 
   getCurrentUser: async () => {
-    const local = getLocalDemoSession();
-    if (local) return local.user;
-    const { data: { user } } = await supabase.auth.getUser();
-    return user;
+    try {
+      const local = getLocalDemoSession();
+      if (local) return local.user;
+      const { data, error } = await supabase.auth.getUser();
+      if (error) {
+        console.warn('Supabase auth getUser error:', error.message);
+        return null;
+      }
+      return data?.user || null;
+    } catch (err) {
+      console.warn('Unhandled Supabase getUser error:', err);
+      return null;
+    }
   },
 
   getSession: async () => {
-    const local = getLocalDemoSession();
-    if (local) return local;
-    const { data: { session } } = await supabase.auth.getSession();
-    return session;
+    try {
+      const local = getLocalDemoSession();
+      if (local) return local;
+      const { data, error } = await supabase.auth.getSession();
+      if (error) {
+        console.warn('Supabase auth getSession error:', error.message);
+        return null;
+      }
+      return data?.session || null;
+    } catch (err) {
+      console.warn('Unhandled Supabase getSession error:', err);
+      return null;
+    }
   },
 
   onAuthStateChange: (callback: (event: string, session: Session | null) => void) => {
