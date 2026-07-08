@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import Link from "next/link";
 import {
+  Search,
   Bot,
   ArrowRight,
   Sparkles,
@@ -32,43 +33,43 @@ interface TicketState {
 
 const mockTicketCycle: TicketState[] = [
   {
-    id: "JM-2026-948",
-    status: "SUBMITTED",
+    id: "JS-2026-948",
+    status: "LOGGED",
     statusColor: "#3B82F6",
     citizen: "Rahul Sharma (Gomti Nagar)",
     desc: "Gomti Nagar main crossing ke pass drinking water pipeline leak ho gayi hai, subah se paani beh raha hai.",
-    category: "Awaiting AI Categorization...",
+    category: "Awaiting AI...",
     assigned: "Pending...",
     step: 1
   },
   {
-    id: "JM-2026-948",
-    status: "AI ANALYZING...",
+    id: "JS-2026-948",
+    status: "AI PROCESSING...",
     statusColor: "#7C3AED",
     citizen: "Rahul Sharma (Gomti Nagar)",
     desc: "Gomti Nagar main crossing ke pass drinking water pipeline leak ho gayi hai, subah se paani beh raha hai.",
-    category: "Water Supply & Sewage (CRITICAL)",
-    assigned: "Matching closest officer...",
+    category: "Urban Water Supply",
+    assigned: "Matching department...",
     step: 2
   },
   {
-    id: "JM-2026-948",
-    status: "ASSIGNED & DISPATCHED",
+    id: "JS-2026-948",
+    status: "AI TRIAGE DONE",
     statusColor: "#F59E0B",
     citizen: "Rahul Sharma (Gomti Nagar)",
     desc: "Gomti Nagar main crossing ke pass drinking water pipeline leak ho gayi hai, subah se paani beh raha hai.",
-    category: "Water Supply & Sewage (CRITICAL)",
-    assigned: "Lucknow Jal Nigam (Er. Alok Srivastava)",
+    category: "Urban Water Supply",
+    assigned: "Lucknow Jal Nigam",
     step: 3
   },
   {
-    id: "JM-2026-948",
-    status: "RESOLVED",
+    id: "JS-2026-948",
+    status: "SMART ROUTED",
     statusColor: "#10B981",
     citizen: "Rahul Sharma (Gomti Nagar)",
     desc: "Gomti Nagar main crossing ke pass drinking water pipeline leak ho gayi hai, subah se paani beh raha hai.",
-    category: "Water Supply & Sewage (CRITICAL)",
-    assigned: "Lucknow Jal Nigam (Er. Alok Srivastava)",
+    category: "Urban Water Supply",
+    assigned: "Lucknow Jal Nigam",
     step: 4
   }
 ];
@@ -143,9 +144,9 @@ export function Hero() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.1 }}
             >
-              <span className="block">Fixing Citizen Grievances</span>
+              <span className="block">Empowering Citizens</span>
               <span className="block gradient-text mt-2 pb-1.5">
-                with Next-Gen AI Routing
+                with Fast & Smart Resolution
               </span>
             </motion.h1>
 
@@ -156,7 +157,7 @@ export function Hero() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.2 }}
             >
-              Resolve municipal issues in seconds. JanMitra parses complaints in Hindi or Hinglish, detects severity levels, and smart-routes to nodal officers automatically.
+              Your civic issues matter. Report local problems easily in any language, and our intelligent platform ensures they reach the right department instantly for swift resolution.
             </motion.p>
 
             {/* CTA Buttons */}
@@ -176,14 +177,14 @@ export function Hero() {
                   <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
-              <Link href="/officer">
+              <Link href="/dashboard">
                 <Button
                   size="lg"
                   variant="outline"
                   className="h-13 px-8 text-base font-semibold border-2 hover:bg-primary/5 rounded-xl transition-all"
                 >
-                  <Bot className="w-5 h-5 mr-2 text-ai-purple" />
-                  Officer Dashboard
+                  <Search className="w-5 h-5 mr-2 text-ai-purple" />
+                  Track Your Complaint
                 </Button>
               </Link>
             </motion.div>
@@ -231,7 +232,7 @@ export function Hero() {
                     <Activity className="w-4 h-4" />
                   </div>
                   <div>
-                    <h4 className="text-xs font-bold uppercase tracking-wider">JanMitra Live Router</h4>
+                    <h4 className="text-xs font-bold uppercase tracking-wider">Jansunwai AI Assistant</h4>
                     <p className="text-[10px] text-muted-foreground font-mono">Real-Time Grievance Feed</p>
                   </div>
                 </div>
@@ -280,7 +281,7 @@ export function Hero() {
                 <div className="grid grid-cols-2 gap-3">
                   <div className="bg-muted/30 border border-border/30 rounded-xl p-3">
                     <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 flex items-center gap-1">
-                      <Brain className="w-3.5 h-3.5 text-ai-purple" /> AI Category Match
+                      <Brain className="w-3.5 h-3.5 text-ai-purple" /> AI Issue Detection
                     </div>
                     <AnimatePresence mode="wait">
                       <motion.div
@@ -298,7 +299,7 @@ export function Hero() {
 
                   <div className="bg-muted/30 border border-border/30 rounded-xl p-3">
                     <div className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1 flex items-center gap-1">
-                      <Building2 className="w-3.5 h-3.5 text-warning-amber" /> Smart Routing
+                      <Building2 className="w-3.5 h-3.5 text-warning-amber" /> Instant Delegation
                     </div>
                     <AnimatePresence mode="wait">
                       <motion.div
@@ -367,8 +368,8 @@ export function Hero() {
                 <TrendingUp className="w-5 h-5" />
               </div>
               <div>
-                <div className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Resolution Rate</div>
-                <div className="text-sm font-bold text-foreground">94.8% (Fast Path)</div>
+                <div className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">AI Confidence Score</div>
+                <div className="text-sm font-bold text-foreground">98.5% Match</div>
               </div>
             </motion.div>
 
@@ -382,8 +383,8 @@ export function Hero() {
                 <Bell className="w-5 h-5" />
               </div>
               <div>
-                <div className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Auto Escalation</div>
-                <div className="text-sm font-bold text-foreground">Active (District)</div>
+                <div className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">Smart Priority</div>
+                <div className="text-sm font-bold text-foreground">CRITICAL (Escalated)</div>
               </div>
             </motion.div>
           </div>

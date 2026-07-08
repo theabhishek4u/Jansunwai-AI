@@ -16,66 +16,82 @@ import {
   TrendingUp,
   Users,
   Building2,
+  Activity,
 } from "lucide-react";
 
 const features = [
   {
-    icon: Brain,
-    title: "AI Classification Engine",
-    description:
-      "Automatically understands complaints in Hindi, English, or Urdu. Detects category, priority, and urgency in milliseconds.",
-    color: "#7C3AED",
-    gradient: "from-purple-500/20 to-purple-600/5",
-  },
-  {
-    icon: Route,
-    title: "Smart Department Routing",
-    description:
-      "AI routes complaints to the correct department — Nagar Nigam, Jal Nigam, PWD, or others — with 94% accuracy.",
-    color: "#1D4ED8",
-    gradient: "from-blue-500/20 to-blue-600/5",
+    icon: Mic,
+    title: "Citizen Complaint AI (Voice/Text)",
+    description: "Citizens can report issues effortlessly using voice notes or text. AI converts unstructured speech into formal complaints instantly.",
+    color: "#EC4899",
   },
   {
     icon: Languages,
     title: "Multilingual Support",
-    description:
-      "Submit in Hindi, Hinglish, Urdu, or English. Get updates in your preferred language. Voice input supported.",
+    description: "Submit in Hindi, Hinglish, Urdu, or English. Get updates in your preferred language. Voice input supported.",
     color: "#10B981",
-    gradient: "from-emerald-500/20 to-emerald-600/5",
+  },
+  {
+    icon: Brain,
+    title: "AI Classification Engine",
+    description: "Automatically understands complaints in Hindi, English, or Urdu. Detects category, priority, and urgency in milliseconds.",
+    color: "#7C3AED",
+  },
+  {
+    icon: Sparkles,
+    title: "AI Semantic Deduplication",
+    description: "AI scans historical records to group similar local complaints into unified, high-impact petitions to prevent duplicate workflows.",
+    color: "#F43F5E",
+  },
+  {
+    icon: Route,
+    title: "Smart Department Routing",
+    description: "AI routes complaints to the correct department — Nagar Nigam, Jal Nigam, PWD, or others — with 94% accuracy.",
+    color: "#1D4ED8",
+  },
+  {
+    icon: Users,
+    title: "MP Dashboard & Priority Review",
+    description: "A centralized command center for MPs to view, prioritize, and instantly allocate budgets for verified issues across their constituency.",
+    color: "#3B82F6",
+  },
+  {
+    icon: Building2,
+    title: "Department Execution Portal",
+    description: "Dedicated interfaces for PWD and other departments to receive routed tasks, update statuses, and submit proof of work.",
+    color: "#14B8A6",
   },
   {
     icon: MapPin,
     title: "Live Complaint Tracking",
-    description:
-      "Amazon/Swiggy-style tracking timeline. Know exactly where your complaint stands — from submission to resolution.",
+    description: "Amazon/Swiggy-style tracking timeline. Know exactly where your complaint stands — from submission to resolution.",
     color: "#F59E0B",
-    gradient: "from-amber-500/20 to-amber-600/5",
   },
   {
     icon: BellRing,
     title: "Autonomous Follow-Ups",
-    description:
-      "AI agent automatically reminds departments, escalates overdue complaints, and keeps citizens updated.",
+    description: "AI agent automatically reminds departments, escalates overdue complaints, and keeps citizens updated.",
     color: "#EF4444",
-    gradient: "from-red-500/20 to-red-600/5",
+  },
+  {
+    icon: Clock,
+    title: "SLA-Driven Escalation Engine",
+    description: "If a department misses their deadline, the system automatically escalates the issue to higher authorities for immediate intervention.",
+    color: "#F97316",
   },
   {
     icon: BarChart3,
     title: "Predictive Analytics",
-    description:
-      "Heatmaps, trend analysis, and predictive governance. Know where problems will arise before they happen.",
+    description: "Heatmaps, trend analysis, and predictive governance. Know where problems will arise before they happen.",
     color: "#06B6D4",
-    gradient: "from-cyan-500/20 to-cyan-600/5",
   },
-];
-
-const extraFeatures = [
-  { icon: Mic, label: "Citizen Complaint AI (Voice/Text)" },
-  { icon: Users, label: "MP Dashboard & Priority Review" },
-  { icon: Building2, label: "Department Execution Portal" },
-  { icon: BarChart3, label: "Admin Live Analytics & Monitoring" },
-  { icon: Sparkles, label: "AI Smart Routing & Summaries" },
-  { icon: Clock, label: "Autonomous Escalation Engine" },
+  {
+    icon: Activity,
+    title: "Admin Live Analytics & Monitoring",
+    description: "Real-time geographical heatmaps and performance metrics allowing super admins to monitor resolution rates globally.",
+    color: "#8B5CF6",
+  },
 ];
 
 export function Features() {
@@ -112,14 +128,14 @@ export function Features() {
           {features.map((feature, i) => (
             <motion.div
               key={feature.title}
-              className="glass-card premium-glow-border rounded-2xl p-6 group cursor-default backdrop-blur-md"
+              className="bg-card/40 border border-border/40 rounded-2xl p-6 group cursor-default backdrop-blur-md shadow-xl hover:bg-card/60 hover:border-primary/30 transition-colors duration-300 relative overflow-hidden"
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: i * 0.08 }}
               whileHover={{ 
                 y: -6,
-                boxShadow: "0 12px 24px -4px rgba(29, 78, 216, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.6)"
+                boxShadow: "0 20px 40px -10px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.1)"
               }}
             >
               {/* Icon container */}
@@ -145,26 +161,6 @@ export function Features() {
             </motion.div>
           ))}
         </div>
-
-        {/* Extra features strip */}
-        <motion.div
-          className="mt-16 flex flex-wrap items-center justify-center gap-3.5"
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-        >
-          {extraFeatures.map((f) => (
-            <motion.span
-              key={f.label}
-              className="inline-flex items-center gap-2 px-4.5 py-2.5 rounded-full bg-muted/40 border border-border/40 text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-muted/80 hover:border-border/80 transition-all cursor-default"
-              whileHover={{ scale: 1.03 }}
-            >
-              <f.icon className="w-4 h-4 text-primary/85" />
-              {f.label}
-            </motion.span>
-          ))}
-        </motion.div>
       </div>
     </section>
   );
