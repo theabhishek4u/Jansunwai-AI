@@ -135,19 +135,6 @@ export function Hero() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-center">
           {/* Left Column: Headlines & CTAs */}
           <div className="lg:col-span-7 space-y-8 text-center lg:text-left">
-            {/* Badge */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="inline-block"
-            >
-              <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/8 border border-primary/15 text-sm font-semibold text-primary">
-                <Sparkles className="w-4 h-4 animate-spin-slow" />
-                AI-Powered Smart Governance
-                <ChevronRight className="w-3.5 h-3.5" />
-              </span>
-            </motion.div>
 
             {/* Headline */}
             <motion.h1

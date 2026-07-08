@@ -22,6 +22,7 @@ import {
   Shield,
   ChevronRight
 } from 'lucide-react';
+import { FloatingCopilot } from '@/components/mp/FloatingCopilot';
 
 export default function MpLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -57,14 +58,13 @@ export default function MpLayout({ children }: { children: React.ReactNode }) {
 
   const sidebarLinks = [
     { href: '/mp', label: 'Dashboard', icon: <LayoutDashboard className="w-5 h-5" />, exact: true },
-    { href: '/mp/copilot', label: 'AI Copilot', icon: <Bot className="w-5 h-5" />, badge: 'AI' },
     { href: '/mp/complaints', label: 'Complaints', icon: <ListTodo className="w-5 h-5" /> },
     { href: '/mp/map', label: 'Constituency Map', icon: <Map className="w-5 h-5" /> },
-    { href: '/mp/priority', label: 'Priority Engine', icon: <Trophy className="w-5 h-5" /> },
-    { href: '/mp/budget', label: 'Budget Planner', icon: <Wallet className="w-5 h-5" /> },
-    { href: '/mp/simulator', label: 'Dev Simulator', icon: <FlaskConical className="w-5 h-5" /> },
     { href: '/mp/analytics', label: 'Analytics', icon: <BarChart3 className="w-5 h-5" /> },
+    { href: '/mp/priority', label: 'Priority Engine', icon: <Trophy className="w-5 h-5" /> },
     { href: '/mp/demographics', label: 'Demographics', icon: <Users2 className="w-5 h-5" /> },
+    { href: '/mp/simulator', label: 'Dev Simulator', icon: <FlaskConical className="w-5 h-5" /> },
+    { href: '/mp/budget', label: 'Budget Tracker', icon: <Wallet className="w-5 h-5" /> },
     { href: '/mp/reports', label: 'Reports', icon: <FileText className="w-5 h-5" /> },
   ];
 
@@ -181,10 +181,12 @@ export default function MpLayout({ children }: { children: React.ReactNode }) {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 p-4 md:p-8 overflow-x-hidden">
+        <main className="flex-1 p-4 md:p-8 overflow-x-hidden relative">
           {children}
         </main>
       </div>
+
+      <FloatingCopilot />
 
       {/* Mobile Sidebar Overlay */}
       {mobileMenuOpen && (

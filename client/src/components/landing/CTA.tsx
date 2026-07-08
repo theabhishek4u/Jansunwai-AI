@@ -42,7 +42,7 @@ export function CTA() {
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
-            <Link href="/citizen">
+            <Link href="/auth/citizen">
               <Button
                 size="lg"
                 className="bg-white text-gov-blue-dark hover:bg-white/90 shadow-xl h-12 px-8 text-base font-semibold group"
@@ -52,11 +52,11 @@ export function CTA() {
                 <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>
-            <Link href="/admin">
+            <Link href="/auth/admin">
               <Button
                 size="lg"
                 variant="outline"
-                className="border-2 border-white/30 text-white hover:bg-white/10 h-12 px-8 text-base"
+                className="border-2 border-white/30 text-white hover:bg-white/10 h-12 px-8 text-base bg-transparent text-white"
               >
                 View Analytics
               </Button>

@@ -14,6 +14,8 @@ import {
   Image as ImageIcon,
   Clock,
   TrendingUp,
+  Users,
+  Building2,
 } from "lucide-react";
 
 const features = [
@@ -68,12 +70,12 @@ const features = [
 ];
 
 const extraFeatures = [
-  { icon: Mic, label: "Multilingual Voice Input" },
-  { icon: ImageIcon, label: "Multimodal Photo Analysis" },
-  { icon: Shield, label: "AI-Powered Fraud Detection" },
+  { icon: Mic, label: "Citizen Complaint AI (Voice/Text)" },
+  { icon: Users, label: "MP Dashboard & Priority Review" },
+  { icon: Building2, label: "Department Execution Portal" },
+  { icon: BarChart3, label: "Admin Live Analytics & Monitoring" },
+  { icon: Sparkles, label: "AI Smart Routing & Summaries" },
   { icon: Clock, label: "Autonomous Escalation Engine" },
-  { icon: Sparkles, label: "Nodal Officer AI Summaries" },
-  { icon: TrendingUp, label: "District Analytics Heatmap" },
 ];
 
 export function Features() {

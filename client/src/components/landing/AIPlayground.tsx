@@ -201,7 +201,7 @@ export function AIPlayground() {
             Interactive Simulation
           </span>
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight mb-4">
-            Test the <span className="gradient-text">JanMitra AI Engine</span> Live
+            Test the <span className="gradient-text">Jansunwai AI Engine</span> Live
           </h2>
           <p className="text-muted-foreground text-lg">
             Experience our neural router. Type a complaint in Hindi, Hinglish, or English, or click a preset below to see AI analysis in under 5 seconds.
@@ -338,7 +338,7 @@ export function AIPlayground() {
                     <span className="w-2.5 h-2.5 rounded-full bg-green-500" />
                   </div>
                   <span className="text-xs font-mono text-muted-foreground ml-2">
-                    janmitra-ai://neural-router/diagnostics
+                    jansunwai-ai://neural-router/diagnostics
                   </span>
                 </div>
                 <div className="flex items-center gap-1">
