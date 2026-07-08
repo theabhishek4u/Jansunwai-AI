@@ -111,6 +111,25 @@ export default function DepartmentDashboard() {
     fetchTasks();
   }, [session]);
 
+  const handleUpdateStatus = async (taskId: string, newStatus: string) => {
+    try {
+      const res = await fetch(`${API}/api/suggestions/${taskId}/timeline`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          status: newStatus,
+          notes: `[Status Update] ${session?.officer.split(' (')[0]} updated state: ${newStatus}`
+        })
+      });
+      if (res.ok) {
+        // Optimistically update the local state
+        setTasks(prev => prev.map(t => t.id === taskId ? { ...t, status: newStatus } : t));
+      }
+    } catch (err) {
+      console.error('Failed to update status:', err);
+    }
+  };
+
   if (!session) return null;
 
   // Search filter
@@ -193,13 +212,25 @@ export default function DepartmentDashboard() {
             </span>
           </div>
 
-          <Link
-            href={`/department/tasks/${t.id}`}
-            className="flex items-center gap-1 text-[10px] font-black uppercase text-blue-400 hover:text-white transition-colors"
-          >
-            <span>Execute</span>
-            <ArrowRight className="w-3 h-3" />
-          </Link>
+          <div className="flex items-center gap-3">
+            <select
+              value={t.status}
+              onChange={(e) => handleUpdateStatus(t.id, e.target.value)}
+              className="bg-slate-950 border border-white/10 text-slate-300 text-[10px] rounded-lg px-2 py-1 outline-none focus:border-blue-500/50 cursor-pointer uppercase font-bold tracking-wider"
+              onClick={(e) => e.stopPropagation()} // prevent link navigation if placed over it
+            >
+              <option value="planned">Assigned</option>
+              <option value="under_review">In Progress</option>
+              <option value="completed">Completed</option>
+            </select>
+            <Link
+              href={`/department/tasks/${t.id}`}
+              className="flex items-center gap-1 text-[10px] font-black uppercase text-blue-400 hover:text-white transition-colors"
+            >
+              <span>Execute</span>
+              <ArrowRight className="w-3 h-3" />
+            </Link>
+          </div>
         </div>
       </div>
     </motion.div>

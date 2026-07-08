@@ -82,7 +82,10 @@ export const authService = {
 
       if (error) {
         // If Supabase fails due to rate limits or unconfirmed emails, and it's a demo account, use local fallback
-        if (email.endsWith('@jansunwai.gov.in') && password === 'password') {
+        const isDemoAdminMp = email.endsWith('@jansunwai.gov.in') && password === 'password';
+        const isDemoCitizen = email === 'theabhishekyt@gmail.com' && password === '112233';
+        
+        if (isDemoAdminMp || isDemoCitizen) {
           console.warn('Supabase Auth blocked by rate-limit/email-verification. Falling back to local demo session simulation.');
           
           let role: 'citizen' | 'mp' | 'admin' = 'citizen';
@@ -133,7 +136,7 @@ export const authService = {
         // Auto-register demo credentials if they do not exist
         if (
           (error.message.includes('Invalid login credentials') || error.message.includes('User not found')) &&
-          email.endsWith('@jansunwai.gov.in')
+          (email.endsWith('@jansunwai.gov.in') || email === 'theabhishekyt@gmail.com')
         ) {
           let role: 'citizen' | 'mp' | 'admin' = 'citizen';
           let additionalMeta: Partial<ProfileData> = {
