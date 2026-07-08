@@ -2,7 +2,6 @@
 
 import { motion } from "framer-motion";
 import { Star, Quote } from "lucide-react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 const testimonials = [
   {
@@ -68,18 +67,18 @@ export function Testimonials() {
               transition={{ duration: 0.5, delay: i * 0.1 }}
             >
               <div className="flex items-start gap-4">
-                <Quote className="w-8 h-8 text-primary/20 flex-shrink-0 mt-1" />
+                <Quote className="w-8 h-8 text-primary/20 shrink-0 mt-1" />
                 <div className="flex-1">
                   <p className="text-base leading-relaxed mb-4">
                     &ldquo;{t.textEn}&rdquo;
                   </p>
 
                   <div className="flex items-center gap-3">
-                    <Avatar className="w-10 h-10 border-2 border-primary/20">
-                      <AvatarFallback className="bg-primary/10 text-primary text-sm font-semibold">
+                    <div className="w-10 h-10 border-2 border-primary/20 rounded-full flex items-center justify-center overflow-hidden">
+                      <div className="w-full h-full bg-primary/10 text-primary text-sm font-semibold flex items-center justify-center">
                         {t.avatar}
-                      </AvatarFallback>
-                    </Avatar>
+                      </div>
+                    </div>
                     <div>
                       <div className="font-semibold text-sm">{t.name}</div>
                       <div className="text-xs text-muted-foreground">{t.location}</div>

@@ -171,7 +171,7 @@ export default function DepartmentComplaints() {
       {/* KPI mini row */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
         <div className="p-5 bg-slate-900/40 backdrop-blur-2xl border border-white/5 rounded-3xl flex items-center justify-between shadow-lg relative overflow-hidden group hover:bg-slate-900/60 transition-all">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/10 blur-[40px] rounded-full pointer-events-none group-hover:bg-blue-500/20 transition-all" />
+          <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/10 blur-2xl rounded-full pointer-events-none group-hover:bg-blue-500/20 transition-all" />
           <div className="relative z-10">
             <span className="text-[10px] font-black text-slate-450 uppercase tracking-widest">Total Problems</span>
             <span className="text-3xl font-black text-white block mt-1 tracking-tighter">{complaints.length}</span>
@@ -182,7 +182,7 @@ export default function DepartmentComplaints() {
         </div>
 
         <div className="p-5 bg-slate-900/40 backdrop-blur-2xl border border-white/5 rounded-3xl flex items-center justify-between shadow-lg relative overflow-hidden group hover:bg-slate-900/60 transition-all">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-rose-500/10 blur-[40px] rounded-full pointer-events-none group-hover:bg-rose-500/20 transition-all" />
+          <div className="absolute top-0 right-0 w-24 h-24 bg-rose-500/10 blur-2xl rounded-full pointer-events-none group-hover:bg-rose-500/20 transition-all" />
           <div className="relative z-10">
             <span className="text-[10px] font-black text-slate-450 uppercase tracking-widest">High Urgency Alerts</span>
             <span className="text-3xl font-black text-rose-450 block mt-1 tracking-tighter">{criticalCount}</span>
@@ -193,7 +193,7 @@ export default function DepartmentComplaints() {
         </div>
 
         <div className="p-5 bg-slate-900/40 backdrop-blur-2xl border border-white/5 rounded-3xl flex items-center justify-between shadow-lg relative overflow-hidden group hover:bg-slate-900/60 transition-all">
-          <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 blur-[40px] rounded-full pointer-events-none group-hover:bg-emerald-500/20 transition-all" />
+          <div className="absolute top-0 right-0 w-24 h-24 bg-emerald-500/10 blur-2xl rounded-full pointer-events-none group-hover:bg-emerald-500/20 transition-all" />
           <div className="relative z-10">
             <span className="text-[10px] font-black text-slate-450 uppercase tracking-widest">High Consensus</span>
             <span className="text-3xl font-black text-emerald-450 block mt-1 tracking-tighter">{highConsensus}</span>
@@ -237,7 +237,7 @@ export default function DepartmentComplaints() {
                     onClick={() => setUrgencyFilter(tab.id)}
                     className={`px-3 py-1.5 rounded-lg text-[10px] font-black tracking-widest uppercase transition-all cursor-pointer ${
                       urgencyFilter === tab.id 
-                        ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/25' 
+                        ? 'bg-linear-to-r from-blue-600 to-indigo-600 text-white shadow-md shadow-blue-500/25' 
                         : 'text-slate-400 hover:text-white hover:bg-slate-800/50'
                     }`}
                   >
@@ -274,7 +274,7 @@ export default function DepartmentComplaints() {
                     transition={{ duration: 0.25, delay: idx * 0.05 }}
                     className="bg-slate-900/40 backdrop-blur-2xl border border-white/5 hover:border-blue-500/30 rounded-3xl p-5 shadow-xl hover:shadow-[0_0_30px_rgba(59,130,246,0.1)] flex flex-col justify-between group relative overflow-hidden transition-all"
                   >
-                    <div className="absolute top-0 right-0 w-20 h-20 bg-blue-500/5 blur-[40px] rounded-full pointer-events-none group-hover:bg-blue-500/15 transition-all" />
+                    <div className="absolute top-0 right-0 w-20 h-20 bg-blue-500/5 blur-2xl rounded-full pointer-events-none group-hover:bg-blue-500/15 transition-all" />
                     
                     <div className="relative z-10 flex flex-col h-full">
                       <div className="flex items-center justify-between gap-2 border-b border-white/5 pb-3 mb-3">
@@ -339,7 +339,7 @@ export default function DepartmentComplaints() {
 
             <div className="relative z-10">
               <div className="flex items-center space-x-3 mb-6">
-                <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 p-px shadow-lg shadow-blue-500/30">
+                <div className="w-10 h-10 rounded-2xl bg-linear-to-tr from-blue-600 to-indigo-600 p-px shadow-lg shadow-blue-500/30">
                   <div className="w-full h-full bg-slate-900 rounded-[15px] flex items-center justify-center">
                     <Zap className="w-5 h-5 text-blue-400 fill-blue-400/20 animate-pulse" />
                   </div>
@@ -373,11 +373,11 @@ export default function DepartmentComplaints() {
                         className="group flex items-center bg-slate-950/50 hover:bg-slate-900 border border-white/5 hover:border-blue-500/30 p-3 rounded-2xl cursor-pointer transition-all relative overflow-hidden"
                       >
                         {idx === 0 && (
-                          <div className="absolute inset-0 bg-gradient-to-r from-blue-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                          <div className="absolute inset-0 bg-linear-to-r from-blue-600/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                         )}
                         
                         <div className={`w-8 h-8 rounded-xl flex items-center justify-center text-xs font-black shrink-0 ${
-                          idx === 0 ? 'bg-gradient-to-br from-amber-400 to-orange-500 text-white shadow-lg shadow-orange-500/30' :
+                          idx === 0 ? 'bg-linear-to-br from-amber-400 to-orange-500 text-white shadow-lg shadow-orange-500/30' :
                           idx === 1 ? 'bg-slate-300 text-slate-900 shadow-lg shadow-slate-400/20' :
                           idx === 2 ? 'bg-amber-700 text-white shadow-lg shadow-amber-800/20' :
                           'bg-slate-800 text-slate-400 group-hover:bg-blue-500/20 group-hover:text-blue-400'

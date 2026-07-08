@@ -168,7 +168,7 @@ export default function DashboardHome() {
 
       {/* Stats Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4">
-        <div className="bg-[#0f142c] border border-[#1e293b]/30 p-5 rounded-2xl shadow-sm hover:border-[#3b82f6]/30 transition-all duration-300">
+        <div className="bg-[#0f142c] border border-[#1e293b]/30 p-5 rounded-2xl shadow-sm hover:border-gov-blue-light/30 transition-all duration-300">
           <div className="flex items-center justify-between mb-3 text-slate-500">
             <span className="text-xs font-bold uppercase tracking-wider">Total Submitted</span>
             <FileText className="w-5 h-5 text-indigo-400" />
@@ -176,7 +176,7 @@ export default function DashboardHome() {
           <span className="text-2xl sm:text-3xl font-black text-white">{total}</span>
         </div>
 
-        <div className="bg-[#0f142c] border border-[#1e293b]/30 p-5 rounded-2xl shadow-sm hover:border-[#3b82f6]/30 transition-all duration-300">
+        <div className="bg-[#0f142c] border border-[#1e293b]/30 p-5 rounded-2xl shadow-sm hover:border-gov-blue-light/30 transition-all duration-300">
           <div className="flex items-center justify-between mb-3 text-slate-500">
             <span className="text-xs font-bold uppercase tracking-wider">Active Tasks</span>
             <Clock className="w-5 h-5 text-indigo-400" />
@@ -184,7 +184,7 @@ export default function DashboardHome() {
           <span className="text-2xl sm:text-3xl font-black text-white">{activeCount}</span>
         </div>
 
-        <div className="bg-[#0f142c] border border-[#1e293b]/30 p-5 rounded-2xl shadow-sm hover:border-[#3b82f6]/30 transition-all duration-300">
+        <div className="bg-[#0f142c] border border-[#1e293b]/30 p-5 rounded-2xl shadow-sm hover:border-gov-blue-light/30 transition-all duration-300">
           <div className="flex items-center justify-between mb-3 text-slate-500">
             <span className="text-xs font-bold uppercase tracking-wider">Under MP Review</span>
             <Clock className="w-5 h-5 text-amber-500" />
@@ -192,7 +192,7 @@ export default function DashboardHome() {
           <span className="text-2xl sm:text-3xl font-black text-white">{underReview}</span>
         </div>
 
-        <div className="bg-[#0f142c] border border-[#1e293b]/30 p-5 rounded-2xl shadow-sm hover:border-[#3b82f6]/30 transition-all duration-300">
+        <div className="bg-[#0f142c] border border-[#1e293b]/30 p-5 rounded-2xl shadow-sm hover:border-gov-blue-light/30 transition-all duration-300">
           <div className="flex items-center justify-between mb-3 text-slate-500">
             <span className="text-xs font-bold uppercase tracking-wider">Implemented</span>
             <CheckCircle className="w-5 h-5 text-emerald-400" />
@@ -200,7 +200,7 @@ export default function DashboardHome() {
           <span className="text-2xl sm:text-3xl font-black text-white">{completed}</span>
         </div>
 
-        <div className="bg-[#0f142c] border border-[#1e293b]/30 p-5 rounded-2xl shadow-sm hover:border-[#3b82f6]/30 transition-all duration-300 col-span-2 lg:col-span-1">
+        <div className="bg-[#0f142c] border border-[#1e293b]/30 p-5 rounded-2xl shadow-sm hover:border-gov-blue-light/30 transition-all duration-300 col-span-2 lg:col-span-1">
           <div className="flex items-center justify-between mb-3 text-slate-500">
             <span className="text-xs font-bold uppercase tracking-wider">Avg AI Score</span>
             <Sparkles className="w-5 h-5 text-indigo-400 animate-pulse" />
@@ -239,7 +239,7 @@ export default function DashboardHome() {
               <Link
                 key={sugg.id}
                 href={`/dashboard/suggestions/${sugg.id}`}
-                className="block bg-[#0a0d1e] hover:bg-[#0f142c] border border-[#1e293b]/20 hover:border-[#3b82f6]/30 p-5 rounded-2xl transition-all shadow-sm"
+                className="block bg-[#0a0d1e] hover:bg-[#0f142c] border border-[#1e293b]/20 hover:border-gov-blue-light/30 p-5 rounded-2xl transition-all shadow-sm"
               >
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="space-y-1">
@@ -311,7 +311,7 @@ export default function DashboardHome() {
               <Link
                 key={sugg.id}
                 href={`/dashboard/suggestions/${sugg.id}`}
-                className="block bg-[#0a0d1e] hover:bg-[#0f142c] border border-[#1e293b]/20 hover:border-[#3b82f6]/30 p-4 rounded-2xl transition-all shadow-sm"
+                className="block bg-[#0a0d1e] hover:bg-[#0f142c] border border-[#1e293b]/20 hover:border-gov-blue-light/30 p-4 rounded-2xl transition-all shadow-sm"
               >
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="space-y-1">

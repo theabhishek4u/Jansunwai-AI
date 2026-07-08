@@ -166,7 +166,7 @@ export default function BroadcastPage() {
       {/* Header */}
       <div className="relative z-10 border-b border-white/10 pb-6 flex items-end justify-between">
         <div>
-          <h1 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-white to-slate-400 flex items-center space-x-3">
+          <h1 className="text-3xl font-black text-transparent bg-clip-text bg-linear-to-r from-white to-slate-400 flex items-center space-x-3">
             <div className="w-12 h-12 rounded-2xl bg-cyan-500/20 flex items-center justify-center border border-cyan-500/30 shadow-[0_0_30px_rgba(6,182,212,0.3)]">
               <Bell className="w-6 h-6 text-cyan-400" />
             </div>
@@ -184,7 +184,7 @@ export default function BroadcastPage() {
         <div className="lg:col-span-5 space-y-6">
           <div className="bg-slate-900/60 backdrop-blur-3xl rounded-[32px] border border-white/10 p-8 shadow-2xl relative overflow-hidden">
             {/* Form Highlight */}
-            <div className="absolute top-0 right-0 w-full h-1 bg-gradient-to-r from-cyan-500 to-indigo-600" />
+            <div className="absolute top-0 right-0 w-full h-1 bg-linear-to-r from-cyan-500 to-indigo-600" />
             
             <h2 className="text-xs font-black text-white uppercase tracking-widest flex items-center space-x-2 mb-6">
               <Target className="w-4 h-4 text-cyan-400" />
@@ -292,7 +292,7 @@ export default function BroadcastPage() {
                     <span>{sending ? 'Pushing Broadcast...' : 'Push Broadcast Alert'}</span>
                   </div>
                   {/* Hover effect */}
-                  <div className="absolute inset-0 bg-gradient-to-r from-cyan-400 to-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                  <div className="absolute inset-0 bg-linear-to-r from-cyan-400 to-indigo-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
                 </button>
                 
                 <AnimatePresence>

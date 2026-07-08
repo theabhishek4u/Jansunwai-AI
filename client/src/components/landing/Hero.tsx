@@ -169,7 +169,7 @@ export function Hero() {
               <Link href="/citizen">
                 <Button
                   size="lg"
-                  className="bg-gradient-to-r from-gov-blue to-gov-blue-light text-white shadow-xl shadow-gov-blue/20 hover:shadow-gov-blue/40 transition-all duration-300 h-13 px-8 text-base font-semibold group rounded-xl"
+                  className="bg-linear-to-r from-gov-blue to-gov-blue-light text-white shadow-xl shadow-gov-blue/20 hover:shadow-gov-blue/40 transition-all duration-300 h-13 px-8 text-base font-semibold group rounded-xl"
                 >
                   <Shield className="w-5 h-5 mr-2" />
                   File a Complaint
@@ -213,7 +213,7 @@ export function Hero() {
           {/* Right Column: Premium Floating Live Mockup */}
           <div className="lg:col-span-5 relative w-full flex justify-center">
             {/* Holographic background glow */}
-            <div className="absolute inset-0 bg-gradient-to-tr from-ai-purple/10 to-gov-blue/10 rounded-3xl blur-2xl transform rotate-3" />
+            <div className="absolute inset-0 bg-linear-to-tr from-ai-purple/10 to-gov-blue/10 rounded-3xl blur-2xl transform rotate-3" />
             
             <motion.div
               className="relative w-full max-w-[420px] glass-premium rounded-2xl p-6 shadow-2xl shadow-gov-blue/10 border-border/60 backdrop-blur-xl hover:scale-[1.01] transition-transform duration-300 active:scale-95"
@@ -227,7 +227,7 @@ export function Hero() {
               {/* Header block */}
               <div className="flex items-center justify-between border-b border-border/50 pb-3.5 mb-4">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-gov-blue to-ai-purple flex items-center justify-center text-white">
+                  <div className="w-8 h-8 rounded-lg bg-linear-to-br from-gov-blue to-ai-purple flex items-center justify-center text-white">
                     <Activity className="w-4 h-4" />
                   </div>
                   <div>

@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/AuthContext';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard,
   Bot,
@@ -19,7 +20,7 @@ import {
   Bell,
   Menu,
   X,
-  Shield,
+  Landmark,
   ChevronRight
 } from 'lucide-react';
 import { FloatingCopilot } from '@/components/mp/FloatingCopilot';
@@ -48,7 +49,7 @@ export default function MpLayout({ children }: { children: React.ReactNode }) {
       <div className="min-h-screen bg-[#0a0e1a] flex items-center justify-center">
         <div className="flex flex-col items-center space-y-4">
           <div className="w-14 h-14 rounded-2xl bg-linear-to-br from-amber-500 to-amber-700 animate-pulse flex items-center justify-center">
-            <Shield className="w-7 h-7 text-white" />
+            <Landmark className="w-7 h-7 text-white" />
           </div>
           <p className="text-slate-400 text-sm font-semibold tracking-wide">Initializing MP Dashboard...</p>
         </div>
@@ -81,7 +82,7 @@ export default function MpLayout({ children }: { children: React.ReactNode }) {
         <div className="px-5 pt-6 pb-5 border-b border-slate-800/50">
           <Link href="/mp" className="flex items-center space-x-3">
             <div className="w-10 h-10 rounded-xl bg-linear-to-br from-amber-500 to-amber-700 flex items-center justify-center shadow-lg shadow-amber-500/20">
-              <Shield className="w-5 h-5 text-white" />
+              <Landmark className="w-5 h-5 text-white" />
             </div>
             <div>
               <span className="font-extrabold text-sm tracking-tight bg-clip-text text-transparent bg-linear-to-r from-amber-400 to-amber-200">Jansunwai AI</span>
@@ -182,7 +183,18 @@ export default function MpLayout({ children }: { children: React.ReactNode }) {
 
         {/* Page Content */}
         <main className="flex-1 p-4 md:p-8 overflow-x-hidden relative">
-          {children}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={pathname}
+              initial={{ opacity: 0, y: 10, filter: 'blur(4px)' }}
+              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+              exit={{ opacity: 0, y: -10, filter: 'blur(4px)' }}
+              transition={{ duration: 0.2, ease: "easeInOut" }}
+              className="h-full"
+            >
+              {children}
+            </motion.div>
+          </AnimatePresence>
         </main>
       </div>
 
@@ -196,7 +208,7 @@ export default function MpLayout({ children }: { children: React.ReactNode }) {
             <div className="flex items-center justify-between px-5 pt-5 pb-4">
               <div className="flex items-center space-x-2">
                 <div className="w-8 h-8 rounded-lg bg-linear-to-br from-amber-500 to-amber-700 flex items-center justify-center">
-                  <Shield className="w-4 h-4 text-white" />
+                  <Landmark className="w-4 h-4 text-white" />
                 </div>
                 <span className="text-sm font-bold text-amber-400">MP Dashboard</span>
               </div>

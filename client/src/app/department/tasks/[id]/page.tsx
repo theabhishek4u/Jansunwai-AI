@@ -291,7 +291,7 @@ export default function TaskDetailConsole() {
               <div className="absolute left-6 right-6 top-1/2 -translate-y-1/2 h-1 bg-slate-800 rounded-full z-0" />
               {/* Progress Line */}
               <div 
-                className="absolute left-6 top-1/2 -translate-y-1/2 h-1 bg-gradient-to-r from-blue-500 to-emerald-400 rounded-full z-0 transition-all duration-700 ease-in-out" 
+                className="absolute left-6 top-1/2 -translate-y-1/2 h-1 bg-linear-to-r from-blue-500 to-emerald-400 rounded-full z-0 transition-all duration-700 ease-in-out" 
                 style={{ width: `calc(${currentStepIndex === -1 ? 0 : (currentStepIndex / (TIMELINE_STEPS.length - 1)) * 100}% - 3rem)` }}
               />
 
@@ -391,7 +391,7 @@ export default function TaskDetailConsole() {
                     <motion.div initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }}>
                       <button
                         onClick={handleSubmitEvidence}
-                        className="w-full py-4 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-black uppercase tracking-widest text-xs flex items-center justify-center space-x-2 shadow-[0_0_30px_rgba(16,185,129,0.3)] transition-all"
+                        className="w-full py-4 rounded-2xl bg-linear-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-black uppercase tracking-widest text-xs flex items-center justify-center space-x-2 shadow-[0_0_30px_rgba(16,185,129,0.3)] transition-all"
                       >
                         <CheckCircle2 className="w-5 h-5" />
                         <span>Submit Evidence & Complete Task</span>
@@ -521,7 +521,7 @@ export default function TaskDetailConsole() {
 
           {/* AI Intelligence / Gemini Recommendation */}
           <div className="bg-slate-900/40 backdrop-blur-2xl border border-blue-500/20 shadow-[0_0_40px_rgba(59,130,246,0.1)] rounded-[32px] p-6 space-y-5 relative overflow-hidden group">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 blur-[40px] rounded-full pointer-events-none group-hover:bg-indigo-500/20 transition-all" />
+            <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 blur-2xl rounded-full pointer-events-none group-hover:bg-indigo-500/20 transition-all" />
             
             <div className="relative z-10">
               <h2 className="text-[10px] font-black text-white uppercase tracking-widest flex items-center space-x-2 border-b border-white/5 pb-4 mb-4">
@@ -565,7 +565,7 @@ export default function TaskDetailConsole() {
             {/* Chat list */}
             <div className="h-44 overflow-y-auto space-y-3 pr-2 scrollbar-thin scrollbar-thumb-slate-700 scrollbar-track-transparent">
               {chats.map((c, i) => (
-                <div key={i} className={`p-3 rounded-2xl max-w-[85%] shadow-md ${c.sender.includes('MP') || c.sender.includes('Dashboard') ? 'bg-slate-950/80 border border-white/5 text-slate-300 mr-auto rounded-tl-sm' : 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white ml-auto rounded-tr-sm'}`}>
+                <div key={i} className={`p-3 rounded-2xl max-w-[85%] shadow-md ${c.sender.includes('MP') || c.sender.includes('Dashboard') ? 'bg-slate-950/80 border border-white/5 text-slate-300 mr-auto rounded-tl-sm' : 'bg-linear-to-r from-blue-600 to-indigo-600 text-white ml-auto rounded-tr-sm'}`}>
                   <span className="block text-[8px] font-black uppercase tracking-widest opacity-60 mb-1">{c.sender} • {c.time}</span>
                   <p className="leading-relaxed text-[11px] font-medium">{c.text}</p>
                 </div>

@@ -192,7 +192,7 @@ export default function MpSuggestionDetailPage() {
           {/* Department Field Evidence Review - Only shows when task is marked completed by Dept */}
           {(isCompletedByDept || isClosed) && (
             <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="bg-[#111827] rounded-2xl p-6 border border-amber-500/30 shadow-[0_0_30px_rgba(245,158,11,0.05)] relative overflow-hidden">
-              <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full blur-[40px] pointer-events-none" />
+              <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full blur-2xl pointer-events-none" />
               
               <div className="relative z-10">
                 <h2 className="text-[11px] uppercase tracking-widest font-black text-amber-400 mb-5 flex items-center justify-between">
@@ -256,7 +256,7 @@ export default function MpSuggestionDetailPage() {
                   <button
                     disabled={submitting}
                     onClick={handleVerifyCompletedTask}
-                    className="w-full py-4 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-black uppercase tracking-widest text-xs flex items-center justify-center space-x-2 shadow-[0_0_20px_rgba(16,185,129,0.2)] transition-all"
+                    className="w-full py-4 rounded-xl bg-linear-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-black uppercase tracking-widest text-xs flex items-center justify-center space-x-2 shadow-[0_0_20px_rgba(16,185,129,0.2)] transition-all"
                   >
                     <CheckCircle2 className="w-4.5 h-4.5" />
                     <span>Verify Evidence & Officially Close Task</span>

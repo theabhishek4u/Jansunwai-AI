@@ -84,7 +84,7 @@ export function FloatingCopilot() {
   return (
     <>
       {/* Floating Button */}
-      <div className="fixed bottom-6 right-6 z-[100] group">
+      <div className="fixed bottom-6 right-6 z-100 group">
         {!isOpen && (
           <div className="absolute -inset-2 bg-blue-600 rounded-full opacity-40 blur-lg animate-pulse" />
         )}
@@ -112,7 +112,7 @@ export function FloatingCopilot() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 30, scale: 0.95 }}
             transition={{ duration: 0.2, type: 'spring', damping: 25, stiffness: 300 }}
-            className="fixed bottom-28 right-6 w-[800px] h-[80vh] max-h-[900px] max-w-[calc(100vw-3rem)] bg-[#0a0e1a] border border-[#1e293b]/80 rounded-2xl shadow-2xl shadow-blue-900/20 z-[90] flex flex-col overflow-hidden"
+            className="fixed bottom-28 right-6 w-[800px] h-[80vh] max-h-[900px] max-w-[calc(100vw-3rem)] bg-[#0a0e1a] border border-[#1e293b]/80 rounded-2xl shadow-2xl shadow-blue-900/20 z-90 flex flex-col overflow-hidden"
             style={{ fontFamily: "'Inter', sans-serif" }}
           >
             {/* Header */}

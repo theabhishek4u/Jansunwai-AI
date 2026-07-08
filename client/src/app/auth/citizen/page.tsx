@@ -82,8 +82,8 @@ function CitizenAuthForm() {
     }
   }, [user, router]);
 
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState('theabhishekyt@gmail.com');
+  const [password, setPassword] = useState('112233');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [phone, setPhone] = useState('');

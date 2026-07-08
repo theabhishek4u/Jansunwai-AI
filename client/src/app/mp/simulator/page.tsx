@@ -139,7 +139,7 @@ export default function SimulatorPage() {
     <div className="space-y-8 max-w-[1400px] mx-auto font-sans pb-10">
       
       {/* Header */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-slate-955 via-[#0c1222] to-slate-955 p-6 rounded-3xl border border-slate-800/80 shadow-2xl flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="relative overflow-hidden bg-linear-to-r from-slate-955 via-[#0c1222] to-slate-955 p-6 rounded-3xl border border-slate-800/80 shadow-2xl flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="absolute top-0 right-0 w-80 h-80 bg-cyan-500/5 rounded-full blur-[100px] pointer-events-none" />
         
         <div className="space-y-2">
@@ -209,7 +209,7 @@ export default function SimulatorPage() {
           <button
             onClick={simulate}
             disabled={loading || !projectA || !projectB}
-            className="flex items-center justify-center space-x-2 px-8 py-3.5 rounded-xl bg-gradient-to-r from-amber-600 to-amber-700 text-white text-sm font-black hover:shadow-lg hover:shadow-amber-500/25 transition-all disabled:opacity-50 shrink-0 border border-amber-500/50"
+            className="flex items-center justify-center space-x-2 px-8 py-3.5 rounded-xl bg-linear-to-r from-amber-600 to-amber-700 text-white text-sm font-black hover:shadow-lg hover:shadow-amber-500/25 transition-all disabled:opacity-50 shrink-0 border border-amber-500/50"
           >
             {loading ? <Loader2 className="w-4.5 h-4.5 animate-spin" /> : <Zap className="w-4.5 h-4.5" />}
             <span>{loading ? 'Simulating...' : 'Run Simulation'}</span>
@@ -225,7 +225,7 @@ export default function SimulatorPage() {
             {/* The Headers */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="bg-slate-900/60 rounded-3xl p-6 border-2 border-cyan-500/20 shadow-lg shadow-cyan-500/5 relative overflow-hidden">
-                <div className="absolute -right-10 -top-10 w-40 h-40 bg-cyan-500/10 rounded-full blur-[40px] pointer-events-none" />
+                <div className="absolute -right-10 -top-10 w-40 h-40 bg-cyan-500/10 rounded-full blur-2xl pointer-events-none" />
                 <div className="flex items-center space-x-3 mb-4">
                   <div className="w-8 h-8 rounded-xl bg-cyan-500/20 flex items-center justify-center border border-cyan-500/30">
                     <span className="text-xs font-black text-cyan-400">A</span>
@@ -239,7 +239,7 @@ export default function SimulatorPage() {
               </div>
 
               <div className="bg-slate-900/60 rounded-3xl p-6 border-2 border-fuchsia-500/20 shadow-lg shadow-fuchsia-500/5 relative overflow-hidden">
-                <div className="absolute -right-10 -top-10 w-40 h-40 bg-fuchsia-500/10 rounded-full blur-[40px] pointer-events-none" />
+                <div className="absolute -right-10 -top-10 w-40 h-40 bg-fuchsia-500/10 rounded-full blur-2xl pointer-events-none" />
                 <div className="flex items-center space-x-3 mb-4">
                   <div className="w-8 h-8 rounded-xl bg-fuchsia-500/20 flex items-center justify-center border border-fuchsia-500/30">
                     <span className="text-xs font-black text-fuchsia-400">B</span>
@@ -283,24 +283,24 @@ export default function SimulatorPage() {
                       <div className="grid grid-cols-2 gap-8 relative">
                         <div className="absolute left-1/2 top-0 bottom-0 w-px bg-slate-800/50 -translate-x-1/2" />
                         <div>
-                          <p className="text-lg font-black text-cyan-400 mb-2">{metric.format(valA)}</p>
+                          <p className="text-lg font-black text-cyan-400 mb-2">{metric.format(numA)}</p>
                           <div className="w-full h-2 bg-slate-950 rounded-full overflow-hidden border border-slate-800/50 flex justify-end">
                             <motion.div
                               initial={{ width: 0 }}
                               animate={{ width: `${(numA / total) * 100}%` }}
                               transition={{ duration: 0.8, delay: 0.1, type: 'spring' }}
-                              className="h-full bg-gradient-to-l from-cyan-400 to-cyan-600 rounded-full"
+                              className="h-full bg-linear-to-l from-cyan-400 to-cyan-600 rounded-full"
                             />
                           </div>
                         </div>
-                        <div>
-                          <p className="text-lg font-black text-fuchsia-400 mb-2">{metric.format(valB)}</p>
+                        <div className="pl-4">
+                          <p className="text-lg font-black text-indigo-400 mb-2">{metric.format(numB)}</p>
                           <div className="w-full h-2 bg-slate-950 rounded-full overflow-hidden border border-slate-800/50">
                             <motion.div
                               initial={{ width: 0 }}
                               animate={{ width: `${(numB / total) * 100}%` }}
                               transition={{ duration: 0.8, delay: 0.1, type: 'spring' }}
-                              className="h-full bg-gradient-to-r from-fuchsia-400 to-fuchsia-600 rounded-full"
+                              className="h-full bg-linear-to-r from-fuchsia-400 to-fuchsia-600 rounded-full"
                             />
                           </div>
                         </div>
@@ -343,7 +343,7 @@ export default function SimulatorPage() {
               initial={{ opacity: 0, scale: 0.98 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ delay: 0.6 }}
-              className="mt-8 relative overflow-hidden bg-gradient-to-br from-slate-900 to-[#0c1222] border border-amber-500/20 rounded-3xl p-1 shadow-2xl shadow-amber-500/5"
+              className="mt-8 relative overflow-hidden bg-linear-to-br from-slate-900 to-[#0c1222] border border-amber-500/20 rounded-3xl p-1 shadow-2xl shadow-amber-500/5"
             >
               <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/10 rounded-full blur-[80px] pointer-events-none" />
               <div className="bg-slate-950/80 backdrop-blur-xl rounded-[22px] p-8 border border-slate-800/50">
