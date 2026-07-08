@@ -358,7 +358,7 @@ export default function LandingPage() {
                 {activeModal === 'help' && (
                   <>
                     <p className="font-semibold text-foreground text-sm">How do I report a grievance?</p>
-                    <p>Simply click on "File a Complaint" from your dashboard, record a 15-second Hindi/English voice note or upload a photo of the issue. The AI will auto-detect your location and route the complaint instantly.</p>
+                    <p>Simply click on &quot;File a Complaint&quot; from your dashboard, record a 15-second Hindi/English voice note or upload a photo of the issue. The AI will auto-detect your location and route the complaint instantly.</p>
                     <p className="font-semibold text-foreground text-sm">How does the SLA escalation work?</p>
                     <p>Each category has a predetermined resolution time (e.g., 24 hours for water leaks, 72 hours for school construction). If a department officer breaches this timeframe, the AI automatically escalates the ticket to the Chief Engineer or District Magistrate.</p>
                     <p className="font-semibold text-foreground text-sm">Can I track my status in real-time?</p>
