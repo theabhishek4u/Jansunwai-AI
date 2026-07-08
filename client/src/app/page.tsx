@@ -16,7 +16,8 @@ import {
   Phone,
   Mail,
   Code,
-  X
+  X,
+  Menu
 } from 'lucide-react';
 
 import { Hero } from '@/components/landing/Hero';
@@ -33,30 +34,36 @@ import { SecurityBadges } from '@/components/landing/SecurityBadges';
 export default function LandingPage() {
   const { user } = useAuth();
   const [portalDropdownOpen, setPortalDropdownOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeModal, setActiveModal] = useState<'privacy' | 'terms' | 'help' | null>(null);
+
+  const loginPortals = [
+    { href: '/auth/citizen', icon: <User className="w-4 h-4" />, label: 'Citizen Login', desc: 'Submit grievances & track progress', color: 'text-gov-blue', bg: 'bg-gov-blue/10 border-gov-blue/15' },
+    { href: '/auth/mp', icon: <Building2 className="w-4 h-4" />, label: 'MP Login', desc: 'Constituency dashboard', color: 'text-ai-purple', bg: 'bg-ai-purple/10 border-ai-purple/15' },
+    { href: '/department/login', icon: <Wrench className="w-4 h-4" />, label: 'Department Login', desc: 'Task execution & evidence upload', color: 'text-trust-green', bg: 'bg-trust-green/10 border-trust-green/15' },
+    { href: '/auth/admin', icon: <Shield className="w-4 h-4" />, label: 'Admin Login', desc: 'Platform management', color: 'text-warning-amber', bg: 'bg-warning-amber/10 border-warning-amber/15' }
+  ];
 
   return (
     <div className="flex flex-col min-h-screen font-sans selection:bg-primary/30 selection:text-white">
       {/* ─── NAVIGATION ─── */}
-      <header className="sticky top-0 z-50 backdrop-blur-xl bg-background/85 border-b border-border/40">
+      <header className="sticky top-0 z-50 backdrop-blur-xl bg-background/90 border-b border-border/40">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-xl bg-linear-to-br from-gov-blue to-ai-purple flex items-center justify-center">
+            <div className="w-10 h-10 rounded-xl bg-linear-to-br from-gov-blue to-ai-purple flex items-center justify-center shrink-0">
               <Brain className="w-6 h-6 text-white" />
             </div>
             <div>
-              <span className="font-black text-xl tracking-tight text-foreground uppercase">JANSUNWAI AI</span>
-              <p className="text-[9px] text-muted-foreground uppercase tracking-widest font-bold">AI SMART GOVERNANCE</p>
+              <span className="font-black text-lg sm:text-xl tracking-tight text-foreground uppercase block leading-none">JANSUNWAI AI</span>
+              <p className="text-[8px] sm:text-[9px] text-muted-foreground uppercase tracking-widest font-bold mt-1">AI SMART GOVERNANCE</p>
             </div>
           </div>
 
-          <div className="flex items-center space-x-4">
-            <button className="w-10 h-10 rounded-full hover:bg-muted/60 flex items-center justify-center text-muted-foreground transition-colors">
-              <Sun className="w-5 h-5" />
-            </button>
+          {/* Desktop Navigation */}
+          <div className="hidden md:flex items-center space-x-4">
             <Link
               href="/auth/citizen"
-              className="px-6 py-2.5 rounded-full bg-linear-to-r from-gov-blue to-gov-blue-light hover:brightness-110 text-white text-xs font-bold transition-all shadow-[0_0_20px_rgba(37,99,235,0.4)] flex items-center space-x-2"
+              className="px-6 py-2.5 rounded-full bg-linear-to-r from-gov-blue to-gov-blue-light hover:brightness-110 text-white text-xs font-bold transition-all shadow-[0_0_20px_rgba(37,99,235,0.4)] flex items-center space-x-2 shrink-0"
             >
               <FileText className="w-4 h-4" />
               <span>FILE COMPLAINT</span>
@@ -65,7 +72,7 @@ export default function LandingPage() {
             {user ? (
                <Link
                  href={user.role === 'admin' ? '/admin' : user.role === 'mp' ? '/mp' : '/dashboard'}
-                 className="px-6 py-2.5 rounded-full border border-border hover:bg-muted/50 text-foreground text-xs font-bold transition-all flex items-center space-x-2"
+                 className="px-6 py-2.5 rounded-full border border-border hover:bg-muted/50 text-foreground text-xs font-bold transition-all flex items-center space-x-2 shrink-0"
                >
                  <User className="w-4 h-4" />
                  <span>MY DASHBOARD</span>
@@ -92,12 +99,7 @@ export default function LandingPage() {
                     >
                       <div className="absolute top-0 left-0 right-0 h-[2px] bg-linear-to-r from-gov-blue to-ai-purple" />
                       <div className="space-y-1 mt-1">
-                        {[
-                          { href: '/auth/citizen', icon: <User className="w-4 h-4" />, label: 'Citizen Login', desc: 'Submit grievances & track progress', color: 'text-gov-blue', bg: 'bg-gov-blue/10 border-gov-blue/15' },
-                          { href: '/auth/mp', icon: <Building2 className="w-4 h-4" />, label: 'Representative Login', desc: 'Constituency dashboard', color: 'text-ai-purple', bg: 'bg-ai-purple/10 border-ai-purple/15' },
-                          { href: '/department/login', icon: <Wrench className="w-4 h-4" />, label: 'Department Login', desc: 'Task execution & evidence upload', color: 'text-trust-green', bg: 'bg-trust-green/10 border-trust-green/15' },
-                          { href: '/auth/admin', icon: <Shield className="w-4 h-4" />, label: 'Admin Login', desc: 'Platform management', color: 'text-warning-amber', bg: 'bg-warning-amber/10 border-warning-amber/15' }
-                        ].map(portal => (
+                        {loginPortals.map(portal => (
                           <Link
                             key={portal.href}
                             href={portal.href}
@@ -119,7 +121,73 @@ export default function LandingPage() {
               </div>
             )}
           </div>
+
+          {/* Mobile Menu Toggle (3-dots) */}
+          <div className="md:hidden flex items-center">
+            <button 
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)} 
+              className="p-2 -mr-2 text-foreground hover:bg-muted/50 rounded-full transition-colors"
+            >
+              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            </button>
+          </div>
         </div>
+
+        {/* Mobile Menu Dropdown */}
+        <AnimatePresence>
+          {mobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="md:hidden bg-card/95 backdrop-blur-xl border-b border-border/50 overflow-hidden"
+            >
+              <div className="px-4 py-6 flex flex-col space-y-6">
+                <Link
+                  href="/auth/citizen"
+                  className="w-full py-3.5 rounded-2xl bg-linear-to-r from-gov-blue to-gov-blue-light text-white text-sm font-bold transition-all shadow-[0_0_15px_rgba(37,99,235,0.3)] flex items-center justify-center space-x-2"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <FileText className="w-4 h-4" />
+                  <span>FILE A COMPLAINT</span>
+                </Link>
+
+                {user ? (
+                  <Link
+                    href={user.role === 'admin' ? '/admin' : user.role === 'mp' ? '/mp' : '/dashboard'}
+                    className="w-full py-3.5 rounded-2xl border border-border bg-muted/20 text-foreground text-sm font-bold transition-all flex items-center justify-center space-x-2"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    <User className="w-4 h-4" />
+                    <span>MY DASHBOARD</span>
+                  </Link>
+                ) : (
+                  <div className="space-y-3">
+                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest pl-1">Login Portals</p>
+                    <div className="grid grid-cols-1 gap-2">
+                      {loginPortals.map(portal => (
+                        <Link
+                          key={portal.href}
+                          href={portal.href}
+                          onClick={() => setMobileMenuOpen(false)}
+                          className="flex items-center space-x-4 p-3 rounded-xl hover:bg-muted/40 transition-all border border-transparent hover:border-border/50"
+                        >
+                          <div className={`w-10 h-10 rounded-xl ${portal.bg} border flex items-center justify-center ${portal.color} shrink-0`}>
+                            {portal.icon}
+                          </div>
+                          <div>
+                            <span className="text-sm font-bold text-foreground block">{portal.label}</span>
+                            <span className="text-[10px] text-muted-foreground block">{portal.desc}</span>
+                          </div>
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </header>
 
       <main className="flex-1 w-full flex flex-col overflow-x-hidden">
@@ -168,7 +236,7 @@ export default function LandingPage() {
                   <Link href="/auth/citizen" className="hover:text-foreground transition-colors">Citizen Login</Link>
                 </li>
                 <li>
-                  <Link href="/auth/mp" className="hover:text-foreground transition-colors">Representative Login</Link>
+                  <Link href="/auth/mp" className="hover:text-foreground transition-colors">MP Login</Link>
                 </li>
                 <li>
                   <Link href="/department/login" className="hover:text-foreground transition-colors">Department Login</Link>

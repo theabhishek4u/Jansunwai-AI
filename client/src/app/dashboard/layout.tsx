@@ -75,7 +75,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const sidebarLinks = [
     { href: '/dashboard', label: 'Overview', icon: <LayoutGrid className="w-5.5 h-5.5 transition-transform group-hover:scale-110" /> },
     { href: '/dashboard/submit', label: 'Submit Complaint', icon: <FileEdit className="w-5.5 h-5.5 transition-transform group-hover:scale-110" /> },
-    { href: '/dashboard/supported', label: 'Supported Proposals', icon: <Award className="w-5.5 h-5.5 transition-transform group-hover:scale-110" /> }
+    { href: '/dashboard/supported', label: 'Support Complaints', icon: <Award className="w-5.5 h-5.5 transition-transform group-hover:scale-110" /> }
   ];
 
   return (

@@ -285,13 +285,13 @@ export default function DashboardHome() {
         )}
       </div>
 
-      {/* ── SUPPORTED PROPOSALS SECTION ── */}
+      {/* ── SUPPORT COMPLAINTS SECTION ── */}
       <div className="bg-[#0a0d1e]/90 border border-[#1e293b]/20 rounded-3xl p-6 sm:p-8 space-y-6 shadow-md">
         <div className="flex items-center justify-between">
           <div className="space-y-1">
             <h3 className="text-lg font-black text-white flex items-center gap-2">
               <Sparkles className="w-5 h-5 text-indigo-400" />
-              <span>Supported Proposals</span>
+              <span>Support Complaints</span>
             </h3>
             <p className="text-xs text-slate-500 font-medium">Community proposals you are backing to accelerate constituency funding</p>
           </div>

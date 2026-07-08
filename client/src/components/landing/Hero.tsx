@@ -167,7 +167,7 @@ export function Hero() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: 0.3 }}
             >
-              <Link href="/citizen">
+              <Link href="/auth/citizen">
                 <Button
                   size="lg"
                   className="bg-linear-to-r from-gov-blue to-gov-blue-light text-white shadow-xl shadow-gov-blue/20 hover:shadow-gov-blue/40 transition-all duration-300 h-13 px-8 text-base font-semibold group rounded-xl"
@@ -200,10 +200,7 @@ export function Hero() {
                 <span className="w-2.5 h-2.5 bg-trust-green rounded-full radar-glow relative" />
                 <span className="font-semibold text-foreground/90">10,000+ Issues Resolved</span>
               </div>
-              <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 bg-gov-blue rounded-full" />
-                <span className="font-semibold text-foreground/90">75 Districts (UP)</span>
-              </div>
+
               <div className="flex items-center gap-2">
                 <span className="w-2.5 h-2.5 bg-ai-purple rounded-full animate-pulse" />
                 <span className="font-semibold text-foreground/90">24/7 AI Engine Active</span>

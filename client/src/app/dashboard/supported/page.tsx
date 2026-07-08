@@ -67,7 +67,7 @@ export default function SupportedProposalsPage() {
       <div className="flex items-center justify-center py-20 text-slate-500 text-sm">
         <div className="flex flex-col items-center space-y-4">
           <div className="w-8 h-8 rounded-full border-2 border-indigo-600 border-t-transparent animate-spin" />
-          <p className="font-semibold text-slate-400">Loading supported proposals...</p>
+          <p className="font-semibold text-slate-400">Loading supported complaints...</p>
         </div>
       </div>
     );
@@ -79,10 +79,10 @@ export default function SupportedProposalsPage() {
       <div>
         <h1 className="text-2xl font-black text-white flex items-center gap-2.5">
           <Sparkles className="w-6 h-6 text-indigo-400" />
-          <span>Supported Proposals</span>
+          <span>Support Complaints</span>
         </h1>
-        <p className="text-xs text-slate-400 mt-1">
-          Review community efforts you have backed to accelerate development prioritization.
+        <p className="text-xs text-slate-400 mt-1 max-w-3xl">
+          Support complaints submitted by others in your area. If a complaint is in your local area (pincode), you can view and support it. Complaints with high community support are prioritized by the AI and recommended to the MP and local officials.
         </p>
       </div>
 
@@ -92,7 +92,7 @@ export default function SupportedProposalsPage() {
             <MessageSquare className="w-6 h-6" />
           </div>
           <div className="space-y-1">
-            <h3 className="text-sm font-bold text-slate-200">No supported proposals yet</h3>
+            <h3 className="text-sm font-bold text-slate-200">No supported complaints yet</h3>
             <p className="text-xs text-slate-500 leading-relaxed">
               Browse submitted issues on the overview or try submitting a new complaint to trigger duplicate checking and support suggestions.
             </p>
@@ -101,7 +101,7 @@ export default function SupportedProposalsPage() {
             href="/dashboard" 
             className="inline-flex items-center text-xs font-bold text-indigo-400 hover:text-indigo-300 gap-1 mt-2 hover:underline"
           >
-            <span>Browse proposals</span>
+            <span>Browse complaints</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
