@@ -67,7 +67,7 @@ export function Testimonials() {
               transition={{ duration: 0.5, delay: i * 0.1 }}
             >
               <div className="flex items-start gap-4">
-                <Quote className="w-8 h-8 text-primary/20 flex-shrink-0 mt-1" />
+                <Quote className="w-8 h-8 text-primary/20 shrink-0 mt-1" />
                 <div className="flex-1">
                   <p className="text-base leading-relaxed mb-4">
                     &ldquo;{t.textEn}&rdquo;

@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/AuthContext';
 import { 
-  Vote, 
+  HeartHandshake, 
   LayoutGrid, 
   FileEdit, 
   UserCircle, 
@@ -64,7 +64,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
       <div className="min-h-screen bg-slate-950 flex items-center justify-center">
         <div className="flex flex-col items-center space-y-4">
           <div className="w-12 h-12 rounded-2xl bg-indigo-600 animate-spin flex items-center justify-center">
-            <Vote className="w-6 h-6 text-white" />
+            <HeartHandshake className="w-6 h-6 text-white" />
           </div>
           <p className="text-slate-400 text-sm font-semibold">Verifying Session...</p>
         </div>
@@ -85,7 +85,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         {/* Brand */}
         <div className="flex items-center space-x-3 mb-8">
           <div className="w-9 h-9 rounded-xl bg-linear-to-tr from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-            <Vote className="w-5 h-5 text-white" />
+            <HeartHandshake className="w-5 h-5 text-white" />
           </div>
           <div>
             <span className="font-extrabold text-md tracking-tight bg-clip-text text-transparent bg-linear-to-r from-blue-400 to-indigo-400">Jansunwai AI</span>
@@ -104,7 +104,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                 href={link.href}
                 className={`flex items-center space-x-3 py-2.5 rounded-xl text-sm font-semibold transition-all ${
                   isActive 
-                    ? 'bg-[#131930] text-[#3b82f6] border border-[#3b82f6]/20 font-extrabold border-l-4 border-l-[#3b82f6] pl-3' 
+                    ? 'bg-[#131930] text-gov-blue-light border border-gov-blue-light/20 font-extrabold border-l-4 border-l-gov-blue-light pl-3' 
                     : 'text-slate-400 hover:text-white hover:bg-[#131930]/40 border-l-4 border-transparent pl-3'
                 }`}
               >
@@ -134,7 +134,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           {/* Mobile Logo Brand */}
           <div className="flex items-center space-x-2 md:hidden">
             <div className="w-7 h-7 rounded-lg bg-linear-to-tr from-orange-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-500/20">
-              <Vote className="w-4 h-4 text-white" />
+              <HeartHandshake className="w-4 h-4 text-white" />
             </div>
             <span className="font-extrabold text-sm bg-clip-text text-transparent bg-linear-to-r from-orange-400 to-indigo-400">Jansunwai AI</span>
           </div>
@@ -254,7 +254,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
               href={link.href}
               className={`flex flex-col items-center justify-center flex-1 h-full py-1 text-center transition-all ${
                 isActive 
-                  ? 'text-[#3b82f6] font-bold scale-105' 
+                  ? 'text-gov-blue-light font-bold scale-105' 
                   : 'text-slate-400 hover:text-slate-200'
               }`}
             >

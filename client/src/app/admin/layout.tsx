@@ -21,7 +21,7 @@ import {
   Sparkles,
   Users,
   UserCheck,
-  X,
+  X, Activity,
   Building2
 } from 'lucide-react';
 
@@ -86,7 +86,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
         <div className="px-5 pt-6 pb-5 border-b border-slate-800/60">
           <Link href="/admin" className="flex items-center space-x-3">
             <div className="w-10 h-10 rounded-xl bg-linear-to-br from-cyan-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
-              <Shield className="w-5 h-5 text-white" />
+              <Activity className="w-5 h-5 text-white" />
             </div>
             <div>
               <span className="font-extrabold text-sm tracking-tight bg-clip-text text-transparent bg-linear-to-r from-cyan-400 to-indigo-400">Jansunwai AI</span>
@@ -197,7 +197,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             <div className="flex items-center justify-between px-5 pt-5 pb-4">
               <div className="flex items-center space-x-2">
                 <div className="w-8 h-8 rounded-lg bg-linear-to-br from-cyan-500 to-indigo-600 flex items-center justify-center">
-                  <Shield className="w-4 h-4 text-white" />
+                  <Activity className="w-4 h-4 text-white" />
                 </div>
                 <span className="text-sm font-bold text-cyan-400">Super Admin</span>
               </div>

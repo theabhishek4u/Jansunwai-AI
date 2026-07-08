@@ -122,7 +122,7 @@ export default function PriorityEnginePage() {
     <div className="space-y-6 max-w-[1400px] mx-auto font-sans pb-10">
       
       {/* 1. Header Card */}
-      <div className="relative overflow-hidden bg-gradient-to-r from-slate-955 via-[#0c1222] to-slate-955 p-6 rounded-3xl border border-slate-800/80 shadow-2xl flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="relative overflow-hidden bg-linear-to-r from-slate-955 via-[#0c1222] to-slate-955 p-6 rounded-3xl border border-slate-800/80 shadow-2xl flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="absolute top-0 right-0 w-80 h-80 bg-amber-500/5 rounded-full blur-[100px] pointer-events-none" />
         
         <div className="space-y-2">
@@ -195,7 +195,7 @@ export default function PriorityEnginePage() {
         animate={{ opacity: 1, y: 0 }}
         className="bg-indigo-950/30 border border-indigo-500/30 rounded-3xl p-5 shadow-lg relative overflow-hidden flex items-start gap-4"
       >
-        <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-[40px] pointer-events-none" />
+        <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none" />
         <div className="w-12 h-12 bg-indigo-500/20 rounded-2xl flex items-center justify-center border border-indigo-500/30 shrink-0">
           <Sparkles className="w-6 h-6 text-indigo-400" />
         </div>
@@ -392,11 +392,11 @@ export default function PriorityEnginePage() {
                     <td className="px-5 py-4">
                       <span className={`inline-flex items-center justify-center w-7 h-7 rounded-xl text-[10px] font-black tracking-tight transition-transform group-hover:scale-105 ${
                         isRanked1 
-                          ? 'bg-gradient-to-br from-amber-300 via-yellow-500 to-amber-600 text-slate-950 shadow-md shadow-yellow-500/20' 
+                          ? 'bg-linear-to-br from-amber-300 via-yellow-500 to-amber-600 text-slate-950 shadow-md shadow-yellow-500/20' 
                           : isRanked2
-                            ? 'bg-gradient-to-br from-slate-200 via-slate-400 to-slate-500 text-slate-950 shadow-md shadow-slate-400/10'
+                            ? 'bg-linear-to-br from-slate-200 via-slate-400 to-slate-500 text-slate-950 shadow-md shadow-slate-400/10'
                             : isRanked3
-                              ? 'bg-gradient-to-br from-amber-600 via-amber-700 to-amber-900 text-white shadow-md shadow-amber-800/15'
+                              ? 'bg-linear-to-br from-amber-600 via-amber-700 to-amber-900 text-white shadow-md shadow-amber-800/15'
                               : 'bg-slate-950 text-slate-500 border border-slate-850'
                       }`}>
                         {i + 1}

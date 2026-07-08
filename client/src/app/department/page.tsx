@@ -164,7 +164,7 @@ export default function DepartmentDashboard() {
       transition={{ duration: 0.2, delay: idx * 0.05 }}
       className="bg-slate-900/50 backdrop-blur-xl border border-white/5 hover:border-blue-500/30 rounded-2xl p-4 shadow-lg hover:shadow-[0_0_20px_rgba(59,130,246,0.1)] transition-all group relative overflow-hidden flex flex-col"
     >
-      <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 blur-[40px] rounded-full pointer-events-none group-hover:bg-blue-500/15 transition-all duration-300" />
+      <div className="absolute top-0 right-0 w-24 h-24 bg-blue-500/5 blur-2xl rounded-full pointer-events-none group-hover:bg-blue-500/15 transition-all duration-300" />
       
       <div className="relative z-10 flex flex-col h-full">
         <div className="flex items-center justify-between mb-3">

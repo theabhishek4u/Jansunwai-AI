@@ -10,7 +10,7 @@ import {
   Wrench,
   Shield,
   FileText,
-  Bot,
+  Brain,
   Sun,
   ChevronDown,
   Phone,
@@ -37,8 +37,8 @@ export default function LandingPage() {
       <header className="sticky top-0 z-50 backdrop-blur-xl bg-background/85 border-b border-border/40">
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-gov-blue to-ai-purple flex items-center justify-center">
-              <Bot className="w-6 h-6 text-white" />
+            <div className="w-10 h-10 rounded-xl bg-linear-to-br from-gov-blue to-ai-purple flex items-center justify-center">
+              <Brain className="w-6 h-6 text-white" />
             </div>
             <div>
               <span className="font-black text-xl tracking-tight text-foreground uppercase">JANSUNWAI AI</span>
@@ -52,7 +52,7 @@ export default function LandingPage() {
             </button>
             <Link
               href="/auth/citizen"
-              className="px-6 py-2.5 rounded-full bg-gradient-to-r from-gov-blue to-gov-blue-light hover:brightness-110 text-white text-xs font-bold transition-all shadow-[0_0_20px_rgba(37,99,235,0.4)] flex items-center space-x-2"
+              className="px-6 py-2.5 rounded-full bg-linear-to-r from-gov-blue to-gov-blue-light hover:brightness-110 text-white text-xs font-bold transition-all shadow-[0_0_20px_rgba(37,99,235,0.4)] flex items-center space-x-2"
             >
               <FileText className="w-4 h-4" />
               <span>FILE COMPLAINT</span>
@@ -86,7 +86,7 @@ export default function LandingPage() {
                       transition={{ duration: 0.12 }}
                       className="absolute right-0 mt-2 w-72 rounded-2xl bg-card border border-border/80 shadow-2xl shadow-black/40 p-2 backdrop-blur-xl z-50 overflow-hidden"
                     >
-                      <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-gov-blue to-ai-purple" />
+                      <div className="absolute top-0 left-0 right-0 h-[2px] bg-linear-to-r from-gov-blue to-ai-purple" />
                       <div className="space-y-1 mt-1">
                         {[
                           { href: '/auth/citizen', icon: <User className="w-4 h-4" />, label: 'Citizen Login', desc: 'Submit grievances & track progress', color: 'text-gov-blue', bg: 'bg-gov-blue/10 border-gov-blue/15' },
@@ -139,7 +139,7 @@ export default function LandingPage() {
             <div className="space-y-4">
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 rounded-xl bg-gov-blue/10 border border-gov-blue/20 flex items-center justify-center text-gov-blue">
-                  <Bot className="w-5 h-5" />
+                  <Brain className="w-5 h-5" />
                 </div>
                 <div>
                   <span className="font-extrabold text-lg text-foreground block leading-tight">Jansunwai</span>

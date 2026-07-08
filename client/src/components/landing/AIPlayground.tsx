@@ -235,7 +235,7 @@ export function AIPlayground() {
                         onClick={() => handlePresetSelect(p)}
                         className={`text-left p-3.5 rounded-xl border text-xs leading-relaxed transition-all duration-300 hover:translate-x-1 cursor-pointer ${
                           isSelected
-                            ? `${borderGradient} border-l-[4px] font-semibold text-foreground`
+                            ? `${borderGradient} border-l-4 font-semibold text-foreground`
                             : "bg-slate-900/30 border-white/5 hover:bg-slate-900/60 hover:border-white/10 text-slate-400 hover:text-slate-200"
                         }`}
                       >
@@ -294,7 +294,7 @@ export function AIPlayground() {
 
               <div className="mt-5">
                 <Button
-                  className="w-full bg-gradient-to-r from-gov-blue to-ai-purple text-white shadow-lg shadow-gov-blue/20 hover:shadow-gov-blue/40 h-12 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2"
+                  className="w-full bg-linear-to-r from-gov-blue to-ai-purple text-white shadow-lg shadow-gov-blue/20 hover:shadow-gov-blue/40 h-12 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2"
                   disabled={isAnalyzing || (!inputText && !customText)}
                   onClick={runAnalysis}
                 >
@@ -572,7 +572,7 @@ export function AIPlayground() {
                           animate={{ opacity: 1, x: 0 }}
                           transition={{ delay: i * 0.1, duration: 0.3 }}
                         >
-                          <CheckCircle className="w-4 h-4 text-emerald-400 mt-0.5 flex-shrink-0" />
+                          <CheckCircle className="w-4 h-4 text-emerald-400 mt-0.5 shrink-0" />
                           <span>{act}</span>
                         </motion.div>
                       ))}

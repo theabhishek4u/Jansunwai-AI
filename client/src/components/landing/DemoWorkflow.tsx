@@ -92,7 +92,7 @@ export function DemoWorkflow() {
         {/* Timeline */}
         <div className="relative">
           {/* Vertical line */}
-          <div className="absolute left-6 sm:left-8 top-0 bottom-0 w-px bg-gradient-to-b from-gov-blue via-ai-purple to-trust-green" />
+          <div className="absolute left-6 sm:left-8 top-0 bottom-0 w-px bg-linear-to-b from-gov-blue via-ai-purple to-trust-green" />
 
           <div className="space-y-8">
             {steps.map((step, i) => (
@@ -105,7 +105,7 @@ export function DemoWorkflow() {
                 transition={{ duration: 0.5, delay: i * 0.1 }}
               >
                 {/* Step circle */}
-                <div className="relative z-10 flex-shrink-0">
+                <div className="relative z-10 shrink-0">
                   <div
                     className="w-12 h-12 sm:w-16 sm:h-16 rounded-2xl flex items-center justify-center shadow-lg"
                     style={{

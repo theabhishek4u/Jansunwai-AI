@@ -154,9 +154,9 @@ export default function MpComplaintsPage() {
       >
         <Link
           href={`/mp/complaints/${s.id}`}
-          className="flex items-center gap-4 p-4 rounded-2xl bg-[#0a0d1e] border border-[#1e293b]/20 hover:border-[#3b82f6]/30 transition-all group shadow-sm"
+          className="flex items-center gap-4 p-4 rounded-2xl bg-[#0a0d1e] border border-[#1e293b]/20 hover:border-gov-blue-light/30 transition-all group shadow-sm"
         >
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500/10 to-amber-500/5 flex items-center justify-center shrink-0 border border-amber-500/10">
+          <div className="w-10 h-10 rounded-xl bg-linear-to-br from-amber-500/10 to-amber-500/5 flex items-center justify-center shrink-0 border border-amber-500/10">
             <span className="text-xs font-black text-amber-400">#{i + 1}</span>
           </div>
 
@@ -238,7 +238,7 @@ export default function MpComplaintsPage() {
               onClick={() => setFilterCategory(filterCategory === cat.name ? '' : cat.name)}
               className={`p-4 rounded-2xl flex flex-col justify-center text-left hover:scale-[1.03] active:scale-[0.97] transition-all duration-300 cursor-pointer border relative overflow-hidden group shadow-md ${
                 filterCategory === cat.name 
-                  ? 'bg-[#1c223c] border-[#3b82f6]/50 shadow-lg shadow-blue-500/10' 
+                  ? 'bg-[#1c223c] border-gov-blue-light/50 shadow-lg shadow-blue-500/10' 
                   : 'bg-[#0f142c] border-[#1e293b]/30 hover:border-[#1e293b]/60'
               }`}
             >

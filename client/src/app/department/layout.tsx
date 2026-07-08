@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { 
-  Shield, LayoutDashboard, LogOut, Bell, User, 
+  Wrench, LayoutDashboard, LogOut, Bell, User, 
   RefreshCw, ClipboardCheck, ArrowLeftRight, ChevronRight, AlertCircle
 } from 'lucide-react';
 
@@ -83,10 +83,10 @@ export default function DepartmentLayout({ children }: { children: React.ReactNo
       {/* Sidebar Navigation */}
       <aside className="w-full md:w-[280px] bg-slate-900/40 backdrop-blur-2xl flex flex-col md:h-screen sticky top-0 z-30 shadow-[4px_0_24px_rgba(0,0,0,0.4)]">
         {/* Title / Logo block */}
-        <div className="px-7 py-6 flex items-center space-x-3 bg-gradient-to-b from-slate-900/50 to-transparent">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-600/30 relative overflow-hidden group">
+        <div className="px-7 py-6 flex items-center space-x-3 bg-linear-to-b from-slate-900/50 to-transparent">
+          <div className="w-10 h-10 rounded-2xl bg-linear-to-tr from-blue-600 to-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-600/30 relative overflow-hidden group">
             <div className="absolute inset-0 bg-white/20 translate-y-full group-hover:translate-y-0 transition-transform duration-300" />
-            <Shield className="w-5 h-5 text-white relative z-10" />
+            <Wrench className="w-5 h-5 text-white relative z-10" />
           </div>
           <div>
             <h1 className="text-sm font-black uppercase tracking-widest text-white">Jansunwai AI</h1>
@@ -101,7 +101,7 @@ export default function DepartmentLayout({ children }: { children: React.ReactNo
             href="/department"
             className={`flex items-center space-x-3 px-5 py-3.5 rounded-2xl text-xs font-bold transition-all relative overflow-hidden group ${
               pathname === '/department' 
-                ? 'bg-gradient-to-r from-blue-600/20 to-indigo-600/20 text-blue-400' 
+                ? 'bg-linear-to-r from-blue-600/20 to-indigo-600/20 text-blue-400' 
                 : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
             }`}
           >
@@ -117,7 +117,7 @@ export default function DepartmentLayout({ children }: { children: React.ReactNo
             href="/department/complaints"
             className={`flex items-center space-x-3 px-5 py-3.5 rounded-2xl text-xs font-bold transition-all relative overflow-hidden group ${
               pathname === '/department/complaints' 
-                ? 'bg-gradient-to-r from-blue-600/20 to-indigo-600/20 text-blue-400' 
+                ? 'bg-linear-to-r from-blue-600/20 to-indigo-600/20 text-blue-400' 
                 : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
             }`}
           >
@@ -164,7 +164,7 @@ export default function DepartmentLayout({ children }: { children: React.ReactNo
 
             <div className="flex items-center space-x-3 pl-6 relative">
               <div className="absolute left-0 top-1/2 -translate-y-1/2 w-px h-6 bg-slate-800" />
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-700 flex items-center justify-center font-black text-white text-xs shadow-lg shadow-blue-900/30">
+              <div className="w-8 h-8 rounded-xl bg-linear-to-br from-blue-600 to-indigo-700 flex items-center justify-center font-black text-white text-xs shadow-lg shadow-blue-900/30">
                 {session.officer[0]}
               </div>
               <span className="text-xs font-black text-slate-300 hidden sm:inline tracking-wide">{session.officer.split(' (')[0]}</span>
