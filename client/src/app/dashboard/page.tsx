@@ -49,7 +49,7 @@ export default function DashboardHome() {
 
   const fetchSupportedSuggestions = async () => {
     try {
-      const res = await fetch(`http://localhost:5000/api/profile/${user?.id}/supported`);
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/profile/${user?.id}/supported`);
       if (res.ok) {
         const data = await res.json();
         setSupportedSuggestions(data);
@@ -61,7 +61,7 @@ export default function DashboardHome() {
 
   const fetchAllSuggestions = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/suggestions?t=${Date.now()}`, { cache: 'no-store' });
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/suggestions?t=${Date.now()}`, { cache: 'no-store' });
       if (response.ok) {
         const data = await response.json();
         // Filter active constituency projects managed by the MP (planned, under_review, completed)
@@ -77,7 +77,7 @@ export default function DashboardHome() {
 
   const fetchSuggestions = async () => {
     try {
-      const response = await fetch(`http://localhost:5000/api/suggestions?citizen_id=${user?.id}&t=${Date.now()}`, { cache: 'no-store' });
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/suggestions?citizen_id=${user?.id}&t=${Date.now()}`, { cache: 'no-store' });
       if (response.ok) {
         const data = await response.json();
         setSuggestions(data);
@@ -108,7 +108,7 @@ export default function DashboardHome() {
     }
 
     try {
-      const response = await fetch(`http://localhost:5000/api/suggestions/${id}`, {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/suggestions/${id}`, {
         method: 'DELETE',
       });
       

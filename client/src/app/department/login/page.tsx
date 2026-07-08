@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { Shield, Mail, Key, Users, ArrowRight, ArrowLeft, CheckCircle2, AlertCircle, Building2, HardHat, FileCheck } from 'lucide-react';
 import { motion } from 'framer-motion';
 
-const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+const API = process.env.NEXT_PUBLIC_API_URL || `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}`;
 
 const DEPARTMENTS = [
   { id: 'pwd', name: 'Public Works Department (PWD)', email: 'pwd@jansunwai.gov.in', officer: 'Rakesh Kumar', category: 'Road' },

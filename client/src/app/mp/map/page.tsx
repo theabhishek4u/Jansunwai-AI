@@ -11,7 +11,7 @@ import {
   RefreshCw, Eye, ListTodo, ChevronRight, ArrowLeft
 } from 'lucide-react';
 
-const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+const API = process.env.NEXT_PUBLIC_API_URL || `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}`;
 
 interface VillageNode {
   name: string;

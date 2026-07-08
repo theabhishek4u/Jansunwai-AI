@@ -10,7 +10,7 @@ import {
   Zap, Droplet, Heart, BookOpen, Trash2, ShieldAlert, Bus, FileText
 } from 'lucide-react';
 
-const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+const API = process.env.NEXT_PUBLIC_API_URL || `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}`;
 
 interface SuggestionItem {
   id: string;

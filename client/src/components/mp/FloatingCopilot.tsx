@@ -7,7 +7,7 @@ import {
   ArrowRight, Loader2, Table, RotateCcw, X, MessageSquare
 } from 'lucide-react';
 
-const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+const API = process.env.NEXT_PUBLIC_API_URL || `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}`;
 
 interface ChatMessage {
   id: string;

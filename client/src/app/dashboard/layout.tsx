@@ -42,7 +42,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
         router.push('/mp');
       } else {
         // Fetch real notifications for this citizen
-        fetch(`http://localhost:5000/api/notifications?citizen_id=${user.id}`)
+        fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/notifications?citizen_id=${user.id}`)
           .then(res => res.json())
           .then(data => {
             if (Array.isArray(data)) setNotifications(data);
@@ -164,7 +164,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
                       <button 
                         onClick={() => {
                           setNotifications([]);
-                          notifications.forEach(n => fetch(`http://localhost:5000/api/notifications/${n.id}/read`, { method: 'POST' }).catch(console.error));
+                          notifications.forEach(n => fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/notifications/${n.id}/read`, { method: 'POST' }).catch(console.error));
                         }} 
                         className="text-[10px] text-indigo-400 font-semibold hover:text-indigo-300 transition-colors"
                       >

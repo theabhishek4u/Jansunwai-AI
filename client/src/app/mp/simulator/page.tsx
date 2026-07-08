@@ -8,7 +8,7 @@ import {
   AlertTriangle, ArrowRight, ShieldCheck, Target, Sparkles
 } from 'lucide-react';
 
-const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000';
+const API = process.env.NEXT_PUBLIC_API_URL || `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}`;
 
 interface SuggestionOption {
   id: string;
