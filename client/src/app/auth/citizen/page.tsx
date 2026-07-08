@@ -202,7 +202,7 @@ function CitizenAuthForm() {
     <div className="min-h-screen bg-[#030712] relative overflow-hidden font-sans flex items-center justify-center p-4 sm:p-8">
       {/* Animated Background - Blue/Sky */}
       <div className="absolute inset-0 z-0">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#0ea5e908_1px,transparent_1px),linear-gradient(to_bottom,#0ea5e908_1px,transparent_1px)] bg-[size:4rem_4rem]" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#0ea5e908_1px,transparent_1px),linear-gradient(to_bottom,#0ea5e908_1px,transparent_1px)] bg-size-[4rem_4rem]" />
         
         <motion.div 
           animate={{ scale: [1, 1.2, 1], opacity: [0.15, 0.3, 0.15] }}

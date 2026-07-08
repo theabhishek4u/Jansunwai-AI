@@ -83,7 +83,7 @@ export default function DepartmentLoginPage() {
     <div className="min-h-screen bg-[#030712] relative overflow-hidden font-sans flex items-center justify-center p-4 sm:p-8">
       {/* Animated Background - Amber */}
       <div className="absolute inset-0 z-0">
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#f59e0b08_1px,transparent_1px),linear-gradient(to_bottom,#f59e0b08_1px,transparent_1px)] bg-[size:4rem_4rem]" />
+        <div className="absolute inset-0 bg-[linear-gradient(to_right,#f59e0b08_1px,transparent_1px),linear-gradient(to_bottom,#f59e0b08_1px,transparent_1px)] bg-size-[4rem_4rem]" />
         
         <motion.div 
           animate={{ scale: [1, 1.2, 1], opacity: [0.15, 0.3, 0.15] }}

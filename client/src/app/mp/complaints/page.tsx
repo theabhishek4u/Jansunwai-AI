@@ -238,12 +238,12 @@ export default function MpComplaintsPage() {
               onClick={() => setFilterCategory(filterCategory === cat.name ? '' : cat.name)}
               className={`relative p-5 rounded-2xl flex flex-col justify-center text-left hover:-translate-y-1 active:scale-[0.98] transition-all duration-400 cursor-pointer border overflow-hidden group shadow-lg ${
                 filterCategory === cat.name 
-                  ? 'bg-gradient-to-br from-[#1c2242] to-[#131836] border-indigo-500/50 shadow-indigo-500/20' 
-                  : 'bg-gradient-to-br from-[#0f142c] to-[#0a0d1e] border-[#1e293b]/40 hover:border-[#1e293b]/80 hover:shadow-indigo-500/10'
+                  ? 'bg-linear-to-br from-[#1c2242] to-[#131836] border-indigo-500/50 shadow-indigo-500/20' 
+                  : 'bg-linear-to-br from-[#0f142c] to-[#0a0d1e] border-[#1e293b]/40 hover:border-[#1e293b]/80 hover:shadow-indigo-500/10'
               }`}
             >
               {/* Subtle top highlight */}
-              <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              <div className="absolute top-0 inset-x-0 h-px bg-linear-to-r from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
               
               {/* Subtle background glow when active */}
               {filterCategory === cat.name && (
