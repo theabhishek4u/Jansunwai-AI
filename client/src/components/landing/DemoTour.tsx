@@ -71,8 +71,8 @@ export function DemoTour() {
           avatar: "🤖",
           advisorName: "Mitra AI — Citizen Guide",
           instruction: autofilled 
-            ? "Fabulous! The visual hazard scanning laser is analyzing the Gomti Nagar garbage pile. Review the classified tags, then scroll down to press the 'Submit & Analyze with AI' button!"
-            : "Welcome, Judge! Let's simulate a live citizen complaint. Click the button below to auto-fill a real garbage disposal complaint in Gomti Nagar, Lucknow.",
+            ? "Fabulous! The visual hazard scanning laser is analyzing the stalled school construction site. Review the classified tags, then scroll down to press the 'Submit & Analyze with AI' button!"
+            : "Welcome, Judge! Let's simulate a live citizen complaint. Click the button below to auto-fill a real school infrastructure complaint in Gomti Nagar, Lucknow.",
           actionText: autofilled ? "Waiting for submission..." : "Auto-Fill Demo Data",
           action: triggerAutofill,
           disabled: autofilled,
@@ -84,7 +84,7 @@ export function DemoTour() {
           title: "Officer Dashboard Tour",
           avatar: "👮",
           advisorName: "Mitra AI — Governance Console",
-          instruction: "Look! Your newly filed Gomti Nagar garbage ticket is sitting at the top of the queue. Select it, inspect the visual laser markers, add notes, and advance its status to 'In Progress'.",
+          instruction: "Look! Your newly filed Gomti Nagar school infrastructure ticket is sitting at the top of the queue. Select it, inspect the visual laser markers, add notes, and advance its status to 'In Progress'.",
           actionText: "Advance to Admin Board",
           action: () => router.push("/admin?demo=true"),
           disabled: false,

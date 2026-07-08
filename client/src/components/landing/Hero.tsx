@@ -37,7 +37,7 @@ const mockTicketCycle: TicketState[] = [
     status: "LOGGED",
     statusColor: "#3B82F6",
     citizen: "Rahul Sharma (Gomti Nagar)",
-    desc: "Gomti Nagar main crossing ke pass drinking water pipeline leak ho gayi hai, subah se paani beh raha hai.",
+    desc: "Government school ki nayi building ka kaam 6 mahine se ruka hua hai aur contractors gaayab hain. Bachhon ko majboori mein bahar khule aasmaan ke niche padhna pad raha hai, kripya jaldi action lein.",
     category: "Awaiting AI...",
     assigned: "Pending...",
     step: 1
@@ -47,8 +47,8 @@ const mockTicketCycle: TicketState[] = [
     status: "AI PROCESSING...",
     statusColor: "#7C3AED",
     citizen: "Rahul Sharma (Gomti Nagar)",
-    desc: "Gomti Nagar main crossing ke pass drinking water pipeline leak ho gayi hai, subah se paani beh raha hai.",
-    category: "Urban Water Supply",
+    desc: "Government school ki nayi building ka kaam 6 mahine se ruka hua hai aur contractors gaayab hain. Bachhon ko majboori mein bahar khule aasmaan ke niche padhna pad raha hai, kripya jaldi action lein.",
+    category: "Education Infrastructure",
     assigned: "Matching department...",
     step: 2
   },
@@ -57,9 +57,9 @@ const mockTicketCycle: TicketState[] = [
     status: "AI TRIAGE DONE",
     statusColor: "#F59E0B",
     citizen: "Rahul Sharma (Gomti Nagar)",
-    desc: "Gomti Nagar main crossing ke pass drinking water pipeline leak ho gayi hai, subah se paani beh raha hai.",
-    category: "Urban Water Supply",
-    assigned: "Lucknow Jal Nigam",
+    desc: "Government school ki nayi building ka kaam 6 mahine se ruka hua hai aur contractors gaayab hain. Bachhon ko majboori mein bahar khule aasmaan ke niche padhna pad raha hai, kripya jaldi action lein.",
+    category: "Education Infrastructure",
+    assigned: "Basic Education Dept & PWD",
     step: 3
   },
   {
@@ -67,9 +67,9 @@ const mockTicketCycle: TicketState[] = [
     status: "SMART ROUTED",
     statusColor: "#10B981",
     citizen: "Rahul Sharma (Gomti Nagar)",
-    desc: "Gomti Nagar main crossing ke pass drinking water pipeline leak ho gayi hai, subah se paani beh raha hai.",
-    category: "Urban Water Supply",
-    assigned: "Lucknow Jal Nigam",
+    desc: "Government school ki nayi building ka kaam 6 mahine se ruka hua hai aur contractors gaayab hain. Bachhon ko majboori mein bahar khule aasmaan ke niche padhna pad raha hai, kripya jaldi action lein.",
+    category: "Education Infrastructure",
+    assigned: "Basic Education Dept & PWD",
     step: 4
   }
 ];

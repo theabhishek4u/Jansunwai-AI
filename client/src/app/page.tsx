@@ -90,7 +90,7 @@ export default function LandingPage() {
                       <div className="space-y-1 mt-1">
                         {[
                           { href: '/auth/citizen', icon: <User className="w-4 h-4" />, label: 'Citizen Login', desc: 'Submit grievances & track progress', color: 'text-gov-blue', bg: 'bg-gov-blue/10 border-gov-blue/15' },
-                          { href: '/auth/mp', icon: <Building2 className="w-4 h-4" />, label: 'MP Login', desc: 'Constituency dashboard', color: 'text-ai-purple', bg: 'bg-ai-purple/10 border-ai-purple/15' },
+                          { href: '/auth/mp', icon: <Building2 className="w-4 h-4" />, label: 'Representative Login', desc: 'Constituency dashboard', color: 'text-ai-purple', bg: 'bg-ai-purple/10 border-ai-purple/15' },
                           { href: '/department/login', icon: <Wrench className="w-4 h-4" />, label: 'Department Login', desc: 'Task execution & evidence upload', color: 'text-trust-green', bg: 'bg-trust-green/10 border-trust-green/15' },
                           { href: '/auth/admin', icon: <Shield className="w-4 h-4" />, label: 'Admin Login', desc: 'Platform management', color: 'text-warning-amber', bg: 'bg-warning-amber/10 border-warning-amber/15' }
                         ].map(portal => (
@@ -159,7 +159,7 @@ export default function LandingPage() {
                   <Link href="/auth/citizen" className="hover:text-foreground transition-colors">Citizen Login</Link>
                 </li>
                 <li>
-                  <Link href="/auth/mp" className="hover:text-foreground transition-colors">MP Login</Link>
+                  <Link href="/auth/mp" className="hover:text-foreground transition-colors">Representative Login</Link>
                 </li>
                 <li>
                   <Link href="/department/login" className="hover:text-foreground transition-colors">Department Login</Link>

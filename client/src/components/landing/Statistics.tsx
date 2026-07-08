@@ -19,12 +19,12 @@ interface LiveResolution {
 }
 
 const mockLiveResolutions: LiveResolution[] = [
-  { id: "RES-941", district: "Hazratganj, Lucknow", category: "Water Pipeline Leak", time: "12 hours ago" },
-  { id: "RES-942", district: "Gomti Nagar, Lucknow", category: "Garbage Pile Cleanup", time: "8 hours ago" },
-  { id: "RES-943", district: "Sector 15, Noida", category: "Streetlight Restoration", time: "16 hours ago" },
-  { id: "RES-944", district: "Civil Lines, Prayagraj", category: "Pothole Filling", time: "4 hours ago" },
-  { id: "RES-945", district: "Taj Ganj, Agra", category: "Sewage Line Fix", time: "18 hours ago" },
-  { id: "RES-946", district: "Sigra, Varanasi", category: "Drainage Cleaning", time: "2 hours ago" },
+  { id: "JS-RES-941", district: "Hazratganj, Lucknow", category: "Waterlogging & Flooding at Crossing", time: "Resolved in 12 hours" },
+  { id: "JS-RES-942", district: "Gomti Nagar, Lucknow", category: "Illegal Medical Waste Dumping", time: "Resolved in 6 hours" },
+  { id: "JS-RES-943", district: "Sector 15, Noida", category: "Major Sewage Line Overflow", time: "Resolved in 16 hours" },
+  { id: "JS-RES-944", district: "Civil Lines, Prayagraj", category: "Severe Potholes & Broken Road", time: "Resolved in 8 hours" },
+  { id: "JS-RES-945", district: "Taj Ganj, Agra", category: "Damaged Public Bridge Repair", time: "Resolved in 18 hours" },
+  { id: "JS-RES-946", district: "Cantt, Varanasi", category: "High-Voltage Transformer Explosion", time: "Resolved in 4 hours" },
 ];
 
 function useCountUp(target: number, duration: number = 2000, start: boolean = false) {
@@ -140,7 +140,7 @@ export function Statistics() {
             Transforming <span className="gradient-text">Governance</span> at Scale
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Providing transparency, accountabilty, and velocity to citizen complaints across Uttar Pradesh.
+            Bringing absolute transparency, strict accountability, and rapid resolution to citizen complaints across Uttar Pradesh.
           </p>
         </motion.div>
 

@@ -36,50 +36,50 @@ interface PresetComplaint {
 
 const presets: PresetComplaint[] = [
   {
-    text: "गोमती नगर में सड़क के किनारे कचरे का ढेर लगा है, बदबू आ रही है और आवारा जानवर घूम रहे हैं। कोई उठाने नहीं आ रहा।",
+    text: "Hamare block mein naya primary school banne ka budget pass hua tha, lekin pichle 2 saal se sirf zameen khali padi hai. Bachhe door gaon jaane ko majboor hain.",
     lang: "Hindi / Devanagari",
-    category: "Sanitation & Waste Management",
+    category: "Education Infrastructure",
     priority: "HIGH",
-    dept: "Lucknow Nagar Nigam (Zone 4)",
-    officer: "Shri Rajesh Kumar (Chief Sanitation Inspector)",
-    summaryHi: "गोमती नगर में कचरे के ढेर और उससे फैलने वाली बदबू के कारण स्वच्छता की गंभीर समस्या है।",
-    summaryEn: "Severe sanitation concern in Gomti Nagar due to accumulation of garbage heaps and foul odor.",
+    dept: "District Basic Education Dept & PWD",
+    officer: "Er. Sunil Kumar (Executive Engineer, PWD)",
+    summaryHi: "प्राइमरी स्कूल का बजट पास होने के बावजूद दो साल से निर्माण शुरू नहीं हुआ है, जिससे छात्रों को दूर जाना पड़ रहा है।",
+    summaryEn: "Construction of the sanctioned primary school has not started for 2 years, forcing students to travel far.",
     actions: [
-      "Alert sent to Ward Inspector (Smt. Rekha Devi)",
-      "Sanitation pickup vehicle (UP-32-EG-4521) routed for immediate dispatch",
-      "SMS alert triggered to Nodal Officer",
-      "Scheduled auto-escalation to Ward Commissioner in 48 hours if unresolved"
+      "Auto-fetched budget allocation and land sanction records",
+      "Notice generated to PWD regarding delay in tender release",
+      "SMS alert triggered to District Magistrate and local MP",
+      "Scheduled auto-escalation to Education Secretary in 48 hours"
     ]
   },
   {
-    text: "Hazratganj main crossing ke pass water pipeline leak ho gayi hai, subah se hazaron gallon peene ka paani sadak par beh raha hai.",
+    text: "Sadar Hospital mein pichle ek mahine se X-Ray aur MRI machines kharab padi hain. Mareez bahar private lab jaane ko majboor hain, kripya naya equipment fund release karein.",
     lang: "Hinglish / Roman Hindi",
-    category: "Water Supply & Sewage Management",
+    category: "Healthcare Infrastructure",
     priority: "CRITICAL",
-    dept: "Lucknow Jal Nigam (Zone 1)",
-    officer: "Er. Alok Srivastava (Executive Engineer)",
-    summaryHi: "हज़रतगंज चौराहे के पास मुख्य पेयजल पाइपलाइन लीक होने से भारी जलभराव और पानी की बर्बादी हो रही है।",
-    summaryEn: "Drinking water leakage near Hazratganj crossing causing severe flooding and massive water wastage.",
+    dept: "Chief Medical Officer (CMO), Health Dept",
+    officer: "Dr. Alok Srivastava (CMO)",
+    summaryHi: "सदर अस्पताल में एक्स-रे और एमआरआई मशीनें एक महीने से खराब हैं, मरीजों को निजी लैब जाना पड़ रहा है।",
+    summaryEn: "X-Ray and MRI machines at Sadar Hospital are dysfunctional for a month, forcing patients to private labs.",
     actions: [
-      "Water valve shutoff command issued to Hazratganj pumping station",
-      "Emergency pipeline repair unit dispatched",
-      "Traffic control department notified regarding water logging",
-      "Auto-escalated to Chief Engineer Lucknow Jal Sansthan directly due to high wastage volume"
+      "Auto-identified equipment warranty and maintenance contracts",
+      "Emergency equipment repair fund request drafted for MP approval",
+      "Notified Hospital Superintendent for immediate interim arrangements",
+      "Auto-escalated to Health Dashboard due to high patient impact"
     ]
   },
   {
-    text: "Sector 14 streetlights have been completely dark for 5 days. It is very unsafe for women and children to walk after 7 PM.",
+    text: "The main connecting road between Sector 14 and the highway has been completely washed away in the monsoon. We urgently need a sanctioned project for a concrete road.",
     lang: "English / Pure English",
-    category: "Public Safety & Infrastructure",
+    category: "Public Works (Roads)",
     priority: "MEDIUM",
-    dept: "Madhyanchal Vidyut Vitran Nigam (MVVNL)",
-    officer: "Shri V. P. Singh (Assistant Engineer, Sector 14)",
-    summaryHi: "सेक्टर 14 में पिछले 5 दिनों से स्ट्रीट लाइट खराब होने से सुरक्षा की समस्या उत्पन्न हो गई है।",
-    summaryEn: "Streetlights dysfunctional in Sector 14 for the past 5 days, raising public safety concerns.",
+    dept: "Public Works Department (PWD)",
+    officer: "Shri V. P. Singh (Assistant Engineer, PWD)",
+    summaryHi: "मानसून में सेक्टर 14 और राजमार्ग को जोड़ने वाली मुख्य सड़क पूरी तरह बह गई है, पक्की सड़क की तत्काल आवश्यकता है।",
+    summaryEn: "Main connecting road to highway washed away during monsoon, urgently requiring a new concrete road project.",
     actions: [
-      "Maintenance order generated for Sector 14 light pole maintenance",
-      "Contractor notified with 24-hour compliance deadline",
-      "Citizen safety alert tagged for patrolling route enhancement",
+      "Initial cost estimation generated for 2KM concrete road construction",
+      "Proposal routed to local MP for budget allocation review",
+      "Site inspection task assigned to PWD Assistant Engineer",
       "Auto-reminder scheduled for Executive Engineer in 72 hours"
     ]
   }
@@ -267,7 +267,7 @@ export function AIPlayground() {
                   )}
                 </div>
                 <Textarea
-                  placeholder="e.g., Gomti Nagar Sector 4 me kal se bijli ki supply cut hai aur transformer se aawaz aa rahi hai..."
+                  placeholder="e.g., Hamare kshetra mein pichle 5 saal se degree college banane ki maang chal rahi hai, zameen uplabdh hai kripya fund pass karein..."
                   className={`min-h-[120px] text-sm rounded-xl resize-none bg-slate-950/55 dark:bg-black/50 border-white/10 placeholder-slate-500 focus:border-primary/50 focus:ring-1 focus:ring-primary/20 ${
                     isAnalyzing ? "pointer-events-none opacity-60" : ""
                   } ${customText ? "ai-active-glow" : ""}`}

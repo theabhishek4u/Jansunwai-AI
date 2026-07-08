@@ -31,14 +31,13 @@ export function CTA() {
           </div>
 
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-white tracking-tight">
-            Ready to Transform
+            Your Voice, Heard.
             <br />
-            <span className="text-trust-green-light">Citizen Grievance Resolution?</span>
+            <span className="text-trust-green-light">AI-Powered Rapid Resolution.</span>
           </h2>
 
           <p className="text-lg text-white/70 max-w-2xl mx-auto">
-            Experience AI-powered governance that actually works. File complaints in Hindi,
-            get updates automatically, and see real resolution — not just promises.
+            Speak up in Hindi, Hinglish, or English. Our intelligent platform ensures your civic issues reach the correct public representative and local department instantly.
           </p>
 
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4">
