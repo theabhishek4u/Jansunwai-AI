@@ -340,7 +340,7 @@ export default function PriorityEnginePage() {
             </select>
             <select 
               value={sortBy} 
-              onChange={e => setSortBy(e.target.value as any)} 
+              onChange={e => setSortBy(e.target.value as Parameters<typeof setSortBy>[0])} 
               className="px-3 py-2 rounded-xl bg-slate-900 border border-slate-800 text-[11px] font-semibold text-amber-400 focus:outline-none focus:border-amber-500/50"
             >
               <option value="priorityScore">Sort: Priority Score</option>

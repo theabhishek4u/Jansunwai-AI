@@ -263,10 +263,10 @@ export default function SimulatorPage() {
               </div>
               <div className="divide-y divide-slate-800/40 p-2">
                 {[
-                  { key: 'populationImpacted', label: 'Population Impacted', icon: <Users className="w-4 h-4 text-slate-400" />, format: (v: any) => v.toLocaleString() },
-                  { key: 'estimatedCostCrore', label: 'Estimated Cost', icon: <IndianRupee className="w-4 h-4 text-slate-400" />, format: (v: any) => `₹${v} Cr` },
-                  { key: 'supporters', label: 'Citizen Supporters', icon: <Heart className="w-4 h-4 text-slate-400" />, format: (v: any) => v.toLocaleString() },
-                  { key: 'longTermScore', label: 'AI Priority Score', icon: <Zap className="w-4 h-4 text-slate-400" />, format: (v: any) => `${Math.round(v)}/100` },
+                  { key: 'populationImpacted', label: 'Population Impacted', icon: <Users className="w-4 h-4 text-slate-400" />, format: (v: number) => v.toLocaleString() },
+                  { key: 'estimatedCostCrore', label: 'Estimated Cost', icon: <IndianRupee className="w-4 h-4 text-slate-400" />, format: (v: number) => `₹${v} Cr` },
+                  { key: 'supporters', label: 'Citizen Supporters', icon: <Heart className="w-4 h-4 text-slate-400" />, format: (v: number) => v.toLocaleString() },
+                  { key: 'longTermScore', label: 'AI Priority Score', icon: <Zap className="w-4 h-4 text-slate-400" />, format: (v: number) => `${Math.round(v)}/100` },
                 ].map((metric) => {
                   const valA = result.scenarioA[metric.key as keyof Scenario];
                   const valB = result.scenarioB[metric.key as keyof Scenario];
