@@ -60,7 +60,7 @@ export default function CitizenProfile() {
 
   const fetchProfileData = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/profile/${user?.id}`);
+      const response = await fetch(`${(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/$/, '')}/api/profile/${user?.id}`);
       if (response.ok) {
         const data = await response.json();
         setSuggestionsCount(data.suggestionsCount || 0);
@@ -86,7 +86,7 @@ export default function CitizenProfile() {
       }
 
       // Sync with backend API
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/profile/sync`, {
+      const response = await fetch(`${(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/$/, '')}/api/profile/sync`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

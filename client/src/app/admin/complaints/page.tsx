@@ -31,7 +31,7 @@ export default function AdminComplaintsList() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/suggestions`)
+    fetch(`${(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/$/, '')}/api/suggestions`)
       .then(res => res.json())
       .then(data => {
         setComplaints(data);

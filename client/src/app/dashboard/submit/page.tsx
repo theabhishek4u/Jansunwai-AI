@@ -120,7 +120,7 @@ export default function SubmitSuggestion() {
     try {
       const formData = new FormData();
       formData.append('image', file);
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/ai/analyze-image`, {
+      const res = await fetch(`${(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/$/, '')}/api/ai/analyze-image`, {
         method: 'POST',
         body: formData,
       });
@@ -455,7 +455,7 @@ export default function SubmitSuggestion() {
     if (!textToAnalyze) return;
     setAiLoading(true);
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/ai/writing-assist`, {
+      const response = await fetch(`${(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/$/, '')}/api/ai/writing-assist`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -520,7 +520,7 @@ export default function SubmitSuggestion() {
     try {
       // 1. Duplicate check interceptor (if warning not ignored)
       if (!ignoreDuplicateWarning) {
-        const dupRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/ai/duplicate-check`, {
+        const dupRes = await fetch(`${(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/$/, '')}/api/ai/duplicate-check`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ title, description, category, district })
@@ -571,7 +571,7 @@ export default function SubmitSuggestion() {
         formData.append('attachmentCount', attachments.length.toString());
       }
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/suggestions`, {
+      const response = await fetch(`${(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/$/, '')}/api/suggestions`, {
         method: 'POST',
         body: formData
       });
@@ -607,7 +607,7 @@ export default function SubmitSuggestion() {
     if (!duplicateFoundInfo || !user) return;
     setIsSupportingFromModal(true);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/suggestions/${duplicateFoundInfo.id}/support`, {
+      const res = await fetch(`${(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/$/, '')}/api/suggestions/${duplicateFoundInfo.id}/support`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: user.id })
@@ -681,7 +681,7 @@ export default function SubmitSuggestion() {
           formData.append('image', firstImage.file);
         }
 
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/ai/analyze-suggestion`, {
+        const response = await fetch(`${(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/$/, '')}/api/ai/analyze-suggestion`, {
           method: 'POST',
           body: formData
         });

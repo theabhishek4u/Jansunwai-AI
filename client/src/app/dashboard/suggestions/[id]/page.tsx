@@ -87,7 +87,7 @@ export default function SuggestionDetails() {
 
   const checkSupportStatus = async () => {
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/suggestions/${id}/support/${user?.id}`);
+      const res = await fetch(`${(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/$/, '')}/api/suggestions/${id}/support/${user?.id}`);
       if (res.ok) {
         const data = await res.json();
         setHasSupported(data.supported);
@@ -101,7 +101,7 @@ export default function SuggestionDetails() {
     if (!user || isSupporting || hasSupported) return;
     setIsSupporting(true);
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/suggestions/${id}/support`, {
+      const res = await fetch(`${(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/$/, '')}/api/suggestions/${id}/support`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ userId: user.id })
@@ -133,7 +133,7 @@ export default function SuggestionDetails() {
 
   const fetchSuggestionDetails = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/suggestions/${id}`);
+      const response = await fetch(`${(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/$/, '')}/api/suggestions/${id}`);
       if (response.ok) {
         const data = await response.json();
         setSugg(data);

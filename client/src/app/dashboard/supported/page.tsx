@@ -41,7 +41,7 @@ export default function SupportedProposalsPage() {
     try {
       // Fetch public complaints from the user's local area (village_ward) so they can support them
       const localArea = user?.village_ward || 'Gomti Nagar'; // Default to Gomti Nagar for testing if none is set
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/suggestions?village=${localArea}`);
+      const res = await fetch(`${(process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000').replace(/\/$/, '')}/api/suggestions?village=${localArea}`);
       if (res.ok) {
         let data = await res.json();
         // Filter out the user's own complaints so they support others
