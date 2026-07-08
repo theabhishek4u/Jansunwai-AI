@@ -460,12 +460,17 @@ export const mockDb = {
       return newProfile;
     }
   },
-  getSuggestions: async (filters?: { citizen_id?: string; category?: string; district?: string }) => {
+  getSuggestions: async (filters?: { citizen_id?: string; category?: string; district?: string; village?: string }): Promise<Suggestion[]> => {
     console.log("mockDb getSuggestions filters:", filters);
     let list = [...suggestions];
     if (filters?.citizen_id) list = list.filter(s => s.citizen_id === filters.citizen_id);
     if (filters?.category && filters.category !== "undefined") list = list.filter(s => s.category === filters.category);
-    if (filters?.district && filters.district !== "undefined") list = list.filter(s => s.district.toLowerCase() === filters.district?.toLowerCase());
+    if (filters?.district) {
+      list = list.filter(s => s.district?.toLowerCase() === filters.district?.toLowerCase());
+    }
+    if (filters?.village) {
+      list = list.filter(s => s.village?.toLowerCase() === filters.village?.toLowerCase());
+    }
     console.log(`mockDb returning ${list.length} suggestions`);
     return list.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
   },

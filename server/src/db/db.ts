@@ -74,7 +74,7 @@ export const db = {
     return mockDb.upsertProfile(profile);
   },
 
-  getSuggestions: async (filters?: { citizen_id?: string; category?: string; district?: string }): Promise<Suggestion[]> => {
+  getSuggestions: async (filters?: { citizen_id?: string; category?: string; district?: string; village?: string }): Promise<Suggestion[]> => {
     let supabaseData: Suggestion[] = [];
     if (supabase) {
       let query = supabase.from('suggestions').select('*');
@@ -86,6 +86,9 @@ export const db = {
       }
       if (filters?.district) {
         query = query.ilike('district', filters.district);
+      }
+      if (filters?.village) {
+        query = query.ilike('village', filters.village);
       }
       const { data, error } = await query.order('created_at', { ascending: false });
       if (!error && data) {

@@ -236,38 +236,55 @@ export default function MpComplaintsPage() {
             <button
               key={cat.name}
               onClick={() => setFilterCategory(filterCategory === cat.name ? '' : cat.name)}
-              className={`p-4 rounded-2xl flex flex-col justify-center text-left hover:scale-[1.03] active:scale-[0.97] transition-all duration-300 cursor-pointer border relative overflow-hidden group shadow-md ${
+              className={`relative p-5 rounded-2xl flex flex-col justify-center text-left hover:-translate-y-1 active:scale-[0.98] transition-all duration-400 cursor-pointer border overflow-hidden group shadow-lg ${
                 filterCategory === cat.name 
-                  ? 'bg-[#1c223c] border-gov-blue-light/50 shadow-lg shadow-blue-500/10' 
-                  : 'bg-[#0f142c] border-[#1e293b]/30 hover:border-[#1e293b]/60'
+                  ? 'bg-gradient-to-br from-[#1c2242] to-[#131836] border-indigo-500/50 shadow-indigo-500/20' 
+                  : 'bg-gradient-to-br from-[#0f142c] to-[#0a0d1e] border-[#1e293b]/40 hover:border-[#1e293b]/80 hover:shadow-indigo-500/10'
               }`}
             >
-              <div className="flex items-center justify-between gap-3 w-full">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-slate-900/50 flex items-center justify-center border border-[#1e293b]/50 shadow-inner shrink-0 group-hover:scale-110 transition-transform">
+              {/* Subtle top highlight */}
+              <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+              
+              {/* Subtle background glow when active */}
+              {filterCategory === cat.name && (
+                <div className="absolute inset-0 bg-indigo-500/5 blur-xl rounded-2xl pointer-events-none" />
+              )}
+
+              <div className="flex items-center justify-between gap-4 w-full relative z-10">
+                <div className="flex items-center gap-4">
+                  <div className={`w-11 h-11 rounded-xl flex items-center justify-center border shadow-inner shrink-0 transition-all duration-300 ${
+                    filterCategory === cat.name 
+                      ? 'bg-indigo-500/20 border-indigo-500/30 group-hover:scale-110' 
+                      : 'bg-slate-900/60 border-slate-700/50 group-hover:bg-slate-800/80 group-hover:scale-110'
+                  }`}>
                     {getCategoryIcon(cat.name)}
                   </div>
-                  <div className="text-left">
-                    <span className="block text-[11px] font-black text-slate-200 uppercase tracking-wide group-hover:text-white transition-colors" title={cat.name}>
+                  <div className="text-left flex-1 min-w-0">
+                    <span className="block text-[11px] font-extrabold text-slate-300 uppercase tracking-wider group-hover:text-white transition-colors truncate" title={cat.name}>
                       {cat.name}
                     </span>
-                    <span className="text-sm font-mono font-bold text-amber-400 block mt-0.5">{cat.active}</span>
+                    <div className="flex items-baseline gap-1 mt-1">
+                      <span className="text-lg font-black text-amber-400 font-mono tracking-tight">{cat.active}</span>
+                      <span className="text-[9px] text-slate-500 uppercase font-semibold">Active</span>
+                    </div>
                   </div>
                 </div>
                 
-                <div className="relative w-8 h-8 flex items-center justify-center shrink-0">
-                  <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
-                    <circle cx="18" cy="18" r="15.915" fill="none" className="stroke-[#131930]" strokeWidth="3.5" />
+                <div className="relative w-9 h-9 flex items-center justify-center shrink-0">
+                  <svg className="w-full h-full transform -rotate-90 drop-shadow-md" viewBox="0 0 36 36">
+                    <circle cx="18" cy="18" r="15.915" fill="none" className="stroke-[#131930]" strokeWidth="4" />
                     <circle 
                       cx="18" cy="18" r="15.915" fill="none" 
-                      className="stroke-emerald-500 transition-all duration-700" 
-                      strokeWidth="3.5"
+                      className={`${filterCategory === cat.name ? 'stroke-indigo-400' : 'stroke-emerald-500'} transition-all duration-1000 ease-out`} 
+                      strokeWidth="4"
                       strokeDasharray="100"
                       strokeDashoffset={100 - cat.rate}
                       strokeLinecap="round"
                     />
                   </svg>
-                  <span className="absolute text-[7px] font-black text-emerald-400 drop-shadow-[0_0_4px_rgba(16,185,129,0.4)]">{cat.rate}%</span>
+                  <span className={`absolute text-[8px] font-black ${filterCategory === cat.name ? 'text-indigo-300 drop-shadow-[0_0_5px_rgba(99,102,241,0.5)]' : 'text-emerald-400 drop-shadow-[0_0_5px_rgba(16,185,129,0.5)]'}`}>
+                    {cat.rate}%
+                  </span>
                 </div>
               </div>
             </button>

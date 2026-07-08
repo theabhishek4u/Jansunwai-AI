@@ -230,7 +230,7 @@ export const createSuggestion = async (req: Request, res: Response) => {
  * Fetch suggestions with optional filtering.
  */
 export const getSuggestions = async (req: Request, res: Response) => {
-  const { citizen_id, category, district } = req.query;
+  const { citizen_id, category, district, village } = req.query;
   console.log("=== GET /api/suggestions ===");
   console.log("Query:", req.query);
 
@@ -238,7 +238,8 @@ export const getSuggestions = async (req: Request, res: Response) => {
     const list = await db.getSuggestions({
       citizen_id: citizen_id as string,
       category: category as string,
-      district: district as string
+      district: district as string,
+      village: village as string
     });
     return res.json(list);
   } catch (error: any) {

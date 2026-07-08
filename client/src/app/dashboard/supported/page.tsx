@@ -39,13 +39,19 @@ export default function SupportedProposalsPage() {
 
   const fetchSupportedProposals = async () => {
     try {
-      const res = await fetch(`http://localhost:5000/api/profile/${user?.id}/supported`);
+      // Fetch public complaints from the user's local area (village_ward) so they can support them
+      const localArea = user?.village_ward || 'Gomti Nagar'; // Default to Gomti Nagar for testing if none is set
+      const res = await fetch(`http://localhost:5000/api/suggestions?village=${localArea}`);
       if (res.ok) {
-        const data = await res.json();
+        let data = await res.json();
+        // Filter out the user's own complaints so they support others
+        if (user?.id) {
+          data = data.filter((s: any) => s.citizen_id !== user.id);
+        }
         setProposals(data);
       }
     } catch (err) {
-      console.error('Failed to load supported suggestions:', err);
+      console.error('Failed to load local suggestions:', err);
     } finally {
       setLoading(false);
     }
