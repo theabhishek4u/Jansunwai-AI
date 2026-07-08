@@ -88,7 +88,7 @@ export function Hero() {
   const activeTicket = mockTicketCycle[currentStep];
 
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden hero-gradient pt-24 pb-20">
+    <section className="relative overflow-hidden hero-gradient pt-28 pb-20 md:pt-32 md:pb-24">
       {/* Animated background orbs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <motion.div

@@ -292,6 +292,30 @@ export function AIPlayground() {
                 </div>
               </div>
 
+              {/* Prompt Helpers */}
+              <div className="mt-3 flex flex-wrap gap-2 items-center">
+                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Try Prompts:</span>
+                {[
+                  { label: "🏥 Health Center (Hinglish)", text: "Gomti Nagar me naye primary health center ki zaroorat hai, zameen empty padi hai." },
+                  { label: "💧 Water Pipeline (Hindi)", text: "हमारे गांव में साफ पानी की टंकी और पाइपलाइन बिछाने की तत्काल आवश्यकता है।" },
+                  { label: "🛣️ Road Resurfacing (English)", text: "The main bypass highway in Kanpur has severe potholes, requiring urgent road resurfacing and structural repairs." }
+                ].map((helper, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => {
+                      setCustomText(helper.text);
+                      setInputText(helper.text);
+                      setResult(null);
+                      setStep(0);
+                    }}
+                    className="text-[10px] font-semibold px-2.5 py-1 rounded-full bg-slate-900/50 border border-white/5 hover:border-primary/30 text-slate-400 hover:text-slate-200 transition-colors cursor-pointer"
+                  >
+                    {helper.label}
+                  </button>
+                ))}
+              </div>
+
               <div className="mt-5">
                 <Button
                   className="w-full bg-linear-to-r from-gov-blue to-ai-purple text-white shadow-lg shadow-gov-blue/20 hover:shadow-gov-blue/40 h-12 rounded-xl text-sm font-semibold transition-all duration-300 flex items-center justify-center gap-2"

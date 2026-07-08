@@ -15,7 +15,8 @@ import {
   ChevronDown,
   Phone,
   Mail,
-  Code
+  Code,
+  X
 } from 'lucide-react';
 
 import { Hero } from '@/components/landing/Hero';
@@ -26,10 +27,13 @@ import { Testimonials } from '@/components/landing/Testimonials';
 import { AIPlayground } from '@/components/landing/AIPlayground';
 import { DemoTour } from '@/components/landing/DemoTour';
 import { CTA } from '@/components/landing/CTA';
+import { ManualVsAI } from '@/components/landing/ManualVsAI';
+import { SecurityBadges } from '@/components/landing/SecurityBadges';
 
 export default function LandingPage() {
   const { user } = useAuth();
   const [portalDropdownOpen, setPortalDropdownOpen] = useState(false);
+  const [activeModal, setActiveModal] = useState<'privacy' | 'terms' | 'help' | null>(null);
 
   return (
     <div className="flex flex-col min-h-screen font-sans selection:bg-primary/30 selection:text-white">
@@ -121,6 +125,7 @@ export default function LandingPage() {
       <main className="flex-1 w-full flex flex-col overflow-x-hidden">
         <Hero />
         <Features />
+        <ManualVsAI />
         <DemoWorkflow />
         <AIPlayground />
         <Suspense fallback={<div>Loading Demo...</div>}>
@@ -128,14 +133,18 @@ export default function LandingPage() {
         </Suspense>
         <Statistics />
         <Testimonials />
+        <SecurityBadges />
         <CTA />
       </main>
 
       {/* ─── FOOTER ─── */}
-      <footer className="mt-auto border-t border-border bg-background py-16 text-muted-foreground">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-10 md:gap-8 pb-12">
-            {/* Brand Column */}
+      <footer className="bg-card border-t border-border/40 py-16 relative overflow-hidden mt-auto">
+        {/* Vignette blue glow effect */}
+        <div className="absolute -bottom-20 left-1/2 -translate-x-1/2 w-[700px] h-[350px] rounded-full bg-gov-blue/15 blur-[100px] pointer-events-none z-0" />
+
+        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-12 pb-12">
+            {/* Branding Column */}
             <div className="space-y-4">
               <div className="flex items-center space-x-3">
                 <div className="w-10 h-10 rounded-xl bg-gov-blue/10 border border-gov-blue/20 flex items-center justify-center text-gov-blue">
@@ -154,7 +163,7 @@ export default function LandingPage() {
             {/* Platform Column */}
             <div className="space-y-4">
               <h4 className="text-xs font-bold text-foreground uppercase tracking-wider">Platform</h4>
-              <ul className="space-y-2.5 text-xs">
+              <ul className="space-y-2.5 text-xs text-muted-foreground">
                 <li>
                   <Link href="/auth/citizen" className="hover:text-foreground transition-colors">Citizen Login</Link>
                 </li>
@@ -173,15 +182,15 @@ export default function LandingPage() {
             {/* Resources Column */}
             <div className="space-y-4">
               <h4 className="text-xs font-bold text-foreground uppercase tracking-wider">Resources</h4>
-              <ul className="space-y-2.5 text-xs">
+              <ul className="space-y-2.5 text-xs text-muted-foreground">
                 <li>
-                  <Link href="#" className="hover:text-foreground transition-colors">Privacy Policy</Link>
+                  <button onClick={() => setActiveModal('privacy')} className="hover:text-foreground transition-colors text-left">Privacy Policy</button>
                 </li>
                 <li>
-                  <Link href="#" className="hover:text-foreground transition-colors">Terms of Service</Link>
+                  <button onClick={() => setActiveModal('terms')} className="hover:text-foreground transition-colors text-left">Terms of Service</button>
                 </li>
                 <li>
-                  <Link href="#" className="hover:text-foreground transition-colors">Help Center</Link>
+                  <button onClick={() => setActiveModal('help')} className="hover:text-foreground transition-colors text-left">Help Center</button>
                 </li>
               </ul>
             </div>
@@ -208,12 +217,6 @@ export default function LandingPage() {
                   </div>
                   <a href="mailto:support@jansunwai.gov.in" className="text-foreground/80 hover:text-foreground transition-colors">support@jansunwai.gov.in</a>
                 </li>
-                <li className="flex items-center space-x-3">
-                  <div className="w-8 h-8 rounded-lg bg-muted border border-border/60 flex items-center justify-center text-gov-blue shrink-0">
-                    <Code className="w-3.5 h-3.5" />
-                  </div>
-                  <span className="text-foreground/80 hover:text-foreground cursor-pointer transition-colors">Developers</span>
-                </li>
               </ul>
             </div>
           </div>
@@ -226,6 +229,79 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
+
+      {/* ─── MODAL OVERLAYS ─── */}
+      <AnimatePresence>
+        {activeModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setActiveModal(null)}
+              className="absolute inset-0 bg-black/80 backdrop-blur-md"
+            />
+
+            {/* Modal Box */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
+              className="relative bg-card border border-border/80 rounded-2xl w-full max-w-xl max-h-[80vh] overflow-y-auto p-6 md:p-8 shadow-2xl z-50 flex flex-col"
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between border-b border-border/50 pb-4 mb-6">
+                <h3 className="text-lg font-bold text-foreground">
+                  {activeModal === 'privacy' && 'Privacy Policy'}
+                  {activeModal === 'terms' && 'Terms of Service'}
+                  {activeModal === 'help' && 'Help Center'}
+                </h3>
+                <button
+                  onClick={() => setActiveModal(null)}
+                  className="w-8 h-8 rounded-full hover:bg-muted/80 flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+
+              {/* Content */}
+              <div className="text-xs text-muted-foreground leading-relaxed space-y-4 overflow-y-auto flex-1 pr-1 font-sans">
+                {activeModal === 'privacy' && (
+                  <>
+                    <p className="font-semibold text-foreground text-sm">1. Data Collection & Privacy Safeguards</p>
+                    <p>At Jansunwai AI, we prioritize citizen data protection. We collect GPS coordinates, voice recordings, and text descriptions solely for automated grievance routing. All data is encrypted in transit and at rest using AES-256 protocols.</p>
+                    <p className="font-semibold text-foreground text-sm">2. NLP Translation & AI Analysis</p>
+                    <p>Citizen voice inputs (in Hindi, Hinglish, etc.) are transcribed and summarized using our localized LLM. The processed text is routed only to authorized government execution portals and public representatives.</p>
+                    <p className="font-semibold text-foreground text-sm">3. Third-Party Sharing</p>
+                    <p>No citizen data is shared with commercial entities. Information is only dispatched to authenticated department officers (PWD, Jal Nigam, etc.) and district magistrates for administrative execution.</p>
+                  </>
+                )}
+                {activeModal === 'terms' && (
+                  <>
+                    <p className="font-semibold text-foreground text-sm">1. Acceptable Use Policy</p>
+                    <p>Citizens must submit honest, real-time civic issues. Filing fraudulent complaints, spamming the AI routing engine, or uploading unrelated media is strictly prohibited and can result in account suspension.</p>
+                    <p className="font-semibold text-foreground text-sm">2. Automated Triage & SLA Timelines</p>
+                    <p>By filing a grievance, you acknowledge that classification, priority tagging, and nodal allocation are performed automatically by the AI system. Actual resolution is carried out by municipal/district departments under strict SLA timelines.</p>
+                    <p className="font-semibold text-foreground text-sm">3. Representative Supervision</p>
+                    <p>Complaints marked critical are forwarded to the local MP/MLA dashboard. Representatives have visual review rights to allocate local budget funds for high-impact infrastructure grievances.</p>
+                  </>
+                )}
+                {activeModal === 'help' && (
+                  <>
+                    <p className="font-semibold text-foreground text-sm">How do I report a grievance?</p>
+                    <p>Simply click on "File a Complaint" from your dashboard, record a 15-second Hindi/English voice note or upload a photo of the issue. The AI will auto-detect your location and route the complaint instantly.</p>
+                    <p className="font-semibold text-foreground text-sm">How does the SLA escalation work?</p>
+                    <p>Each category has a predetermined resolution time (e.g., 24 hours for water leaks, 72 hours for school construction). If a department officer breaches this timeframe, the AI automatically escalates the ticket to the Chief Engineer or District Magistrate.</p>
+                    <p className="font-semibold text-foreground text-sm">Can I track my status in real-time?</p>
+                    <p>Yes. The platform displays an Amazon-style status pipeline. You will also receive real-time SMS and WhatsApp notifications once work starts and when evidence photos are submitted.</p>
+                  </>
+                )}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

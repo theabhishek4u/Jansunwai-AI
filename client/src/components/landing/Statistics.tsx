@@ -120,7 +120,7 @@ export function Statistics() {
   const thirdResolution = mockLiveResolutions[(tickerIndex + 2) % mockLiveResolutions.length];
 
   return (
-    <section className="py-24 relative overflow-hidden">
+    <section className="pt-24 pb-12 relative overflow-hidden">
       {/* Background decoration grid */}
       <div className="absolute top-1/2 left-0 right-0 h-px bg-border/20 pointer-events-none" />
       <div className="absolute top-1/2 left-1/4 -translate-y-1/2 w-[350px] h-[350px] rounded-full bg-trust-green/5 blur-[100px] pointer-events-none" />
