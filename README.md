@@ -1,33 +1,35 @@
 <div align="center">
   <img src="https://via.placeholder.com/150/4f46e5/ffffff?text=Jansunwai+AI" alt="Jansunwai AI Logo" width="120" />
   <h1>🇮🇳 Jansunwai AI (जनसुनवाई)</h1>
-  <p><strong>AI-Powered Constituency Decision Intelligence Platform for Modern India</strong></p>
+  <p><strong>AI-Powered Constituency Decision Intelligence & Execution Platform for Modern India</strong></p>
   
   [![Next.js 15](https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
+  [![React 19](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react)](https://react.dev/)
   [![Node.js](https://img.shields.io/badge/Node.js-Express-339933?style=for-the-badge&logo=nodedotjs)](https://nodejs.org/)
+  [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
   [![Gemini 2.5 Flash](https://img.shields.io/badge/AI-Gemini%202.5%20Flash-4285F4?style=for-the-badge&logo=google)](https://deepmind.google/technologies/gemini/)
   [![Supabase](https://img.shields.io/badge/Database-Supabase-3ECF8E?style=for-the-badge&logo=supabase)](https://supabase.com/)
-  [![Tailwind CSS](https://img.shields.io/badge/Styling-Tailwind%20CSS-06B6D4?style=for-the-badge&logo=tailwindcss)](https://tailwindcss.com/)
+  [![Tailwind CSS v4](https://img.shields.io/badge/Styling-Tailwind%20CSS-06B6D4?style=for-the-badge&logo=tailwindcss)](https://tailwindcss.com/)
 </div>
 
 <br/>
 
 ## 🌟 The Vision
 
-Traditional public grievance filing is often broken—plagued by duplicate complaints, lack of structural context, and delayed responses. Members of Parliament (MPs) struggle to parse thousands of physical letters and unstructured digital complaints, making data-driven budget allocation almost impossible.
+Traditional public grievance filing is often broken—plagued by duplicate complaints, lack of structural context, and delayed responses. Members of Parliament (MPs) struggle to parse thousands of physical letters and unstructured digital complaints, making data-driven budget allocation almost impossible. 
 
-**Jansunwai AI** is a complete paradigm shift. It transforms static complaint filing into an interactive, **Data-Driven Constituency Decision Intelligence Platform**. By aggregating citizen suggestions and applying advanced **Artificial Intelligence**, it filters noise, verifies physical realities via Image Analysis, and empowers MPs to simulate and execute the most impactful infrastructural developments.
+**Jansunwai AI** is a complete paradigm shift. It transforms static complaint filing into an interactive, **Data-Driven Constituency Decision Intelligence & Execution Platform**. By aggregating citizen suggestions, verifying them via Artificial Intelligence, enabling MPs to simulate budget impact, and seamlessly pushing tasks to local Departments, it bridges the gap between governance and execution.
 
 ---
 
-## 🧠 Core AI Innovations
+## 🧠 How AI is Powering Jansunwai
 
-Jansunwai AI isn't just a dashboard; it's an intelligent agent embedded within governance.
+Jansunwai AI goes beyond a standard CRUD dashboard by integrating multi-modal AI agents directly into the governance pipeline:
 
-* 👁️ **Gemini Vision (Real-Time Image Analyzer):** Citizens upload photos of damaged roads, broken pipes, or unbuilt schools. The AI instantly analyzes the image in real-time, detecting the exact issue, estimating severity, and generating a confidence score—preventing fraudulent submissions.
-* 🎙️ **Multilingual Voice-to-Text & Co-Author:** Illiterate or non-tech-savvy citizens can record audio in their native language. The AI transcribes the audio and instantly translates and structures it into a highly professional, formalized English proposal.
-* 🔍 **Semantic Duplicate Detection:** Before a complaint is logged, the AI scans historical records to find semantically similar complaints, merging them into a single "high-impact" petition to prevent database clutter.
-* 📈 **Priority Engine & Scoring:** AI grades every incoming complaint on Completeness (0-100%), Urgency, and Estimated Beneficiaries, automatically pushing critical issues to the top of the MP's dashboard.
+* 👁️ **Gemini Vision (Real-Time Evidence Analyzer):** When citizens upload photos of a broken road or water leak, the AI instantaneously analyzes the image. It detects the precise infrastructural issue, estimates the severity level, and generates a confidence score to prevent fake or spoofed submissions.
+* 🎙️ **Multilingual Voice-to-Text & Smart Structuring:** Designed for inclusivity, citizens can record complaints in their native language or raw format. The AI transcribes the audio, translates it, and synthesizes it into a formalized, highly professional English proposal ready for parliamentary review.
+* 🔍 **Semantic Deduplication:** To prevent database clutter, the AI engine scans historical records for semantically similar complaints. It groups parallel local issues into unified "high-impact" petitions.
+* 📈 **Priority Scoring Engine:** The AI autonomously grades every incoming complaint on Completeness (0-100%), Urgency, and Estimated Beneficiaries, automatically pushing critical issues to the top of the MP's dashboard for immediate action.
 
 ---
 
@@ -38,12 +40,14 @@ graph TD
     %% Entities
     Citizen([🧑‍🤝‍🧑 Citizen])
     MP([🏛️ Member of Parliament])
+    Dept([👷 Department Officials])
     Admin([🛡️ Super Admin])
 
     %% Frontend Portals
-    subgraph Frontend [Next.js 15 Client]
+    subgraph Frontend [Next.js 15 Client App]
         CP[Citizen Portal]
         MD[MP Dashboard]
+        DP[Department Execution Portal]
         AC[Admin Command Center]
     end
 
@@ -51,7 +55,7 @@ graph TD
     subgraph Backend [Node.js / Express API]
         Router[API Router]
         AI_Controller[AI Controller]
-        Sugg_Controller[Suggestion Controller]
+        Task_Controller[Task & Suggestion Controller]
     end
 
     %% External Services
@@ -60,83 +64,97 @@ graph TD
 
     %% Connections
     Citizen <-->|Voice/Photo/Text| CP
-    MP <-->|View & Approve| MD
-    Admin <-->|Manage Prompts & Data| AC
+    MP <-->|Budget & Approve| MD
+    Dept <-->|Update Status| DP
+    Admin <-->|Manage Rules| AC
 
-    CP <-->|REST| Router
-    MD <-->|REST| Router
-    AC <-->|REST| Router
+    CP <-->|REST API| Router
+    MD <-->|REST API| Router
+    DP <-->|REST API| Router
+    AC <-->|REST API| Router
 
     Router --> AI_Controller
-    Router --> Sugg_Controller
+    Router --> Task_Controller
 
     AI_Controller <-->|Vision / NLP / Processing| Gemini
-    Sugg_Controller <-->|CRUD Operations| Supabase
+    Task_Controller <-->|CRUD Operations| Supabase
 ```
 
 ---
 
-## 👥 Deep-Dive: User Portals
+## 👥 Deep-Dive: The Four Core Portals
 
-### 1. 🧑‍🤝‍🧑 Citizen Engagement Portal (`/dashboard`)
-Designed for extreme accessibility and empowerment.
-* **Smart Submission Form:** Real-time map picker (OpenStreetMap), drag-and-drop evidence hub, and instant AI validation.
-* **AI Image Analysis in Real-Time:** Upload a photo, and the AI evaluates it on the spot (Detects Issue, Severity, Estimated Scope).
-* **Live Tracker & Gamification:** Citizens can track the exact timeline of their complaint (AI Audit -> Under Review -> Planned -> Completed) and earn badges for verified infrastructural reporting.
+### 1. 🧑‍🤝‍🧑 Citizen Engagement Portal
+**The entry point for public participation.**
+* **Smart Submission Hub:** Citizens submit complaints with real-time OpenStreetMap picking, drag-and-drop evidence uploads, and live AI validation.
+* **Live Tracker & Gamification:** View the exact timeline of a complaint (AI Audit -> Under MP Review -> Forwarded to Dept -> Completed). Citizens earn trust scores for validated reports.
 
-### 2. 🏛️ MP Decision Intelligence Portal (`/mp`)
-A command center for elected representatives to make the best use of their budgets.
-* **KPI Command Gauge:** Health indicators displaying priority categories, registered users, and active projects.
-* **AI Copilot & Priority Engine:** An embedded AI assistant that summarizes thousands of complaints into actionable insights. It sorts issues by **Impact vs. Cost**.
-* **Budget Allocation Simulator:** Interactive sliders allowing MPs to tune funding across categories (Health, Roads, Water) and instantly see the simulated impact on the constituency's HDI (Human Development Index).
-* **PDF Governance Reporter:** One-click generation of beautifully formatted parliamentary session reports.
+### 2. 🏛️ MP Decision Intelligence Portal
+**A sophisticated command center for elected representatives.**
+* **KPI Command Gauge:** Executive summary of critical issues, priority complaints, and overall constituency health.
+* **AI Copilot & Priority Engine:** An embedded AI assistant that digests thousands of suggestions and sorts them by **Impact vs. Cost**.
+* **Budget Allocation Simulator:** Interactive sliders allowing MPs to tune funding across categories (Health, Roads, Water) to visually simulate the projected impact on the constituency's HDI (Human Development Index).
+* **Automated Sanctions:** One-click approval to instantly allocate funds and route the project directly to the relevant execution department.
 
-### 3. 🛡️ Super Admin National Command Center (`/admin`)
-The overarching view of the nation's operational health.
-* **Executive India Operations Map:** Dynamic vector mapping showing live API traffic and suggestion hotspots across states.
-* **Live Tick Ticker:** A real-time terminal feed of suggestions being processed nationally.
-* **Dynamic Prompt Configuration Suite:** Admins can edit the fundamental system prompts for the AI models on the fly—adjusting how strict the AI auditor should be without writing a single line of code.
-* **Public Datasets Ingestion:** Ground the AI's logic by uploading Census data or infrastructural baselines.
+### 3. 👷 Department Execution Portal *(New!)*
+**The operational ground-zero for government departments (PWD, Water, Health, etc.).**
+* **Department-Specific Task Queues:** Officials only see projects routed to their specific jurisdiction (e.g., PWD sees road projects, Water board sees plumbing tasks).
+* **Execution & Evidence Tracking:** Departments can update project statuses in real-time (e.g., "Tender Floated", "Work in Progress", "Completed").
+* **Proof of Work Uploads:** Allows ground engineers to upload completion photos, maintaining a verifiable audit trail back to the MP and the Citizen.
+
+### 4. 🛡️ Super Admin National Command Center
+**The overarching view of operational health.**
+* **Executive Operations Map:** Dynamic mapping showing live API traffic and suggestion hotspots.
+* **Dynamic Prompt Configuration Suite:** Admins can edit the fundamental system prompts for the AI models on the fly—adjusting strictness or language parameters without writing a single line of code.
+* **Broadcast Engine:** Push critical announcements directly to citizens, MPs, or Departments simultaneously.
 
 ---
 
-## 🔄 Complaint AI Workflow
+## 🔄 AI-Driven Execution Workflow
 
 ```mermaid
 sequenceDiagram
     participant Citizen
-    participant Client as Frontend Portal
-    participant Server as Node.js API
-    participant AI as Gemini 2.5 Flash
+    participant API as Node.js API
+    participant AI as Gemini 2.5
     participant DB as Supabase
     participant MP
+    participant Dept as Local Dept (PWD)
 
-    Citizen->>Client: Uploads Photo & Voice Note
-    Client->>Server: POST /api/ai/analyze-image
-    Server->>AI: Image + Prompt
-    AI-->>Server: Returns {"detected": "Pothole", "severity": "High"}
-    Server-->>Client: Renders Real-Time AI Score Card
-    Citizen->>Client: Clicks "Confirm & Submit"
-    Client->>Server: POST /api/suggestions (FormData)
-    Server->>AI: Transcript Translation & Priority Scoring
-    Server->>DB: Stores Complaint + Timeline Event
-    DB-->>Server: 201 Created
-    Server-->>Client: Success Animation (No Auto-Redirect)
-    Client-->>Citizen: Shows "Track Complaint Timeline"
-    
-    MP->>DB: Fetches Dashboard Analytics
-    DB-->>MP: High Priority Complaints First
+    Citizen->>API: Submits Photo + Voice Note
+    API->>AI: Analyzes Image & Transcribes Audio
+    AI-->>API: Returns {"issue": "Pothole", "severity": "High", "score": 98}
+    API->>DB: Stores AI-Verified Complaint
+    DB-->>MP: Highlights High-Priority Issue in Dashboard
+    MP->>API: Approves Budget & Sanctions Task
+    API->>DB: Updates Status -> "Approved"
+    DB-->>Dept: Routes Task to PWD Department Portal
+    Dept->>API: Marks "Work In Progress"
+    API->>Citizen: Sends Live Timeline Notification
+    Dept->>API: Uploads "Completed" Photo Evidence
+    API->>DB: Marks Project as Finished
+    DB-->>Citizen: Issue Resolved! 🎉
 ```
 
 ---
 
 ## 🛠️ Technology Stack
 
-* **Frontend:** Next.js 15 (App Router), React 19, Tailwind CSS v4, Framer Motion (Micro-animations), Recharts (Data Viz), Lucide Icons.
-* **Backend:** Node.js, Express.js, TypeScript.
-* **AI & Machine Learning:** Google GenAI SDK (Gemini 2.5 Flash for Multimodal Vision & NLP).
-* **Database & Storage:** Supabase (PostgreSQL), Multer (In-memory Buffer processing).
-* **Geospatial:** OpenStreetMap Nominatim API (Reverse Geocoding).
+**Frontend (Client)**
+* **Framework:** Next.js 15 (App Router), React 19
+* **Language:** TypeScript
+* **Styling:** Tailwind CSS v4, Framer Motion (for fluid micro-animations)
+* **Data Visualization & Maps:** Recharts, Leaflet / OpenStreetMap
+
+**Backend (Server)**
+* **Framework:** Node.js, Express.js
+* **Language:** TypeScript
+* **Core Logic:** Custom routing and controller architecture
+
+**AI & Cloud**
+* **AI Engine:** Google GenAI SDK (Gemini 2.5 Flash for Multimodal Vision & NLP)
+* **Database:** Supabase (PostgreSQL) 
+* **Data Handling:** Multer (In-memory buffer processing for real-time edge capabilities)
 
 ---
 
@@ -153,14 +171,16 @@ npm install
 ```
 
 ### 3. Environment Variables
-Create a `.env` file inside the `server/` directory:
+Create a `.env.local` file inside the root directory:
 ```env
+NEXT_PUBLIC_API_URL=http://localhost:5000
+# Backend Env Variables (in server/.env)
 PORT=5000
 GEMINI_API_KEY=your_gemini_api_key
 SUPABASE_URL=your_supabase_url
 SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
-*(💡 Note: If Supabase credentials are not provided, the backend seamlessly falls back to a robust In-Memory Mock Database, perfect for Hackathon demos!)*
+*(💡 Note: If Supabase credentials are not provided, the system gracefully falls back to a robust In-Memory Database, making it plug-and-play for hackathon demonstrations!)*
 
 ### 4. Boot up the System
 Run both the Next.js frontend and Express backend concurrently:
@@ -174,19 +194,20 @@ npm run dev
 
 ## 🔑 Demo Quick-Access Credentials
 
-To experience the platform across different roles, use the built-in preset login buttons on the `/auth` page, or use the credentials below:
+To experience the platform across all operational levels, you can use the preset login buttons on the `/auth` pages, or use the exact credentials below:
 
-| Role | Email | Password | Redirects To |
+| Portal Role | Login URL | Email | Password |
 | :--- | :--- | :--- | :--- |
-| **Citizen** | `aarav@mail.com` | `password` | `/dashboard` |
-| **MP / Official** | `mp@jansunwai.gov.in` | `password` | `/mp` |
-| **Super Admin** | `admin@jansunwai.gov.in` | `password` | `/admin` |
+| **Citizen** | `/auth/citizen` | `aarav@mail.com` | `password` |
+| **MP / Official** | `/auth/mp` | `mp@jansunwai.gov.in` | `password` |
+| **Department (PWD)** | `/department/login` | `pwd@jansunwai.gov.in` | `password` |
+| **Super Admin** | `/auth/admin` | `admin@jansunwai.gov.in` | `password` |
 
 ---
 
 ## 🏆 Real-World Impact
 
-Jansunwai AI doesn't just digitize complaints; it **optimizes governance**. By drastically reducing the noise of duplicate and invalid complaints, and by structuring raw citizen grief into actionable, AI-estimated project proposals, it allows our leaders to spend less time reading and more time **building**.
+Jansunwai AI doesn't just digitize complaints; it **optimizes the entire lifecycle of governance**. By drastically reducing the noise of duplicate or invalid complaints, structuring raw citizen grief into AI-estimated project proposals, and providing a seamless execution pipeline directly to local departments, it allows our leaders to spend less time reading and more time **building**.
 
 <p align="center">
   <i>Built with ❤️ for a smarter, data-driven India.</i>
