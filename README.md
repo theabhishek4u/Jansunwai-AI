@@ -16,6 +16,20 @@
 
 <br/>
 
+## 🎥 Demo Video
+
+<p align="center">
+  <a href="https://youtu.be/VDnTvyx5GiQ?si=AzYVYv3tFFEPWPDj">
+    <img src="https://img.youtube.com/vi/VDnTvyx5GiQ/maxresdefault.jpg" alt="Demo Video" width="800"/>
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://youtu.be/VDnTvyx5GiQ?si=AzYVYv3tFFEPWPDj">
+    <img src="https://img.shields.io/badge/▶%20Watch%20Demo-YouTube-red?style=for-the-badge&logo=youtube&logoColor=white" alt="Watch Demo"/>
+  </a>
+</p>
+
 ## 🌟 The Vision
 
 Traditional public grievance filing is often broken—plagued by duplicate complaints, lack of structural context, and delayed responses. Members of Parliament (MPs) struggle to parse thousands of physical letters and unstructured digital complaints, making data-driven budget allocation almost impossible. 
