@@ -3,6 +3,8 @@
   <h1>🇮🇳 Jansunwai AI (जनसुनवाई)</h1>
   <p><strong>AI-Powered Constituency Decision Intelligence & Execution Platform for Modern India</strong></p>
   
+  <h3>🌐 <a href="https://jansunwai-ai-client.vercel.app/">Live Demo (Frontend)</a> | ⚡ <a href="https://jansunwai-ai-server.vercel.app/">Live API (Backend)</a></h3>
+
   [![Next.js 15](https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
   [![React 19](https://img.shields.io/badge/React-19-61DAFB?style=for-the-badge&logo=react)](https://react.dev/)
   [![Node.js](https://img.shields.io/badge/Node.js-Express-339933?style=for-the-badge&logo=nodedotjs)](https://nodejs.org/)
@@ -187,12 +189,16 @@ Run both the Next.js frontend and Express backend concurrently:
 ```bash
 npm run dev
 ```
-* **Frontend Portal:** [http://localhost:3000](http://localhost:3000)
-* **Backend API:** [http://localhost:5000](http://localhost:5000)
+* **Local Frontend Portal:** [http://localhost:3000](http://localhost:3000)
+* **Local Backend API:** [http://localhost:5000](http://localhost:5000)
 
 ---
 
-## 🔑 Demo Quick-Access Credentials
+## 🌐 Live Demo & Quick-Access Credentials
+
+The platform is fully deployed and accessible live!
+* **Frontend Portal:** [https://jansunwai-ai-client.vercel.app/](https://jansunwai-ai-client.vercel.app/)
+* **Backend API:** [https://jansunwai-ai-server.vercel.app/](https://jansunwai-ai-server.vercel.app/)
 
 To experience the platform across all operational levels, you can use the preset login buttons on the `/auth` pages, or use the exact credentials below:
 
