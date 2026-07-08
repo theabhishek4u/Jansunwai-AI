@@ -93,7 +93,6 @@ export default function MpComplaintsPage() {
   const categories = [...new Set(complaints.map(s => s.category))].sort();
   const villages = [...new Set(complaints.map(s => s.village))].sort();
 
-  // Group by category to compute stats dynamically
   const categoryStats = complaints.reduce((acc, curr) => {
     const cat = curr.category;
     if (!acc[cat]) {
@@ -108,7 +107,6 @@ export default function MpComplaintsPage() {
     return acc;
   }, {} as Record<string, { total: number; active: number; solved: number }>);
 
-  // Convert to array and filter out categories with 0 active complaints
   const activeCategoryList = Object.entries(categoryStats)
     .map(([name, stats]) => ({
       name,
@@ -120,6 +118,16 @@ export default function MpComplaintsPage() {
     .filter(cat => cat.active > 0)
     .sort((a, b) => b.active - a.active);
 
+  if (!activeCategoryList.some(c => c.name.toLowerCase() === 'others')) {
+    activeCategoryList.push({
+      name: 'Others',
+      active: 0,
+      solved: 0,
+      total: 0,
+      rate: 0
+    });
+  }
+
   const filtered = complaints
     .filter(s => {
       if (searchQuery && !s.title.toLowerCase().includes(searchQuery.toLowerCase())) return false;
@@ -130,6 +138,76 @@ export default function MpComplaintsPage() {
       return true;
     })
     .sort((a, b) => (b[sortBy] || 0) - (a[sortBy] || 0));
+
+  const activeComplaints = filtered.filter(s => s.status !== 'completed' && s.status !== 'rejected');
+  const completedComplaints = filtered.filter(s => s.status === 'completed')
+    .sort((a, b) => (b.supporters || 0) - (a.supporters || 0));
+
+  const renderComplaintCard = (s: SuggestionItem, i: number) => {
+    const sc = statusConfig[s.status] || statusConfig.submitted;
+    return (
+      <motion.div
+        key={s.id}
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: i * 0.02 }}
+      >
+        <Link
+          href={`/mp/complaints/${s.id}`}
+          className="flex items-center gap-4 p-4 rounded-2xl bg-[#0a0d1e] border border-[#1e293b]/20 hover:border-[#3b82f6]/30 transition-all group shadow-sm"
+        >
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500/10 to-amber-500/5 flex items-center justify-center shrink-0 border border-amber-500/10">
+            <span className="text-xs font-black text-amber-400">#{i + 1}</span>
+          </div>
+
+          <div className="flex-1 min-w-0">
+            <div className="flex flex-col">
+              <span className="text-[10px] text-slate-400 font-mono mb-1">{s.complaint_number || s.id.substring(0, 8)}</span>
+              <p className="text-sm font-semibold text-slate-200 truncate group-hover:text-white">{s.title}</p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2 mt-1.5">
+              <span className="flex items-center space-x-1 text-[10px] text-slate-500">
+                <MapPin className="w-3 h-3" />
+                <span>{s.village}, {s.district}</span>
+              </span>
+              <span className="text-[10px] text-slate-600">•</span>
+              <span className="text-[10px] text-slate-500">{s.category}</span>
+              <span className="text-[10px] text-slate-600">•</span>
+              <span className="flex items-center space-x-1 text-[10px] text-indigo-400 font-bold bg-indigo-500/10 px-2 py-0.5 rounded-full border border-indigo-500/20">
+                <Users className="w-3 h-3" />
+                <span>{s.supporters.toLocaleString()} Duplicate Complaints</span>
+              </span>
+              <span className="text-[10px] text-slate-600">•</span>
+              <span className="text-[10px] text-slate-500">₹{s.estimatedCostLakhs}L</span>
+              {s.isVerifiedCitizen && (
+                <>
+                  <span className="text-[10px] text-slate-600">•</span>
+                  <span className="inline-flex items-center space-x-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 px-2 py-0.5 rounded-md text-[9px] font-bold">
+                    ✓ Verified Citizen
+                  </span>
+                </>
+              )}
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 shrink-0">
+            <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold border ${urgencyBadge[s.urgency]}`}>
+              {s.urgency.toUpperCase()}
+            </span>
+            <span className={`flex items-center space-x-1 px-2 py-0.5 rounded-full text-[9px] font-bold ${sc.color}`}>
+              {sc.icon}
+              <span>{sc.label}</span>
+            </span>
+            <div className="text-right">
+              <p className="text-lg font-black text-amber-400">{s.priorityScore}</p>
+              <p className="text-[8px] text-slate-500 uppercase">AI Score</p>
+            </div>
+            <ChevronRight className="w-4 h-4 text-slate-600 group-hover:text-slate-400" />
+          </div>
+        </Link>
+      </motion.div>
+    );
+  };
 
   if (loading) {
     return (
@@ -158,34 +236,26 @@ export default function MpComplaintsPage() {
             <button
               key={cat.name}
               onClick={() => setFilterCategory(filterCategory === cat.name ? '' : cat.name)}
-              className={`p-5 rounded-2xl flex flex-col justify-between text-left hover:scale-[1.03] active:scale-[0.97] transition-all duration-300 cursor-pointer border relative overflow-hidden group shadow-md ${
+              className={`p-4 rounded-2xl flex flex-col justify-center text-left hover:scale-[1.03] active:scale-[0.97] transition-all duration-300 cursor-pointer border relative overflow-hidden group shadow-md ${
                 filterCategory === cat.name 
                   ? 'bg-[#1c223c] border-[#3b82f6]/50 shadow-lg shadow-blue-500/10' 
                   : 'bg-[#0f142c] border-[#1e293b]/30 hover:border-[#1e293b]/60'
               }`}
             >
-              {/* Category Icon and Label Header */}
-              <div className="flex items-center justify-between gap-2 border-b border-[#1e293b]/20 pb-2.5 mb-3.5">
-                <div className="space-y-0.5">
-                  <span className="block text-[8px] uppercase tracking-widest text-slate-500 font-black">Category</span>
-                  <span className="block text-xs font-black text-slate-200 truncate uppercase leading-tight group-hover:text-white transition-colors" title={cat.name}>
-                    {cat.name}
-                  </span>
-                </div>
-                <div className="w-7 h-7 rounded-lg bg-slate-950 flex items-center justify-center border border-[#1e293b]/30 shadow-inner shrink-0 group-hover:scale-110 transition-transform">
-                  {getCategoryIcon(cat.name)}
-                </div>
-              </div>
-
-              {/* Progress and Active problem counts */}
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <span className="text-2xl font-mono font-black text-amber-400 block leading-none">{cat.active}</span>
-                  <span className="text-[8px] text-slate-500 font-extrabold uppercase tracking-wider block mt-1">active tasks</span>
+              <div className="flex items-center justify-between gap-3 w-full">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-slate-900/50 flex items-center justify-center border border-[#1e293b]/50 shadow-inner shrink-0 group-hover:scale-110 transition-transform">
+                    {getCategoryIcon(cat.name)}
+                  </div>
+                  <div className="text-left">
+                    <span className="block text-[11px] font-black text-slate-200 uppercase tracking-wide group-hover:text-white transition-colors" title={cat.name}>
+                      {cat.name}
+                    </span>
+                    <span className="text-sm font-mono font-bold text-amber-400 block mt-0.5">{cat.active}</span>
+                  </div>
                 </div>
                 
-                {/* Circular indicator rate with exact r=15.915 math */}
-                <div className="relative w-10 h-10 flex items-center justify-center shrink-0">
+                <div className="relative w-8 h-8 flex items-center justify-center shrink-0">
                   <svg className="w-full h-full transform -rotate-90" viewBox="0 0 36 36">
                     <circle cx="18" cy="18" r="15.915" fill="none" className="stroke-[#131930]" strokeWidth="3.5" />
                     <circle 
@@ -197,22 +267,16 @@ export default function MpComplaintsPage() {
                       strokeLinecap="round"
                     />
                   </svg>
-                  <span className="absolute text-[9px] font-black text-emerald-400 drop-shadow-[0_0_4px_rgba(16,185,129,0.4)]">{cat.rate}%</span>
+                  <span className="absolute text-[7px] font-black text-emerald-400 drop-shadow-[0_0_4px_rgba(16,185,129,0.4)]">{cat.rate}%</span>
                 </div>
-              </div>
-
-              {/* Solved stats footer */}
-              <div className="border-t border-[#1e293b]/20 pt-2.5 flex justify-between text-[8px] text-slate-500 font-bold uppercase">
-                <span>Completed</span>
-                <span className="text-emerald-400 font-extrabold">{cat.solved} solved</span>
               </div>
             </button>
           ))}
         </div>
       </div>
 
-      {/* Filters */}
-      <div className="bg-[#0f142c] rounded-2xl p-4 border border-[#1e293b]/25">
+      {/* Filters Area */}
+      <div className="bg-[#0f142c] rounded-2xl p-4 border border-[#1e293b]/25 space-y-4">
         <div className="flex flex-wrap items-center gap-3">
           <div className="relative flex-1 min-w-[200px]">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
@@ -238,14 +302,6 @@ export default function MpComplaintsPage() {
             <option value="high">High</option>
             <option value="medium">Medium</option>
             <option value="low">Low</option>
-          </select>
-          <select value={filterStatus} onChange={e => setFilterStatus(e.target.value)} className="px-3 py-2.5 rounded-lg bg-slate-800/50 border border-slate-700/50 text-xs text-slate-300 focus:outline-none">
-            <option value="">All Status</option>
-            <option value="submitted">Submitted</option>
-            <option value="under_review">Under Review</option>
-            <option value="planned">Planned</option>
-            <option value="completed">Completed</option>
-            <option value="rejected">Rejected</option>
           </select>
           <div className="flex items-center space-x-1 ml-auto">
             <Filter className="w-3.5 h-3.5 text-slate-500" />
@@ -273,76 +329,41 @@ export default function MpComplaintsPage() {
         ))}
       </div>
 
-      {/* Complaints List */}
-      <div className="space-y-3">
-        {filtered.map((s, i) => {
-          const sc = statusConfig[s.status] || statusConfig.submitted;
-          return (
-            <motion.div
-              key={s.id}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: i * 0.02 }}
-            >
-              <Link
-                href={`/mp/complaints/${s.id}`}
-                className="flex items-center gap-4 p-4 rounded-2xl bg-[#0a0d1e] border border-[#1e293b]/20 hover:border-[#3b82f6]/30 transition-all group shadow-sm"
-              >
-                {/* Rank */}
-                <div className="w-10 h-10 rounded-xl bg-linear-to-br from-amber-500/10 to-amber-500/5 flex items-center justify-center shrink-0 border border-amber-500/10">
-                  <span className="text-xs font-black text-amber-400">#{i + 1}</span>
-                </div>
+      {/* Split Complaints View (Active | Completed) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        {/* Left Side: Active Complaints */}
+        <div className="space-y-4">
+          <div className="flex items-center space-x-2 border-b border-slate-800/50 pb-3">
+            <div className="w-2 h-2 rounded-full bg-amber-400 animate-pulse" />
+            <h2 className="text-sm font-black text-slate-200 uppercase tracking-widest">Active Tasks</h2>
+            <span className="px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20 text-[10px] font-black">{activeComplaints.length}</span>
+          </div>
+          <div className="space-y-3">
+            {activeComplaints.map((s, i) => renderComplaintCard(s, i))}
+            {activeComplaints.length === 0 && (
+              <div className="text-center p-8 border border-slate-800/50 border-dashed rounded-2xl bg-slate-900/20">
+                <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">No active tasks found</p>
+              </div>
+            )}
+          </div>
+        </div>
 
-                {/* Content */}
-                <div className="flex-1 min-w-0">
-                  <div className="flex flex-col">
-                    <span className="text-[10px] text-slate-400 font-mono mb-1">{s.complaint_number || s.id.substring(0, 8)}</span>
-                    <p className="text-sm font-semibold text-slate-200 truncate group-hover:text-white">{s.title}</p>
-                  </div>
-                  <div className="flex flex-wrap items-center gap-2 mt-1.5">
-                    <span className="flex items-center space-x-1 text-[10px] text-slate-500">
-                      <MapPin className="w-3 h-3" />
-                      <span>{s.village}, {s.district}</span>
-                    </span>
-                    <span className="text-[10px] text-slate-600">•</span>
-                    <span className="text-[10px] text-slate-500">{s.category}</span>
-                    <span className="text-[10px] text-slate-600">•</span>
-                    <span className="flex items-center space-x-1 text-[10px] text-indigo-400 font-bold bg-indigo-500/10 px-2 py-0.5 rounded-full border border-indigo-500/20">
-                      <Users className="w-3 h-3" />
-                      <span>{s.supporters.toLocaleString()} Duplicate Complaints</span>
-                    </span>
-                    <span className="text-[10px] text-slate-600">•</span>
-                    <span className="text-[10px] text-slate-500">₹{s.estimatedCostLakhs}L</span>
-                    {s.isVerifiedCitizen && (
-                      <>
-                        <span className="text-[10px] text-slate-600">•</span>
-                        <span className="inline-flex items-center space-x-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/25 px-2 py-0.5 rounded-md text-[9px] font-bold">
-                          ✓ Verified Citizen
-                        </span>
-                      </>
-                    )}
-                  </div>
-                </div>
-
-                {/* Meta */}
-                <div className="flex items-center gap-3 shrink-0">
-                  <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold border ${urgencyBadge[s.urgency]}`}>
-                    {s.urgency.toUpperCase()}
-                  </span>
-                  <span className={`flex items-center space-x-1 px-2 py-0.5 rounded-full text-[9px] font-bold ${sc.color}`}>
-                    {sc.icon}
-                    <span>{sc.label}</span>
-                  </span>
-                  <div className="text-right">
-                    <p className="text-lg font-black text-amber-400">{s.priorityScore}</p>
-                    <p className="text-[8px] text-slate-500 uppercase">AI Score</p>
-                  </div>
-                  <ChevronRight className="w-4 h-4 text-slate-600 group-hover:text-slate-400" />
-                </div>
-              </Link>
-            </motion.div>
-          );
-        })}
+        {/* Right Side: Completed Complaints */}
+        <div className="space-y-4">
+          <div className="flex items-center space-x-2 border-b border-slate-800/50 pb-3">
+            <div className="w-2 h-2 rounded-full bg-emerald-400" />
+            <h2 className="text-sm font-black text-slate-200 uppercase tracking-widest">Completed Tasks</h2>
+            <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 text-[10px] font-black">{completedComplaints.length}</span>
+          </div>
+          <div className="space-y-3">
+            {completedComplaints.map((s, i) => renderComplaintCard(s, i))}
+            {completedComplaints.length === 0 && (
+              <div className="text-center p-8 border border-slate-800/50 border-dashed rounded-2xl bg-slate-900/20">
+                <p className="text-xs text-slate-500 font-bold uppercase tracking-widest">No completed tasks yet</p>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );

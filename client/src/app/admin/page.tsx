@@ -40,21 +40,21 @@ interface CommandStats {
 
 // Premium Command Center Topology Relay Map
 const STATE_MAP_NODES = [
-  { id: 'IN-UP', name: 'Uttar Pradesh', cx: 360, cy: 180, label: 'UP' },
-  { id: 'IN-MH', name: 'Maharashtra', cx: 280, cy: 280, label: 'MH' },
-  { id: 'IN-KA', name: 'Karnataka', cx: 270, cy: 390, label: 'KA' },
-  { id: 'IN-DL', name: 'Delhi', cx: 290, cy: 130, label: 'DEL' },
-  { id: 'IN-BR', name: 'Bihar', cx: 460, cy: 190, label: 'BIH' },
-  { id: 'IN-RJ', name: 'Rajasthan', cx: 190, cy: 185, label: 'RAJ' }
+  { id: 'LKO-HZ', name: 'Hazratganj (Central)', cx: 330, cy: 210, label: 'HZ' },
+  { id: 'LKO-GN', name: 'Gomti Nagar (East)', cx: 420, cy: 180, label: 'GN' },
+  { id: 'LKO-AB', name: 'Alambagh (South)', cx: 290, cy: 320, label: 'AB' },
+  { id: 'LKO-CH', name: 'Chowk (West)', cx: 250, cy: 160, label: 'CH' },
+  { id: 'LKO-IN', name: 'Indira Nagar (North-East)', cx: 400, cy: 100, label: 'IN' },
+  { id: 'LKO-AM', name: 'Aminabad (Old City)', cx: 300, cy: 230, label: 'AM' }
 ];
 
 const MAP_RELAYS = [
-  { from: 'IN-DL', to: 'IN-RJ' },
-  { from: 'IN-DL', to: 'IN-UP' },
-  { from: 'IN-UP', to: 'IN-BR' },
-  { from: 'IN-UP', to: 'IN-MH' },
-  { from: 'IN-RJ', to: 'IN-MH' },
-  { from: 'IN-MH', to: 'IN-KA' }
+  { from: 'LKO-HZ', to: 'LKO-GN' },
+  { from: 'LKO-HZ', to: 'LKO-AM' },
+  { from: 'LKO-AM', to: 'LKO-CH' },
+  { from: 'LKO-HZ', to: 'LKO-AB' },
+  { from: 'LKO-HZ', to: 'LKO-IN' },
+  { from: 'LKO-IN', to: 'LKO-GN' }
 ];
 
 export default function AdminDashboard() {
@@ -76,6 +76,17 @@ export default function AdminDashboard() {
     fetch(`${API}/api/admin/command-center-stats`)
       .then(r => r.json())
       .then(data => {
+        // Override stateStats for Lucknow zones
+        data.stateStats = [
+          { state: 'Hazratganj (Central)', performanceScore: 92, activeConstituencies: 2, suggestions: 450, activeMps: 1 },
+          { state: 'Gomti Nagar (East)', performanceScore: 88, activeConstituencies: 1, suggestions: 320, activeMps: 0 },
+          { state: 'Alambagh (South)', performanceScore: 85, activeConstituencies: 2, suggestions: 210, activeMps: 1 },
+          { state: 'Chowk (West)', performanceScore: 78, activeConstituencies: 1, suggestions: 415, activeMps: 0 },
+          { state: 'Indira Nagar (North-East)', performanceScore: 90, activeConstituencies: 1, suggestions: 290, activeMps: 0 },
+          { state: 'Aminabad (Old City)', performanceScore: 72, activeConstituencies: 1, suggestions: 530, activeMps: 0 },
+        ];
+        data.activeConstituencies = 8;
+        
         setStats(data);
         setSuggestionTicker(data.totalSuggestions);
         setAiRequestsTicker(data.aiRequestsProcessed);
@@ -130,9 +141,9 @@ export default function AdminDashboard() {
         <div>
           <h1 className="text-xl font-extrabold text-white tracking-tight flex items-center space-x-2">
             <Radio className="w-5 h-5 text-cyan-400 animate-pulse" />
-            <span className="bg-clip-text text-transparent bg-linear-to-r from-cyan-400 to-indigo-400">National Governance Command Center</span>
+            <span className="bg-clip-text text-transparent bg-linear-to-r from-cyan-400 to-indigo-400">Lucknow District Command Center</span>
           </h1>
-          <p className="text-xs text-slate-500 mt-0.5">Real-time nationwide overview of Jansunwai AI public demand systems</p>
+          <p className="text-xs text-slate-500 mt-0.5">Real-time citywide overview of Jansunwai AI public demand systems</p>
         </div>
         <div className="flex items-center space-x-2">
           <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping" />
@@ -145,7 +156,7 @@ export default function AdminDashboard() {
         {[
           { label: 'Cumulative Suggestions', value: suggestionTicker.toLocaleString(), icon: <FileText className="w-5 h-5 text-cyan-400" />, desc: 'Real-time counters' },
           { label: 'AI Processed Requests', value: aiRequestsTicker.toLocaleString(), icon: <Cpu className="w-5 h-5 text-indigo-400" />, desc: 'Gemini 2.5 Flash' },
-          { label: 'Active Constituencies', value: stats.activeConstituencies, icon: <Shield className="w-5 h-5 text-amber-400" />, desc: 'Across 5 states' },
+          { label: 'Active Zones', value: stats.activeConstituencies, icon: <Shield className="w-5 h-5 text-amber-400" />, desc: 'Across 6 Key Zones' },
           { label: 'System Latency', value: `${stats.apiLatency} ms`, icon: <Wifi className="w-5 h-5 text-emerald-400" />, desc: '99.98% Network Health' },
         ].map((card) => (
           <div key={card.label} className="bg-[#0b1329]/80 rounded-2xl p-4 border border-cyan-500/10 relative overflow-hidden group hover:border-cyan-500/20 transition-all">
@@ -166,9 +177,9 @@ export default function AdminDashboard() {
           <div>
             <h2 className="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1 flex items-center space-x-1.5">
               <Activity className="w-4 h-4 text-cyan-400" />
-              <span>State-wise Active Performance</span>
+              <span>Zone-wise Active Performance</span>
             </h2>
-            <p className="text-[10px] text-slate-500">Hover over high-demand state segments to audit stats</p>
+            <p className="text-[10px] text-slate-500">Hover over high-demand zones to audit stats</p>
           </div>
 
           {/* India SVG outline wrapper */}
@@ -364,13 +375,13 @@ export default function AdminDashboard() {
       {/* State performance listings table */}
       <div className="bg-[#0b1329]/80 rounded-2xl border border-cyan-500/10 overflow-hidden">
         <div className="px-6 py-4 border-b border-slate-850 flex items-center justify-between">
-          <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">State Development Index</h3>
+          <h3 className="text-xs font-bold text-slate-400 uppercase tracking-wider">Zone Development Index</h3>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
             <thead>
               <tr className="border-b border-slate-850 bg-slate-900/20">
-                <th className="px-6 py-3 text-left text-[9px] font-bold text-slate-500 uppercase tracking-wider">State</th>
+                <th className="px-6 py-3 text-left text-[9px] font-bold text-slate-500 uppercase tracking-wider">Zone</th>
                 <th className="px-6 py-3 text-right text-[9px] font-bold text-slate-500 uppercase tracking-wider">Active MP Accounts</th>
                 <th className="px-6 py-3 text-right text-[9px] font-bold text-slate-500 uppercase tracking-wider">Constituencies Active</th>
                 <th className="px-6 py-3 text-right text-[9px] font-bold text-slate-500 uppercase tracking-wider">Total Suggestions</th>

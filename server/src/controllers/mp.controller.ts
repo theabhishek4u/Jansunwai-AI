@@ -73,22 +73,39 @@ export const getPriorityEngine = async (_req: Request, res: Response) => {
     const allSugg = await db.getAllSuggestions();
     const pops = await db.getPopulations();
 
-    const urgencyWeight: Record<string, number> = { critical: 4, high: 3, medium: 2, low: 1 };
+    // Improved AI Priority Scoring Logic based on situation severity and population impact
+    const urgencyWeight: Record<string, number> = { critical: 1.0, high: 0.8, medium: 0.5, low: 0.2 };
     const ranked = await Promise.all(allSugg.map(async s => {
       const profile = await db.getProfile(s.citizen_id);
       const isVerified = profile?.verification_status === 'verified';
       
-      const urgencyScore = (urgencyWeight[s.urgency] || 1) * 25;
-      const supporterScore = Math.min(25, ((s.supporters || 0) / 100) * 5);
-      const completenessScore = ((s.ai_score_completeness || 50) / 100) * 25;
-      const beneficiaryScore = Math.min(25, (s.estimated_beneficiaries / 1000) * 3);
+      const baseUrgency = urgencyWeight[s.urgency] || 0.2;
       
       // Match suggestion area against database area census populations
       const suggestionArea = (s.village || s.block || '').trim().toLowerCase();
       const matchPop = pops.find(p => p.area.trim().toLowerCase() === suggestionArea);
-      const popWeight = matchPop ? Math.min(20, (matchPop.total_population / 100000) * 8) : 0;
+      const totalPop = matchPop ? matchPop.total_population : 50000; // Fallback population
+      
+      // Impact factor: What percentage of the local population is directly affected?
+      const impactRatio = Math.min(1, (s.estimated_beneficiaries || 0) / totalPop);
+      
+      // Demand factor: Number of unique supporters vs total affected (indicates civic backing)
+      const demandRatio = Math.min(1, (s.supporters || 0) / (s.estimated_beneficiaries || 100));
+      
+      // Cost Efficiency: Beneficiaries per Lakh spent (higher is better for ROI)
+      const costEfficiency = s.estimated_cost_lakhs ? Math.min(1, ((s.estimated_beneficiaries || 0) / s.estimated_cost_lakhs) / 500) : 0.5;
 
-      const priorityScore = Math.round(urgencyScore + supporterScore + completenessScore + beneficiaryScore + popWeight + (isVerified ? 10 : 0));
+      // Weighted AI Model simulating authentic governance evaluation
+      const urgencyScore = baseUrgency * 45;       // 45% weight to situational urgency
+      const impactScore = impactRatio * 25;        // 25% weight to population impacted
+      const demandScore = demandRatio * 20;        // 20% weight to public demand/consensus
+      const efficiencyScore = costEfficiency * 10; // 10% weight to cost ROI
+
+      let priorityScore = Math.round(urgencyScore + impactScore + demandScore + efficiencyScore);
+      
+      // Verification & Completeness adjustments
+      if (isVerified) priorityScore += 5;
+      priorityScore += ((s.ai_score_completeness || 50) / 100) * 5; // Slight bump for well-documented issues
 
       return {
         id: s.id,
