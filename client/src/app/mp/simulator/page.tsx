@@ -283,7 +283,7 @@ export default function SimulatorPage() {
                       <div className="grid grid-cols-2 gap-8 relative">
                         <div className="absolute left-1/2 top-0 bottom-0 w-px bg-slate-800/50 -translate-x-1/2" />
                         <div>
-                          <p className="text-lg font-black text-cyan-400 mb-2">{metric.format(valA)}</p>
+                          <p className="text-lg font-black text-cyan-400 mb-2">{metric.format(numA)}</p>
                           <div className="w-full h-2 bg-slate-950 rounded-full overflow-hidden border border-slate-800/50 flex justify-end">
                             <motion.div
                               initial={{ width: 0 }}
@@ -293,8 +293,8 @@ export default function SimulatorPage() {
                             />
                           </div>
                         </div>
-                        <div>
-                          <p className="text-lg font-black text-fuchsia-400 mb-2">{metric.format(valB)}</p>
+                        <div className="pl-4">
+                          <p className="text-lg font-black text-indigo-400 mb-2">{metric.format(numB)}</p>
                           <div className="w-full h-2 bg-slate-950 rounded-full overflow-hidden border border-slate-800/50">
                             <motion.div
                               initial={{ width: 0 }}

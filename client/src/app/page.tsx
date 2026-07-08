@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, Suspense } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/lib/AuthContext';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -123,7 +123,9 @@ export default function LandingPage() {
         <Features />
         <DemoWorkflow />
         <AIPlayground />
-        <DemoTour />
+        <Suspense fallback={<div>Loading Demo...</div>}>
+          <DemoTour />
+        </Suspense>
         <Statistics />
         <Testimonials />
         <CTA />

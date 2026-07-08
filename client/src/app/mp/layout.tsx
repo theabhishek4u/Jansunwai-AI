@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/AuthContext';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   LayoutDashboard,
   Bot,
@@ -182,7 +183,18 @@ export default function MpLayout({ children }: { children: React.ReactNode }) {
 
         {/* Page Content */}
         <main className="flex-1 p-4 md:p-8 overflow-x-hidden relative">
-          {children}
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={pathname}
+              initial={{ opacity: 0, y: 10, filter: 'blur(4px)' }}
+              animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
+              exit={{ opacity: 0, y: -10, filter: 'blur(4px)' }}
+              transition={{ duration: 0.2, ease: "easeInOut" }}
+              className="h-full"
+            >
+              {children}
+            </motion.div>
+          </AnimatePresence>
         </main>
       </div>
 
